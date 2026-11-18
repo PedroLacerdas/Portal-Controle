@@ -1,0 +1,12 @@
+{
+  "name": "Controle de Floculantes",
+  "short_name": "Floculantes",
+  "description": "Consumo, estoque, dosagem e testes de floculante por turno",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f5f7",
+  "theme_color": "#1d6b47"
+}

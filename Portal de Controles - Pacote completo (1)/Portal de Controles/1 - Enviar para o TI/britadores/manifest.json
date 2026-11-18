@@ -1,0 +1,12 @@
+{
+  "name": "Controle de Britadores",
+  "short_name": "Britadores",
+  "description": "Desgaste dos revestimentos dos britadores BR04B, BR04C e BR04D",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f5f7",
+  "theme_color": "#1d6b47"
+}

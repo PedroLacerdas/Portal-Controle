@@ -1,0 +1,120 @@
+{
+  "modo": "local",
+
+  "local": {
+    "arquivo": [
+      "C:/Users/Mineral do Brasil/OneDrive - Mineral do Brasil/MB-PCM-2026-Relatório de turno digitado - *.xlsx",
+      "C:/Users/Mineral do Brasil/OneDrive - Mineral do Brasil/Controles/Planilha Mestre - Controles.xlsx",
+      "C:/Users/Mineral do Brasil/OneDrive - Mineral do Brasil/Controles/Relatorios/Relatorio_de_turno_*.xlsx"
+    ]
+  },
+
+  "graph": {
+    "tenant_id": "COLE_AQUI_O_ID_DO_LOCATARIO",
+    "client_id": "COLE_AQUI_O_ID_DO_APLICATIVO",
+    "caminho_no_onedrive": "Controles/Floculantes.xlsx"
+  },
+
+  "nuvem": {
+    "url": "",
+    "token": ""
+  },
+
+  "porta": 8000,
+  "intervalo_leitura_seg": 300,
+  "token_app": "",
+
+  "mapeamentos": [
+    {
+      "nome": "relatorio-turno",
+      "tipo": "relatorio_turno",
+      "arquivo_contem": "Relatório de turno",
+      "colecao": "registros",
+      "abas_padrao": "^(\\d{2}-\\d{2}[XYZ]|MODELO)$",
+      "rotulo_data": "Data:",
+      "rotulo_turno": "Turno:",
+      "coluna_volume": "Floculante (L)",
+      "coluna_toneladas": ["Rej. Filtro", "Rej.Baia"],
+      "toneladas_so_positivos": true,
+      "concentracao": 0.1
+    },
+    {
+      "nome": "mestre-granulometria",
+      "arquivo_contem": "Planilha Mestre",
+      "aba": "Granulometria",
+      "colecao": "britadores:amostras",
+      "chave": ["Data", "Britador", "Teste"],
+      "colunas": {
+        "Data":       { "campo": "data",     "tipo": "data" },
+        "Britador":   { "campo": "britador", "tipo": "id" },
+        "Teste":      { "campo": "teste",    "tipo": "texto" },
+        "Lançado em": { "campo": "unidade",  "tipo": "texto", "mapa": { "Percentual": "pct", "Peso": "peso" } },
+        "Observação": { "campo": "obs",      "tipo": "texto", "opcional": true }
+      },
+      "malhas": { "2,0 mm": 2.0, "1,4 mm": 1.4, "0,5 mm": 0.5, "0,15 mm": 0.15 },
+      "coluna_fundo": "Fundo",
+      "corte": 1.4
+    },
+    {
+      "nome": "mestre-eventos",
+      "arquivo_contem": "Planilha Mestre",
+      "aba": "Eventos Britadores",
+      "colecao": "britadores:eventos",
+      "chave": ["Data", "Britador", "Tipo"],
+      "colunas": {
+        "Data":       { "campo": "data",     "tipo": "data" },
+        "Britador":   { "campo": "britador", "tipo": "id" },
+        "Tipo":       { "campo": "tipo",     "tipo": "texto",
+                        "mapa": { "Troca de revestimento": "troca", "Abertura de GAP": "gap", "Outro": "outro" } },
+        "Observação": { "campo": "obs",      "tipo": "texto", "opcional": true }
+      }
+    },
+    {
+      "nome": "mestre-turnos",
+      "ativo": false,
+      "arquivo_contem": "Planilha Mestre",
+      "aba": "Turnos Floculante",
+      "colecao": "registros",
+      "chave": ["Data", "Turno"],
+      "colunas": {
+        "Data":             { "campo": "data",   "tipo": "data" },
+        "Turno":            { "campo": "turno",  "tipo": "texto" },
+        "Volume (L)":       { "campo": "litros", "tipo": "numero" },
+        "Toneladas":        { "campo": "ton",    "tipo": "numero" },
+        "Concentração (%)": { "campo": "conc",   "tipo": "numero" },
+        "Observação":       { "campo": "obs",    "tipo": "texto", "opcional": true }
+      }
+    },
+    {
+      "nome": "mestre-estoque",
+      "arquivo_contem": "Planilha Mestre",
+      "aba": "Estoque Floculante",
+      "colecao": "entradas",
+      "chave": ["Data", "Lote"],
+      "colunas": {
+        "Data":                     { "campo": "data",       "tipo": "data" },
+        "Lote":                     { "campo": "lote",       "tipo": "texto" },
+        "Quantidade (kg)":          { "campo": "kg",         "tipo": "numero" },
+        "Houve coleta?":            { "campo": "coleta",     "tipo": "simnao" },
+        "Quantidade coletada (kg)": { "campo": "coletaKg",   "tipo": "numero" },
+        "Data da coleta":           { "campo": "coletaData", "tipo": "data", "opcional": true },
+        "Observação":               { "campo": "obs",        "tipo": "texto", "opcional": true }
+      }
+    },
+    {
+      "nome": "mestre-testes",
+      "arquivo_contem": "Planilha Mestre",
+      "aba": "Testes Floculante",
+      "colecao": "testes",
+      "chave": ["Data", "Produto"],
+      "colunas": {
+        "Data":             { "campo": "data",      "tipo": "data" },
+        "Produto":          { "campo": "produto",   "tipo": "texto" },
+        "Dosagem (g/t)":    { "campo": "doseGt",    "tipo": "numero" },
+        "Concentração (%)": { "campo": "conc",      "tipo": "numero" },
+        "Status":           { "campo": "status",    "tipo": "texto" },
+        "Resultado":        { "campo": "resultado", "tipo": "texto", "opcional": true }
+      }
+    }
+  ]
+}

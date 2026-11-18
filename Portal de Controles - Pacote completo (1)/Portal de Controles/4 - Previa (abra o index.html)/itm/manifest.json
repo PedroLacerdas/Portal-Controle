@@ -1,0 +1,12 @@
+{
+  "name": "Controle ITM",
+  "short_name": "Controle ITM",
+  "description": "Vazão dos fluxos da ITM contra a capacidade dos equipamentos",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f5f7",
+  "theme_color": "#1d6b47"
+}

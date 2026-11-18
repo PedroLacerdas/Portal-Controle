@@ -1,0 +1,6 @@
+flask==3.0.3
+openpyxl==3.1.5
+waitress==3.0.0
+# só para o modo "graph" (ler direto da nuvem):
+msal==1.31.0
+requests==2.32.3

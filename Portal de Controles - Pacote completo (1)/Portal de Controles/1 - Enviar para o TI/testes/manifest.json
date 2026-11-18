@@ -1,0 +1,12 @@
+{
+  "name": "Registro de Testes",
+  "short_name": "Testes",
+  "description": "Registro e comparação dos testes da usina",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f5f7",
+  "theme_color": "#1d6b47"
+}

@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Registro de Testes</title>
+<meta name="theme-color" content="#1d6b47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Visual alinhado ao Portal de Controles (Mineral do Brasil) */
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#1d2621; --muted:#5f6a66; --line:#dde4e8; --line-strong:#2b322e;
+  --brand:#1d6b47; --brand-dark:#2b5a3b; --brand-soft:#e3f1e8;
+  --blue:#2f6db0; --blue-soft:#e3edf9; --amber:#c58a10; --amber-soft:#fcefd6; --purple:#7650c4; --purple-soft:#eee7fb;
+  --sunken:#f4f7f8;
+  --ok:#1d7a4a; --ok-bg:#e3f1e8; --warn:#b07800; --warn-bg:#fcefd6; --crit:#c0392b; --crit-bg:#f8e1de; --na:#8a958f;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.wrap{max-width:1880px;margin:0 auto;padding:30px 40px 64px;display:flex;flex-direction:column;gap:20px}
+@media (max-width:760px){.wrap{padding:18px 14px 48px}}
+
+.brand{display:flex;gap:24px;align-items:center}
+.brand .logo{width:150px;height:auto;flex:none;display:block}
+@media (max-width:760px){.brand .logo{width:90px}.brand{gap:14px}}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.02em;color:var(--brand-dark);margin:6px 0 8px;line-height:1.1}
+.sub{color:var(--muted);font-size:1.05rem;margin:0}
+@media (max-width:760px){h1{font-size:1.45rem}.sub{font-size:.92rem}}
+
+.tbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+.tbtn{display:inline-flex;align-items:center;gap:10px;font:500 1rem var(--font);color:var(--ink);background:transparent;border:1.5px solid var(--line-strong);border-radius:10px;padding:9px 16px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn svg{width:19px;height:19px;flex:none}
+.tbtn:hover{background:var(--surface)}
+.tbtn[aria-selected="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.tbtn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.syncwrap{display:inline-flex;align-items:center;gap:10px;margin-left:auto}
+.syncst{font-size:.82rem;font-weight:600;padding:6px 10px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+.syncst.na{background:var(--sunken);color:var(--muted)}.syncst.warn{background:var(--amber-soft);color:var(--warn)}.syncst.crit{background:var(--crit-bg);color:var(--crit)}
+@media (max-width:760px){.syncwrap{margin-left:0}}
+
+.banner{border:1px solid var(--amber);background:var(--amber-soft);padding:12px 16px;border-radius:12px;font-size:.92rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-size:1.15rem;font-weight:700;margin:0;color:var(--brand-dark)}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+
+label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted);font-weight:500}
+input,select,textarea{font:500 .95rem var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+.fields{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.fields>label{flex:1 1 160px}
+.btn{font:600 .92rem var(--font);border-radius:8px;padding:10px 18px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:#fff;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn svg{width:17px;height:17px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line-strong)}
+.btn.small{padding:5px 11px;font-size:.8rem}
+.btn.danger{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.msg{font-size:.88rem;color:var(--muted)}.msg.err{color:var(--crit)}.msg.ok{color:var(--ok)}
+.hint{font-size:.86rem;color:var(--muted);margin:0;max-width:85ch}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{color:var(--ok);background:var(--ok-bg)}.chip.warn{color:var(--warn);background:var(--amber-soft)}.chip.crit{color:var(--crit);background:var(--crit-bg)}.chip.na{color:var(--muted);background:var(--sunken)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
+td.num,th.num{text-align:right}
+.empty{padding:34px 12px;text-align:center;color:var(--muted)}
+
+/* ---------- dashboard ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1.5px solid var(--line-strong);border-radius:16px;padding:24px 22px;display:flex;gap:16px;align-items:center;min-width:0}
+.ico{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ico svg{width:23px;height:23px}
+.ico.g{background:var(--brand-soft);color:var(--brand)}.ico.b{background:var(--blue-soft);color:var(--blue)}.ico.a{background:var(--amber-soft);color:var(--amber)}.ico.r{background:var(--crit-bg);color:var(--crit)}
+.kpi .l{color:var(--muted);font-size:.92rem}
+.kpi .v{font-size:1.7rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .v small{font-size:.9rem;font-weight:400;color:var(--muted);letter-spacing:0}
+.kpi .s{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.filtros{display:flex;flex-wrap:wrap;gap:8px}
+.seg{font:500 .88rem var(--font);border:1.5px solid var(--line-strong);background:transparent;border-radius:9px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+.seg[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+/* diálogo */
+dialog{border:0;border-radius:16px;padding:0;max-width:560px;width:calc(100% - 28px);box-shadow:0 20px 60px #0005}
+dialog::backdrop{background:#1d262155}
+.dlg{padding:22px;display:flex;flex-direction:column;gap:14px}
+.dlg h3{margin:0;font-size:1.15rem;color:var(--brand-dark)}
+.cfgeq{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cfgeq h3{margin:0;font-size:1rem}
+.cfgeq table input,.cfgeq table select{width:100%;padding:6px 8px}
+.chip.and{color:var(--blue);background:var(--blue-soft)}
+.chip.apr{color:var(--ok);background:var(--ok-bg)}
+.chip.rep{color:var(--crit);background:var(--crit-bg)}
+.chip.inc{color:var(--warn);background:var(--warn-bg)}
+.chip.tipo{color:var(--ink);background:var(--sunken);border:1px solid var(--line)}
+.ftop{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.ftop .fields>label{flex:0 1 200px}
+.ftop .fields>label.busca{flex:1 1 260px}
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.tcard{border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;background:#fff;min-width:0}
+.tcard:hover{border-color:var(--brand)}
+.tcard.cmp{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.tcard .top{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tcard h3{margin:0;font-size:1.12rem;line-height:1.25}
+.tcard .forn{color:var(--muted);font-size:.9rem;margin-top:-4px}
+.tcard .meta{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:.88rem}
+.tcard .meta dt{color:var(--muted)}.tcard .meta dd{margin:0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.tcard .obj{font-size:.9rem;color:var(--ink);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tcard .bot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
+.ck{display:inline-flex;flex-direction:row!important;align-items:center;gap:8px;font-size:.9rem!important;font-weight:600;color:var(--ink)!important;cursor:pointer}
+.ck input{width:20px;height:20px;margin:0;padding:0}
+.cmpbar{position:sticky;bottom:12px;z-index:5;align-self:center;display:flex;gap:12px;align-items:center;background:var(--ink);color:#fff;border-radius:14px;padding:10px 12px 10px 18px;box-shadow:0 10px 30px #0004;font-weight:600}
+.cmpbar .btn{background:#fff;color:var(--ink);border-color:#fff}
+.cmpbar .lk{background:none;border:0;color:#cfd8d3;font:600 .9rem var(--font);cursor:pointer;text-decoration:underline}
+/* detalhe */
+.dhead{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start}
+.dhead h2{margin:4px 0 2px;font-size:1.5rem;color:var(--brand-dark)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:900px){.dgrid{grid-template-columns:1fr}}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.95rem;margin:0}
+.dl dt{color:var(--muted)}.dl dd{margin:0;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
+.sub2{margin:0 0 10px;font-size:1.08rem;color:var(--brand-dark)}
+.anota{display:flex;flex-direction:column;gap:0}
+.an{display:grid;grid-template-columns:110px 1fr auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
+.an:last-child{border-bottom:0}
+.an .q{font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}.an .q small{display:block;color:var(--muted);font-weight:500}
+.an .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.an .x{background:none;border:0;color:var(--muted);cursor:pointer;font:600 .82rem var(--font);text-decoration:underline;padding:2px 6px;border-radius:6px}
+.an .x:hover{background:var(--crit-bg);color:var(--crit)}
+.novaan{display:flex;flex-direction:column;gap:8px;background:var(--sunken);border-radius:12px;padding:12px}
+.novaan .linha{display:flex;flex-wrap:wrap;gap:8px}
+.novaan .linha label{flex:0 1 170px}
+textarea{font:400 1rem/1.5 var(--font);padding:10px 12px;border:1.5px solid #b9c4c9;border-radius:10px;resize:vertical;width:100%;color:var(--ink)}
+.res{display:flex;flex-wrap:wrap;gap:8px}
+.res .seg{font-size:.95rem;padding:9px 14px}
+.res .seg.apr[aria-pressed="true"]{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.res .seg.rep[aria-pressed="true"]{background:var(--crit-bg);border-color:var(--crit);color:var(--crit)}
+.res .seg.inc[aria-pressed="true"]{background:var(--warn-bg);border-color:var(--amber);color:var(--warn)}
+.res .seg.and[aria-pressed="true"]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.op table td.num,.op table th.num,.cmpt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.op .up{color:var(--crit);font-weight:700}.op .dn{color:var(--blue);font-weight:700}
+.op summary{cursor:pointer;font-weight:700;color:var(--brand-dark);font-size:1.05rem}
+/* comparar */
+.cmpsel{display:flex;flex-wrap:wrap;gap:8px}
+.cmpsel label.ck{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.cmpsel label.ck:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+.cmpt{width:100%;border-collapse:collapse;table-layout:fixed;min-width:640px}
+.cmpt th,.cmpt td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;font-size:.93rem;overflow-wrap:anywhere}
+.cmpt th{text-transform:none;letter-spacing:0}
+.cmpt thead th{background:var(--sunken);font-size:1.05rem;color:var(--ink)}
+.cmpt td.num{text-align:left}
+.cmpt tbody th{color:var(--muted);font-weight:600;width:170px;background:#fafbfc}
+.cmpt .an2{white-space:pre-wrap;margin:0 0 6px}.cmpt .an2 b{font-variant-numeric:tabular-nums}
+.cmpt td.best{background:#eef7f1}
+dialog{max-width:640px}
+.dlg .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dlg .fields .full{grid-column:1/-1}
+@media (max-width:560px){.dlg .fields{grid-template-columns:1fr}}
+.dlg .acts{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.vazio{padding:28px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:14px}
+.tipos li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi{padding:14px}.kpi .v{font-size:1.4rem}}
+.tipos{list-style:none;margin:0;padding:0;max-width:520px}
+/* PDF do teste: gerado em JS puro e baixado direto (ver baixarPdfTeste) */
+.fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.foto{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.foto img{width:100%;height:132px;object-fit:cover;display:block;background:var(--sunken)}
+.foto .fb{display:flex;gap:6px;padding:6px;align-items:center}
+.foto .fb input{flex:1;border:1px solid var(--line);border-radius:8px;padding:5px 7px;font:inherit;font-size:.82rem;min-width:0;background:#fff;color:var(--ink)}
+.foto .fx{background:none;border:0;color:var(--crit);cursor:pointer;font:600 .82rem var(--font);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <img class="logo" alt="Mineral do Brasil" src="data:image/png;base64,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">
+      <div>
+        <p class="eyebrow">Mineral do Brasil · ITM</p>
+        <h1>Registro de Testes</h1>
+        <p class="sub">Testes de floculantes, tecidos, cal, telas e outros: o que foi testado, como foi e o resultado</p>
+      </div>
+    </div>
+    <nav class="tbar" role="tablist" aria-label="Seções">
+      <a class="tbtn" href="/" id="lnkPortal">Controles</a>
+      <button class="tbtn" role="tab" data-tab="lista" aria-selected="true">Testes</button>
+      <button class="tbtn" role="tab" data-tab="comparar" aria-selected="false">Comparar</button>
+      <button class="tbtn" role="tab" data-tab="config" aria-selected="false">Configurar</button>
+      <span class="syncwrap"><span class="syncst ok" role="status">Salvo no aparelho</span></span>
+    </nav>
+  </header>
+
+  <!-- LISTA -->
+  <section id="tab-lista" class="tabpane" style="display:flex;flex-direction:column;gap:20px">
+    <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <div class="ftop">
+        <div class="fields">
+          <label>Tipo<select id="fTipo"></select></label>
+          <label>Situação<select id="fSit"><option value="">Todas</option><option value="and">Em andamento</option><option value="apr">Aprovado</option><option value="rep">Reprovado</option><option value="inc">Inconclusivo</option></select></label>
+          <label class="busca">Buscar<input id="fBusca" type="search" placeholder="Produto, fornecedor, equipamento, anotação…"></label>
+        </div>
+        <div class="actions"><button class="btn ghost" type="button" id="bCsv">Exportar para Excel</button><button class="btn" type="button" id="bNovo">+ Novo teste</button></div>
+      </div>
+    </div>
+    <div id="lista" class="tcards"></div>
+    <div class="cmpbar" id="cmpBar" hidden><span id="cmpTxt"></span><button class="lk" type="button" id="cmpLimpa">limpar</button><button class="btn small" type="button" id="cmpIr">Comparar lado a lado</button></div>
+  </section>
+
+  <!-- DETALHE -->
+  <section id="tab-det" class="tabpane" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel">
+      <div class="dhead">
+        <div><button class="btn ghost small" type="button" id="dVoltar">← Voltar à lista</button>
+          <div id="dTit"></div></div>
+        <div class="actions"><button class="btn small" type="button" id="dPdf">Baixar PDF</button><button class="btn ghost small" type="button" id="dEditar">Editar ficha</button><button class="btn ghost small" type="button" id="dExcluir" style="color:var(--crit);border-color:var(--crit)">Excluir</button></div>
+      </div>
+    </div>
+    <div class="dgrid">
+      <div class="panel"><h3 class="sub2">Ficha do teste</h3><dl class="dl" id="dFicha"></dl></div>
+      <div class="panel">
+        <h3 class="sub2">Resultado</h3>
+        <div class="res" id="dRes" role="group" aria-label="Resultado">
+          <button class="seg and" type="button" data-r="and">Em andamento</button>
+          <button class="seg apr" type="button" data-r="apr">Aprovado</button>
+          <button class="seg rep" type="button" data-r="rep">Reprovado</button>
+          <button class="seg inc" type="button" data-r="inc">Inconclusivo</button>
+        </div>
+        <label style="margin-top:12px">Por quê? (conclusão)<textarea id="dPq" rows="4" placeholder="Ex.: torta saiu com umidade menor e o ciclo ficou mais curto; durou 12 dias a mais que o tecido atual."></textarea></label>
+        <p class="hint" id="dResMsg" style="margin:6px 0 0"></p>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 class="sub2">Anotações durante o teste</h3>
+      <div class="novaan">
+        <div class="linha"><label>Data<input type="date" id="aData"></label><label>Quem anotou<input id="aAutor" placeholder="opcional"></label></div>
+        <textarea id="aTexto" rows="3" placeholder="O que foi observado. Ex.: floculação boa, overflow mais limpo; densidade do underflow subiu."></textarea>
+        <div><button class="btn small" type="button" id="aAdd">Adicionar anotação</button></div>
+      </div>
+      <div class="anota" id="dAnot" style="margin-top:8px"></div>
+    </div>
+    <div class="panel">
+      <h3 class="sub2">Fotos do teste</h3>
+      <p class="hint" style="margin:0 0 8px">As fotos entram no PDF do teste. Ficam salvas neste aparelho.</p>
+      <div><label class="btn small" style="cursor:pointer;display:inline-block">Adicionar foto<input type="file" id="fFoto" accept="image/*" multiple hidden></label> <span class="hint" id="fFotoMsg"></span></div>
+      <div class="fotos" id="dFotos" style="margin-top:10px"></div>
+    </div>
+    <div class="panel op">
+      <details id="dOpBox"><summary>Operação no período (dos Relatórios de Turno)</summary>
+        <p class="hint" style="margin:8px 0 10px">Só como referência: média da usina durante o teste comparada com o mesmo número de turnos logo antes do teste. Horas paradas (correia em 0) ficam de fora da média.</p>
+        <div id="dOp"></div></details>
+    </div>
+  </section>
+
+  <!-- COMPARAR -->
+  <section id="tab-comparar" class="tabpane panel" hidden>
+    <div class="ftop"><div class="fields"><label>Tipo<select id="cTipo"></select></label></div>
+      <p class="hint" style="margin:0">Marque de 2 a 4 testes para ver lado a lado.</p></div>
+    <div class="cmpsel" id="cSel" style="margin:14px 0 18px"></div>
+    <div class="tablebox" id="cTab"></div>
+  </section>
+
+  <!-- CONFIGURAR -->
+  <section id="tab-config" class="tabpane panel" hidden>
+    <h2 style="margin-top:0">Tipos de teste</h2>
+    <p class="hint">Aparecem na ficha e nos filtros. Tipos já usados em algum teste não podem ser apagados.</p>
+    <ul class="tipos" id="tipos"></ul>
+    <div style="display:flex;gap:8px;margin-top:12px;max-width:520px"><input id="novoTipo" placeholder="Novo tipo, ex.: Reagente, Revestimento" style="flex:1"><button class="btn small" type="button" id="addTipo">Adicionar</button></div>
+  </section>
+</div>
+
+<dialog id="dlg"><form method="dialog" class="dlg" id="fForm">
+  <h3 id="fTit">Novo teste</h3>
+  <div class="fields">
+    <label>Tipo<select id="fTipoT" required></select></label>
+    <label>Equipamento / local<input id="fLocal" placeholder="Ex.: Filtro prensa 2, Espessador, PN-04"></label>
+    <label>Produto testado<input id="fProd" required placeholder="Ex.: Floculante AN-934, Tecido PP 750"></label>
+    <label>Fornecedor<input id="fForn" placeholder="Ex.: empresa do produto"></label>
+    <label>Comparado com (o que é usado hoje)<input id="fRef" placeholder="Ex.: floculante atual, tecido atual"></label>
+    <label>Responsável<input id="fResp"></label>
+    <label>Início<input type="date" id="fIni" required></label>
+    <label>Fim (em branco = em andamento)<input type="date" id="fFim"></label>
+    <label class="full">Objetivo do teste<textarea id="fObj" rows="3" placeholder="Ex.: reduzir umidade da torta e o tempo de ciclo"></textarea></label>
+  </div>
+  <p class="msg" id="fMsg" hidden></p>
+  <div class="acts"><button class="btn ghost" value="cancel" formnovalidate type="submit">Cancelar</button><button class="btn" type="submit" value="ok" id="fOk">Salvar</button></div>
+</form></dialog>
+<script>
+(()=>{"use strict";
+const LS="controle-testes.v1";
+const TIPOS_PADRAO=["Floculante","Tecido de filtragem","Cal","Tela","Outro"];
+const RES={and:"Em andamento",apr:"Aprovado",rep:"Reprovado",inc:"Inconclusivo"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=(v,d=1)=>v==null||!isFinite(v)?"—":Number(v).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const brDate=s=>s?s.slice(8,10)+"/"+s.slice(5,7)+"/"+s.slice(0,4):"—";
+const hoje=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const addDia=(s,n)=>{const d=new Date(s+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const dias=(a,b)=>Math.round((new Date(b+"T12:00:00Z")-new Date(a+"T12:00:00Z"))/864e5)+1;
+const num=v=>{if(v==null)return NaN;const s=String(v).trim().replace(/\s/g,"").replace(",",".");return s===""?NaN:Number(s)};
+const novoId=()=>"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ---------- dados ---------- */
+let base={testes:[],tipos:TIPOS_PADRAO.slice()};
+function carregar(){try{const b=JSON.parse(localStorage.getItem(LS)||"null");if(b&&Array.isArray(b.testes))base={testes:b.testes,tipos:Array.isArray(b.tipos)&&b.tipos.length?b.tipos:TIPOS_PADRAO.slice()}}catch(e){}}
+function gravar(){try{localStorage.setItem(LS,JSON.stringify(base))}catch(e){alert("Não foi possível salvar no aparelho (memória cheia?). Faça uma cópia de segurança no Portal.")}}
+const teste=id=>base.testes.find(t=>t.id===id);
+const sit=t=>t.resultado||"and";
+const periodoTxt=t=>`${brDate(t.ini)} → ${t.fim?brDate(t.fim):"em andamento"}`;
+const duracao=t=>t.ini?dias(t.ini,t.fim||hoje()):null;
+
+let aba="lista",atual=null,cmp=new Set(),editando=null;
+
+/* ---------- lista ---------- */
+function opcoesTipo(sel,todos){sel.innerHTML=(todos?`<option value="">Todos</option>`:"")+base.tipos.map(t=>`<option>${esc(t)}</option>`).join("")}
+function filtrados(){const tp=$("fTipo").value,st=$("fSit").value,q=$("fBusca").value.trim().toLowerCase();
+  return base.testes.filter(t=>(!tp||t.tipo===tp)&&(!st||sit(t)===st)&&(!q||[t.tipo,t.produto,t.fornecedor,t.local,t.ref,t.objetivo,t.porque,t.resp,...(t.anotacoes||[]).map(a=>a.texto)].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=>((sit(b)==="and")-(sit(a)==="and"))||(b.ini||"").localeCompare(a.ini||""))}
+function chipRes(t){const s=sit(t);return `<span class="chip ${s}">${RES[s]}</span>`}
+function renderKpis(){const T=base.testes,c=k=>T.filter(t=>sit(t)===k).length;
+  const k=(l,v,s,cl)=>`<div class="kpi"><div><div class="l">${l}</div><div class="v" style="${cl?"color:"+cl:""}">${v}</div><div class="s">${s}</div></div></div>`;
+  $("kpis").innerHTML=k("Testes registrados",T.length,base.tipos.filter(tp=>T.some(t=>t.tipo===tp)).length+" tipos")+k("Em andamento",c("and"),"ainda sem resultado","var(--blue)")+k("Aprovados",c("apr"),c("inc")+" inconclusivos","var(--ok)")+k("Reprovados",c("rep"),"","var(--crit)")}
+function renderLista(){renderKpis();const L=filtrados();
+  $("lista").innerHTML=L.map(t=>`<article class="tcard${cmp.has(t.id)?" cmp":""}">
+    <div class="top"><span class="chip tipo">${esc(t.tipo)}</span>${chipRes(t)}</div>
+    <h3>${esc(t.produto)}</h3>${t.fornecedor?`<div class="forn">${esc(t.fornecedor)}</div>`:""}
+    <dl class="meta"><dt>Onde</dt><dd>${esc(t.local||"—")}</dd><dt>Período</dt><dd>${periodoTxt(t)} <span style="color:var(--muted);font-weight:500">(${duracao(t)} ${duracao(t)===1?"dia":"dias"})</span></dd>${t.ref?`<dt>Contra</dt><dd>${esc(t.ref)}</dd>`:""}</dl>
+    ${t.objetivo?`<p class="obj">${esc(t.objetivo)}</p>`:""}
+    <div class="bot"><label class="ck"><input type="checkbox" data-c="${t.id}" ${cmp.has(t.id)?"checked":""}> comparar</label>
+      <span style="color:var(--muted);font-size:.85rem">${(t.anotacoes||[]).length} anotaç${(t.anotacoes||[]).length===1?"ão":"ões"}</span>
+      <button class="btn small" type="button" data-a="${t.id}">Abrir</button></div></article>`).join("")||
+    `<div class="vazio" style="grid-column:1/-1">${base.testes.length?"Nenhum teste com esses filtros.":"Nenhum teste registrado ainda. Clique em <b>+ Novo teste</b> para começar."}</div>`;
+  $("lista").querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>abrir(b.dataset.a));
+  $("lista").querySelectorAll("[data-c]").forEach(c=>c.onchange=()=>{c.checked?cmp.add(c.dataset.c):cmp.delete(c.dataset.c);renderLista()});
+  $("cmpBar").hidden=cmp.size<1;$("cmpTxt").textContent=cmp.size+(cmp.size===1?" teste marcado":" testes marcados");$("cmpIr").disabled=cmp.size<2}
+
+/* ---------- ficha (novo / editar) ---------- */
+function abrirForm(t){editando=t?t.id:null;$("fTit").textContent=t?"Editar ficha do teste":"Novo teste";opcoesTipo($("fTipoT"));$("fMsg").hidden=true;
+  const v=t||{tipo:$("fTipo").value||base.tipos[0],ini:hoje()};
+  $("fTipoT").value=v.tipo||base.tipos[0];$("fProd").value=v.produto||"";$("fForn").value=v.fornecedor||"";$("fLocal").value=v.local||"";$("fRef").value=v.ref||"";$("fResp").value=v.resp||"";
+  $("fIni").value=v.ini||"";$("fFim").value=v.fim||"";$("fObj").value=v.objetivo||"";
+  $("dlg").showModal();$("fProd").focus()}
+$("fForm").addEventListener("submit",e=>{if(e.submitter&&e.submitter.value!=="ok")return;
+  const d={tipo:$("fTipoT").value,produto:$("fProd").value.trim(),fornecedor:$("fForn").value.trim(),local:$("fLocal").value.trim(),ref:$("fRef").value.trim(),resp:$("fResp").value.trim(),
+    ini:$("fIni").value,fim:$("fFim").value,objetivo:$("fObj").value.trim()};
+  const erro=!d.produto?"Informe o produto testado.":!d.ini?"Informe a data de início.":d.fim&&d.fim<d.ini?"O fim não pode ser antes do início.":"";
+  if(erro){e.preventDefault();$("fMsg").textContent=erro;$("fMsg").hidden=false;return}
+  const agora=new Date().toISOString();
+  if(editando)Object.assign(teste(editando),d,{atualizadoEm:agora});
+  else{const t={id:novoId(),...d,resultado:"",porque:"",anotacoes:[],criadoEm:agora,atualizadoEm:agora};base.testes.push(t);editando=t.id}
+  gravar();abrir(editando)});
+
+/* ---------- detalhe ---------- */
+function abrir(id){atual=id;mostrar("det");renderDet();window.scrollTo({top:0})}
+/* ---------- fotos do teste (guardadas no IndexedDB do aparelho) ---------- */
+const FDB=(()=>{let dp;const open=()=>dp||(dp=new Promise((res,rej)=>{let r;try{r=indexedDB.open("controle-testes-fotos",1)}catch(e){return rej(e)}
+  r.onupgradeneeded=()=>{r.result.createObjectStore("fotos")};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const tx=(mode,fn)=>open().then(d=>new Promise((res,rej)=>{const t=d.transaction("fotos",mode),s=t.objectStore("fotos"),rq=fn(s);t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
+  return{put:(k,v)=>tx("readwrite",s=>s.put(v,k)),get:k=>tx("readonly",s=>s.get(k)),del:k=>tx("readwrite",s=>s.delete(k))}})();
+function processarFoto(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{URL.revokeObjectURL(u);let w=img.naturalWidth,h=img.naturalHeight;if(!w||!h)return rej(new Error("imagem inválida"));
+    const sc=Math.min(1,1400/Math.max(w,h));w=Math.round(w*sc);h=Math.round(h*sc);
+    const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);
+    res({url:cv.toDataURL("image/jpeg",0.82),w,h})};
+  img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("não consegui ler a imagem"))};img.src=u})}
+async function addFotos(files){const t=teste(atual);if(!t)return;t.fotos=t.fotos||[];const msg=$("fFotoMsg");let add=0;
+  for(const f of files){if(!/^image\//.test(f.type))continue;msg.textContent="processando...";
+    try{const r=await processarFoto(f);const id=novoId();await FDB.put(id,r.url);t.fotos.push({id,w:r.w,h:r.h});add++}
+    catch(e){msg.textContent="erro ao salvar a foto ("+(e.message||e)+")"}}
+  t.atualizadoEm=new Date().toISOString();gravar();if(add)msg.textContent=add+" foto(s) adicionada(s).";renderFotos(t)}
+async function renderFotos(t){const box=$("dFotos");if(!box)return;const fs=t.fotos||[];
+  if(!fs.length){box.innerHTML=`<p class="hint">Nenhuma foto ainda. Toque em "Adicionar foto" (no celular dá pra usar a câmera).</p>`;return}
+  box.innerHTML=fs.map((f,i)=>`<div class="foto"><img alt="foto ${i+1}" data-fid="${f.id}"><div class="fb"><input placeholder="legenda (opcional)" data-fleg="${f.id}" value="${esc(f.leg||"")}"><button class="fx" type="button" data-fx="${f.id}">remover</button></div></div>`).join("");
+  for(const f of fs){try{const url=await FDB.get(f.id);const im=box.querySelector(`img[data-fid="${f.id}"]`);if(im&&url)im.src=url}catch(e){}}
+  box.querySelectorAll("[data-fx]").forEach(b=>b.onclick=async()=>{if(!confirm("Remover esta foto?"))return;const t2=teste(atual);t2.fotos=(t2.fotos||[]).filter(x=>x.id!==b.dataset.fx);try{await FDB.del(b.dataset.fx)}catch(e){}t2.atualizadoEm=new Date().toISOString();gravar();renderFotos(t2)});
+  box.querySelectorAll("[data-fleg]").forEach(inp=>inp.onchange=()=>{const t2=teste(atual),f=(t2.fotos||[]).find(x=>x.id===inp.dataset.fleg);if(f){f.leg=inp.value.trim();t2.atualizadoEm=new Date().toISOString();gravar()}})}
+function renderDet(){const t=teste(atual);if(!t){mostrar("lista");return}
+  $("dTit").innerHTML=`<div style="display:flex;gap:6px;margin-top:12px"><span class="chip tipo">${esc(t.tipo)}</span>${chipRes(t)}</div><h2>${esc(t.produto)}</h2><p class="hint" style="margin:0">${esc(t.fornecedor||"")}${t.fornecedor&&t.local?" · ":""}${esc(t.local||"")}</p>`;
+  const r=(k,v)=>v?`<dt>${k}</dt><dd>${esc(v)}</dd>`:"";
+  $("dFicha").innerHTML=r("Tipo",t.tipo)+r("Produto",t.produto)+r("Fornecedor",t.fornecedor)+r("Equipamento / local",t.local)+r("Comparado com",t.ref)+r("Período",periodoTxt(t))+r("Duração",duracao(t)+(duracao(t)===1?" dia":" dias"))+r("Responsável",t.resp)+r("Objetivo",t.objetivo);
+  $("dRes").querySelectorAll("[data-r]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.r===sit(t))));
+  $("dPq").value=t.porque||"";$("dResMsg").textContent="";
+  $("aData").value=hoje();$("aTexto").value="";
+  const A=(t.anotacoes||[]).slice().sort((a,b)=>b.data.localeCompare(a.data));
+  $("dAnot").innerHTML=A.map(a=>`<div class="an"><div class="q">${brDate(a.data)}<small>${a.autor?esc(a.autor):""}</small></div><div class="tx">${esc(a.texto)}</div><button class="x" type="button" title="Apagar anotação" data-x="${a.id}">apagar</button></div>`).join("")||`<p class="hint">Nenhuma anotação ainda.</p>`;
+  $("dAnot").querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{if(!confirm("Apagar esta anotação?"))return;t.anotacoes=t.anotacoes.filter(a=>a.id!==b.dataset.x);t.atualizadoEm=new Date().toISOString();gravar();renderDet()});
+  renderFotos(t);
+  if($("dOpBox").open)renderOp(t)}
+$("fFoto").onchange=e=>{const files=[...e.target.files];e.target.value="";if(files.length)addFotos(files)};
+$("dRes").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const t=teste(atual);const r=b.dataset.r==="and"?"":b.dataset.r;t.resultado=r;
+  if(r&&!t.fim){t.fim=hoje()}t.atualizadoEm=new Date().toISOString();gravar();renderDet();if(r)$("dResMsg").textContent=t.fim===hoje()?"Teste encerrado hoje. Ajuste a data de fim em Editar ficha, se preciso.":""});
+$("dPq").addEventListener("change",()=>{const t=teste(atual);t.porque=$("dPq").value.trim();t.atualizadoEm=new Date().toISOString();gravar();$("dResMsg").textContent="Conclusão salva."});
+$("aAdd").onclick=()=>{const t=teste(atual),tx=$("aTexto").value.trim();if(!tx){$("aTexto").focus();return}
+  (t.anotacoes=t.anotacoes||[]).push({id:novoId(),data:$("aData").value||hoje(),autor:$("aAutor").value.trim(),texto:tx});
+  try{localStorage.setItem("controle-testes.autor",$("aAutor").value.trim())}catch(e){}
+  t.atualizadoEm=new Date().toISOString();gravar();renderDet()};
+$("dVoltar").onclick=()=>mostrar("lista");
+$("dEditar").onclick=()=>abrirForm(teste(atual));
+$("dPdf").onclick=async()=>{const b=$("dPdf"),o=b.textContent;b.disabled=true;b.textContent="Gerando...";try{await baixarPdfTeste(teste(atual))}catch(e){alert("Não consegui gerar o PDF: "+(e.message||e))}b.disabled=false;b.textContent=o};
+$("dExcluir").onclick=async()=>{const t=teste(atual);if(!confirm(`Excluir o teste "${t.produto}" e todas as anotações/fotos? Não dá para desfazer.`))return;
+  for(const f of (t.fotos||[])){try{await FDB.del(f.id)}catch(e){}}
+  base.testes=base.testes.filter(x=>x.id!==t.id);cmp.delete(t.id);gravar();mostrar("lista")};
+$("dOpBox").addEventListener("toggle",()=>{if($("dOpBox").open)renderOp(teste(atual))});
+
+/* ---------- operação no período (Relatório de Turno) ---------- */
+const ORD="ZXY";   // o turno Z do dia começa às 23:40 do dia anterior
+const PARS=[["alim","Alimentação ITM (TC-07 + TC-07B)","t/h",0],["G","Concentrado magnético (TC-11)","t/h",0],["H","Rejeito (TC-12)","t/h",0],["I","Densidade linha A","t/m³",2],["J","Densidade linha B","t/m³",2],["K","Densidade K","t/m³",2],["M","Vazão de água","m³/h",0],["Y","Vazão linha A","m³/h",0],["Z","Vazão linha B","m³/h",0],["X","Floculante","L/h",0]];
+function relatorios(){try{return JSON.parse(localStorage.getItem("rt-reports")||"{}")||{}}catch(e){return {}}}
+function turnosEntre(ini,iniT,fim,fimT){const out=[];let d=ini;const ate=fim||hoje();let g=0;
+  while(d<=ate&&g++<800){for(const t of ORD){if(d===ini&&iniT&&ORD.indexOf(t)<ORD.indexOf(iniT))continue;if(d===ate&&fim&&fimT&&ORD.indexOf(t)>ORD.indexOf(fimT))continue;out.push([d,t])}d=addDia(d,1)}return out}
+function turnosAntes(ini,iniT,n){const out=[];let d=ini,i=iniT?ORD.indexOf(iniT):0;
+  while(out.length<n){i--;if(i<0){i=2;d=addDia(d,-1)}out.unshift([d,ORD[i]])}return out}
+function medias(R,lista){const s={},c={};let nt=0;
+  lista.forEach(([d,t])=>{const r=R[d+t];if(!r||!r.vals)return;nt++;const v=r.vals;
+    for(let h=9;h<=17;h++){const cA=num(v["C"+h]),aa=num(v["AA"+h]);const al=(isFinite(cA)?cA:0)+(isFinite(aa)?aa:0);
+      const rodando=al>0;const add=(k,x)=>{if(isFinite(x)&&rodando){s[k]=(s[k]||0)+x;c[k]=(c[k]||0)+1}};
+      if(rodando)add("alim",al);["G","H","I","J","K","M","Y","Z","X"].forEach(k=>{const x=num(v[k+h]);if(isFinite(x)&&x>0)add(k,x)})}});
+  const m={};Object.keys(s).forEach(k=>m[k]=s[k]/c[k]);return {m,nt}}
+function renderOp(t){const R=relatorios();const dur=turnosEntre(t.ini,t.iniT,t.fim,t.fimT),ant=turnosAntes(t.ini,t.iniT,dur.length);
+  const A=medias(R,ant),D=medias(R,dur);
+  if(!D.nt){$("dOp").innerHTML=`<p class="vazio">Nenhum Relatório de Turno encontrado no período do teste (${periodoTxt(t)}). Os relatórios precisam estar lançados neste mesmo aparelho/navegador.</p>`;return}
+  const linhas=PARS.filter(([k])=>A.m[k]!=null||D.m[k]!=null).map(([k,n,u,dc])=>{const a=A.m[k],b=D.m[k],dv=a!=null&&b!=null?b-a:null,pc=dv!=null&&a?dv/a*100:null;
+    const cl=pc==null||Math.abs(pc)<3?"":dv>0?"up":"dn";
+    return `<tr><td>${n} <span class="hint">${u}</span></td><td class="num">${fmt(a,dc)}</td><td class="num"><b>${fmt(b,dc)}</b></td><td class="num ${cl}">${dv==null?"—":Math.abs(pc)<3?"igual":(dv>0?"subiu +":"desceu ")+fmt(dv,dc)+` <small>(${pc>0?"+":""}${fmt(pc,0)}%)</small>`}</td></tr>`}).join("");
+  $("dOp").innerHTML=`<table><thead><tr><th>Parâmetro</th><th class="num">Antes do teste<br><small>${A.nt} turnos com relatório</small></th><th class="num">Durante o teste<br><small>${D.nt} de ${dur.length} turnos com relatório</small></th><th class="num">Diferença</th></tr></thead><tbody>${linhas}</tbody></table>
+  <p class="hint" style="margin-top:8px">"igual" = diferença menor que 3%. Diferença não prova que foi o teste: outras coisas podem ter mudado no período (minério, paradas, outro teste ao mesmo tempo).</p>`}
+
+/* ---------- PDF do teste: gerado em JS puro (offline), baixa direto ---------- */
+const _HW={32:278,33:278,34:355,35:556,36:556,37:889,38:667,39:191,40:333,41:333,42:389,43:584,44:278,45:333,46:278,47:278,48:556,49:556,50:556,51:556,52:556,53:556,54:556,55:556,56:556,57:556,58:278,59:278,60:584,61:584,62:584,63:556,64:1015,65:667,66:667,67:722,68:722,69:667,70:611,71:778,72:722,73:278,74:500,75:667,76:556,77:833,78:722,79:778,80:667,81:778,82:722,83:667,84:611,85:722,86:667,87:944,88:667,89:667,90:611,91:278,92:278,93:278,94:469,95:556,96:333,97:556,98:556,99:500,100:556,101:556,102:278,103:556,104:556,105:222,106:222,107:500,108:222,109:833,110:556,111:556,112:556,113:556,114:333,115:500,116:278,117:556,118:500,119:722,120:500,121:500,122:500,123:334,124:260,125:334,126:584,176:400,178:333,179:333,183:278,199:722,201:667,211:778,213:778,218:722};
+const _tw=(s,sz)=>{let w=0;s=String(s==null?"":s);for(let i=0;i<s.length;i++)w+=(_HW[s.charCodeAt(i)]||556);return w/1000*sz};
+const _esc=s=>{s=String(s==null?"":s);let o="";const m={8211:150,8212:151,8216:145,8217:146,8220:147,8221:148,8226:149,8230:133,8364:128,8482:153,8201:32,8239:32,160:32};
+  for(let i=0;i<s.length;i++){let c=s.charCodeAt(i);if(c>126){if(m[c]!=null)c=m[c];else if(c>255)c=63}if(c===40||c===41||c===92)o+="\\";o+=String.fromCharCode(c&255)}return o};
+const _wrap=(s,maxw,sz)=>{s=String(s==null?"":s).replace(/→/g,"->");const out=[];
+  s.split(/\r?\n/).forEach(par=>{const ws=par.split(/\s+/).filter(x=>x!=="");if(!ws.length){out.push("");return}let cur="";
+    for(const w of ws){const t=cur?cur+" "+w:w;if(_tw(t,sz)<=maxw||!cur)cur=t;else{out.push(cur);cur=w}}out.push(cur)});
+  return out.length?out:[""]};
+async function baixarPdfTeste(t){if(!t)return;
+  const PW=595,PH=842,mL=48,mR=48,mT=46,mB=52,CW=PW-mL-mR;
+  const images=[];const b64=u=>{const s=atob(u.slice(u.indexOf(",")+1)),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a};
+  let pages=[],cs="",y=mT;
+  const nf=n=>(Math.round(n*100)/100).toString();
+  const flush=()=>{pages.push(cs);cs=""};
+  const np=()=>{flush();y=mT};
+  const room=h=>{if(y+h>PH-mB)np()};
+  const col=(r,g,b)=>{cs+=nf(r)+" "+nf(g)+" "+nf(b)+" rg\n"};
+  const black=()=>{cs+="0 0 0 rg\n"};
+  const txt=(x,topY,s,sz,bold)=>{cs+="BT /"+(bold?"FB":"F1")+" "+nf(sz)+" Tf "+nf(x)+" "+nf(PH-topY-sz)+" Td ("+_esc(s)+") Tj ET\n"};
+  const fillrect=(x,topY,w,h)=>{cs+=nf(x)+" "+nf(PH-topY-h)+" "+nf(w)+" "+nf(h)+" re f\n"};
+  const hr=(x1,x2,topY,wd,c)=>{if(c)cs+=nf(c[0])+" "+nf(c[1])+" "+nf(c[2])+" RG\n";cs+=nf(wd)+" w "+nf(x1)+" "+nf(PH-topY)+" m "+nf(x2)+" "+nf(PH-topY)+" l S\n";if(c)cs+="0 0 0 RG\n"};
+  const h2=s=>{room(30);y+=10;txt(mL,y,s,12.5,true);hr(mL,mL+CW,y+16,1,[0.11,0.42,0.28]);y+=24};
+  const fichaRow=(k,v)=>{if(v==null||v==="")return;const vx=mL+150,vw=CW-150,sz=9.5,lh=13;
+    const lines=_wrap(v,vw,sz);const rh=Math.max(lh,lines.length*lh);room(rh);
+    col(0.42,0.46,0.44);txt(mL,y,k,sz,false);black();
+    let ty=y;for(const ln of lines){txt(vx,ty,ln,sz,false);ty+=lh}y+=rh};
+  const tabela=(cd,rows)=>{const sz=9,lh=11.5,pad=4,hh=lh+2*pad,x0=mL,tW=cd.reduce((a,c)=>a+c.w,0);
+    const header=()=>{room(hh+4);col(0.93,0.96,0.94);fillrect(x0,y,tW,hh);black();
+      let x=x0;for(const c of cd){txt(x+pad,y+pad,c.t,sz,true);x+=c.w}hr(x0,x0+tW,y+hh,0.6,[0.8,0.84,0.82]);y+=hh};
+    header();
+    for(const row of rows){const cl=cd.map((c,i)=>_wrap(row[i],c.w-2*pad,sz));const nl=Math.max.apply(null,cl.map(a=>a.length));const rh=nl*lh+2*pad;
+      if(y+rh>PH-mB){np();header()}
+      let x=x0;for(let i=0;i<cd.length;i++){let ty=y+pad;for(const ln of cl[i]){let tx=x+pad;if(cd[i].a==="r")tx=x+cd[i].w-pad-_tw(ln,sz);txt(tx,ty,ln,sz,false);ty+=lh}x+=cd[i].w}
+      hr(x0,x0+tW,y+rh,0.4,[0.87,0.89,0.88]);y+=rh}y+=4};
+  // logo (lê a imagem do topo e embute no PDF)
+  let imgW=0,imgH=0,imgBytes=null;
+  try{const img=document.querySelector("img.logo");
+    if(img&&img.naturalWidth){imgW=img.naturalWidth;imgH=img.naturalHeight;
+      const cv=document.createElement("canvas");cv.width=imgW;cv.height=imgH;const cx=cv.getContext("2d");cx.drawImage(img,0,0);
+      const dt=cx.getImageData(0,0,imgW,imgH).data;imgBytes=new Uint8Array(imgW*imgH*3);
+      for(let i=0,j=0;i<dt.length;i+=4,j+=3){const a=dt[i+3]/255;imgBytes[j]=Math.round(dt[i]*a+255*(1-a));imgBytes[j+1]=Math.round(dt[i+1]*a+255*(1-a));imgBytes[j+2]=Math.round(dt[i+2]*a+255*(1-a))}}
+  }catch(e){imgBytes=null}
+  if(imgBytes)images.push({name:"Im0",kind:"rgb",bytes:imgBytes,w:imgW,h:imgH});
+  // carrega as fotos do teste (do IndexedDB) e embute como JPEG
+  const fotoImgs=[];
+  for(const f of (t.fotos||[])){try{const url=await FDB.get(f.id);if(!url)continue;const im={name:"Im"+images.length,kind:"dct",bytes:b64(url),w:f.w,h:f.h,leg:f.leg};images.push(im);fotoImgs.push(im)}catch(e){}}
+  // cabeçalho
+  const d=new Date();let hx=mL;
+  if(imgBytes){const lh2=32,lw=lh2*imgW/imgH;cs+="q "+nf(lw)+" 0 0 "+nf(lh2)+" "+nf(mL)+" "+nf(PH-mT-lh2)+" cm /Im0 Do Q\n";hx=mL+lw+12}
+  col(0.11,0.42,0.28);txt(hx,mT+1,"MINERAL DO BRASIL · ITM",8.5,true);black();
+  txt(hx,mT+12,"Relatório de Teste",19,true);
+  const emit="Emitido em "+d.toLocaleDateString("pt-BR")+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  col(0.4,0.4,0.4);txt(PW-mR-_tw(emit,8.5),mT+1,emit,8.5,false);black();
+  hr(mL,mL+CW,mT+40,1.4,[0.11,0.42,0.28]);y=mT+54;
+  // produto + resumo
+  txt(mL,y,t.produto||"",15,true);y+=20;
+  col(0.3,0.33,0.31);txt(mL,y,(t.tipo||"")+" · "+RES[sit(t)]+(t.fornecedor?" · "+t.fornecedor:""),10,false);black();y+=16;
+  // ficha
+  h2("Ficha do teste");
+  const per=periodoTxt(t).replace(/→/g,"->"),dr=duracao(t);
+  [["Tipo",t.tipo],["Produto",t.produto],["Fornecedor",t.fornecedor],["Equipamento / local",t.local],["Comparado com",t.ref],["Período",per],["Duração",dr!=null?dr+(dr===1?" dia":" dias"):""],["Responsável",t.resp],["Objetivo",t.objetivo]].forEach(p=>fichaRow(p[0],p[1]));
+  // resultado
+  h2("Resultado");
+  txt(mL,y,RES[sit(t)],11,true);y+=16;
+  if(t.porque)_wrap(t.porque,CW,9.5).forEach(ln=>{room(13);txt(mL,y,ln,9.5,false);y+=13});
+  else{col(0.4,0.4,0.4);txt(mL,y,"Sem conclusão registrada.",9.5,false);black();y+=13}
+  // anotações
+  h2("Anotações durante o teste");
+  const A=(t.anotacoes||[]).slice().sort((a,b)=>a.data.localeCompare(b.data));
+  if(A.length)tabela([{t:"Data",w:70},{t:"Observação",w:CW-70-110},{t:"Quem anotou",w:110}],A.map(a=>[brDate(a.data),a.texto,a.autor||"—"]));
+  else{col(0.4,0.4,0.4);txt(mL,y,"Nenhuma anotação registrada.",9.5,false);black();y+=14}
+  // operação no período
+  const R=relatorios(),durL=turnosEntre(t.ini,t.iniT,t.fim,t.fimT),antL=turnosAntes(t.ini,t.iniT,durL.length),MA=medias(R,antL),MD=medias(R,durL);
+  if(MD.nt){h2("Operação no período (Relatórios de Turno)");
+    const rows=PARS.filter(([k])=>MA.m[k]!=null||MD.m[k]!=null).map(([k,n,u,dc])=>{const a=MA.m[k],b=MD.m[k],dv=a!=null&&b!=null?b-a:null,pc=dv!=null&&a?dv/a*100:null;
+      const diff=dv==null?"—":(Math.abs(pc)<3?"= igual":(dv>0?"subiu +":"desceu ")+fmt(dv,dc)+" ("+(pc>0?"+":"")+fmt(pc,0)+"%)");
+      return [n+" ("+u+")",fmt(a,dc),fmt(b,dc),diff]});
+    tabela([{t:"Parâmetro",w:CW-80-80-120},{t:"Antes ("+MA.nt+")",w:80,a:"r"},{t:"Durante ("+MD.nt+")",w:80,a:"r"},{t:"Diferença",w:120}],rows);
+    room(14);col(0.4,0.4,0.4);txt(mL,y,"Médias da usina, horas paradas fora. Diferença não prova que foi o teste.",8,false);black();y+=12}
+  // fotos
+  if(fotoImgs.length){h2("Fotos");
+    for(const im of fotoImgs){let dw=CW,dh=dw*im.h/im.w;if(dh>430){dh=430;dw=dh*im.w/im.h}
+      const capH=im.leg?13:0;room(dh+capH+10);const x=mL+(CW-dw)/2;
+      cs+="q "+nf(dw)+" 0 0 "+nf(dh)+" "+nf(x)+" "+nf(PH-y-dh)+" cm /"+im.name+" Do Q\n";y+=dh+2;
+      if(im.leg){col(0.4,0.4,0.4);txt(mL,y,im.leg,9,false);black();y+=capH}y+=8}}
+  pages.push(cs);
+  // monta o arquivo PDF (bytes)
+  const L1=s=>{const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i)&255;return u};
+  const chunks=[];let off=0;const offs=[];
+  const push=u=>{chunks.push(u);off+=u.length};const pS=s=>push(L1(s));
+  const obj=(n,body,stream)=>{offs[n]=off;pS(n+" 0 obj\n");pS(body);if(stream){pS("\nstream\n");push(stream);pS("\nendstream")}pS("\nendobj\n")};
+  let nextN=5;for(const im of images)im.obj=nextN++;
+  const pageN=[],contN=[];for(let i=0;i<pages.length;i++){pageN.push(nextN++);contN.push(nextN++)}
+  const total=nextN-1;
+  pS("%PDF-1.4\n%âãÏÓ\n");
+  obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  const res="<< /Font << /F1 3 0 R /FB 4 0 R >>"+(images.length?" /XObject << "+images.map(im=>"/"+im.name+" "+im.obj+" 0 R").join(" ")+" >>":"")+" >>";
+  obj(2,"<< /Type /Pages /Kids ["+pageN.map(n=>n+" 0 R").join(" ")+"] /Count "+pages.length+" /MediaBox [0 0 "+PW+" "+PH+"] /Resources "+res+" >>");
+  obj(3,"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+  obj(4,"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+  for(const im of images)obj(im.obj,"<< /Type /XObject /Subtype /Image /Width "+im.w+" /Height "+im.h+" /ColorSpace /DeviceRGB /BitsPerComponent 8"+(im.kind==="dct"?" /Filter /DCTDecode":"")+" /Length "+im.bytes.length+" >>",im.bytes);
+  for(let i=0;i<pages.length;i++){const c=L1(pages[i]);obj(contN[i],"<< /Length "+c.length+" >>",c);obj(pageN[i],"<< /Type /Page /Parent 2 0 R /Contents "+contN[i]+" 0 R >>")}
+  const xo=off;pS("xref\n0 "+(total+1)+"\n0000000000 65535 f \n");
+  for(let n=1;n<=total;n++)pS(String(offs[n]).padStart(10,"0")+" 00000 n \n");
+  pS("trailer\n<< /Size "+(total+1)+" /Root 1 0 R >>\nstartxref\n"+xo+"\n%%EOF");
+  let len=0;chunks.forEach(c=>len+=c.length);const outb=new Uint8Array(len);let p=0;chunks.forEach(c=>{outb.set(c,p);p+=c.length});
+  const blob=new Blob([outb],{type:"application/pdf"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=("Teste - "+(t.produto||"teste")).replace(/[\\/:*?"<>|]/g,"_").slice(0,80)+".pdf";
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+}
+/* ---------- comparar ---------- */
+function renderComparar(){opcoesTipo($("cTipo"),true);$("cTipo").value=cTipoSel;
+  const L=base.testes.filter(t=>!cTipoSel||t.tipo===cTipoSel).sort((a,b)=>(b.ini||"").localeCompare(a.ini||""));
+  $("cSel").innerHTML=L.map(t=>`<label class="ck"><input type="checkbox" data-c="${t.id}" ${cmp.has(t.id)?"checked":""}> ${esc(t.produto)} <span class="hint">· ${brDate(t.ini)}</span></label>`).join("")||`<p class="hint">Nenhum teste deste tipo.</p>`;
+  $("cSel").querySelectorAll("[data-c]").forEach(c=>c.onchange=()=>{if(c.checked){if(cmp.size>=4){c.checked=false;alert("Compare no máximo 4 testes de cada vez.");return}cmp.add(c.dataset.c)}else cmp.delete(c.dataset.c);renderComparar()});
+  const T=[...cmp].map(teste).filter(Boolean);
+  if(T.length<2){$("cTab").innerHTML=`<div class="vazio">Marque pelo menos 2 testes acima${T.length?" (1 marcado)":""}.</div>`;return}
+  const R=relatorios();const op=T.map(t=>medias(R,turnosEntre(t.ini,t.iniT,t.fim,t.fimT)));
+  const lin=(n,f,cls)=>`<tr><th>${n}</th>${T.map((t,i)=>`<td class="${cls?cls(t,i):""}">${f(t,i)}</td>`).join("")}</tr>`;
+  let h=`<table class="cmpt"><thead><tr><th></th>${T.map(t=>`<th>${esc(t.produto)}<br><span class="hint" style="font-weight:500">${esc(t.fornecedor||"")}</span></th>`).join("")}</tr></thead><tbody>`;
+  h+=lin("Resultado",t=>chipRes(t),t=>sit(t)==="apr"?"best":"");
+  h+=lin("Por quê",t=>esc(t.porque||"—"));
+  h+=lin("Tipo",t=>esc(t.tipo))+lin("Equipamento / local",t=>esc(t.local||"—"))+lin("Comparado com",t=>esc(t.ref||"—"));
+  h+=lin("Período",t=>periodoTxt(t))+lin("Duração",t=>duracao(t)+" dias")+lin("Objetivo",t=>esc(t.objetivo||"—"))+lin("Responsável",t=>esc(t.resp||"—"));
+  h+=lin("Anotações",t=>(t.anotacoes||[]).slice().sort((a,b)=>a.data.localeCompare(b.data)).map(a=>`<p class="an2"><b>${brDate(a.data)}:</b> ${esc(a.texto)}</p>`).join("")||"—");
+  PARS.forEach(([k,n,u,dc])=>{if(op.some(o=>o.m[k]!=null))h+=lin(`${n} <small>${u}, média no teste</small>`,(t,i)=>fmt(op[i].m[k],dc),()=>"num")});
+  $("cTab").innerHTML=h+"</tbody></table>"+(op.some(o=>o.nt)?`<p class="hint" style="margin-top:8px">Médias da usina durante cada teste, dos Relatórios de Turno (horas paradas fora). Só referência.</p>`:"")}
+let cTipoSel="";
+$("cTipo").onchange=()=>{cTipoSel=$("cTipo").value;renderComparar()};
+
+/* ---------- configurar ---------- */
+function renderCfg(){$("tipos").innerHTML=base.tipos.map((tp,i)=>{const n=base.testes.filter(t=>t.tipo===tp).length;
+  return `<li><span><b>${esc(tp)}</b> <span class="hint">· ${n} ${n===1?"teste":"testes"}</span></span><span style="display:flex;gap:6px"><button class="btn ghost small" type="button" data-up="${i}" ${i?"":"disabled"}>Subir</button><button class="btn ghost small" type="button" data-del="${i}" ${n?"disabled title='Tipo em uso'":""}>Apagar</button></span></li>`}).join("");
+  $("tipos").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{base.tipos.splice(+b.dataset.del,1);gravar();renderCfg()});
+  $("tipos").querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const i=+b.dataset.up;[base.tipos[i-1],base.tipos[i]]=[base.tipos[i],base.tipos[i-1]];gravar();renderCfg()})}
+$("addTipo").onclick=()=>{const v=$("novoTipo").value.trim();if(!v)return;if(base.tipos.some(t=>t.toLowerCase()===v.toLowerCase())){alert("Esse tipo já existe.");return}base.tipos.push(v);$("novoTipo").value="";gravar();renderCfg()};
+
+/* ---------- exportar (CSV abre no Excel) ---------- */
+$("bCsv").onclick=()=>{const L=filtrados();if(!L.length){alert("Nenhum teste para exportar.");return}
+  const c=v=>{const s=String(v??"");return /[;"\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const cab=["Tipo","Produto","Fornecedor","Equipamento/local","Comparado com","Responsável","Início","Fim","Duração (dias)","Objetivo","Resultado","Por quê","Anotações"];
+  const rows=L.map(t=>[t.tipo,t.produto,t.fornecedor,t.local,t.ref,t.resp,brDate(t.ini),t.fim?brDate(t.fim):"",duracao(t),t.objetivo,RES[sit(t)],t.porque,(t.anotacoes||[]).map(a=>brDate(a.data)+": "+a.texto).join(" | ")]);
+  const csv="﻿"+[cab,...rows].map(r=>r.map(c).join(";")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="testes-"+hoje()+".csv";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)};
+
+/* ---------- navegação ---------- */
+function mostrar(t){aba=t;document.querySelectorAll(".tabpane").forEach(p=>p.hidden=p.id!=="tab-"+t);
+  document.querySelectorAll(".tbar [data-tab]").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.tab===(t==="det"?"lista":t))));
+  if(t==="lista"){opcoesTipoKeep($("fTipo"));renderLista()}if(t==="comparar")renderComparar();if(t==="config")renderCfg()}
+function opcoesTipoKeep(sel){const v=sel.value;opcoesTipo(sel,true);sel.value=base.tipos.includes(v)?v:""}
+document.querySelectorAll(".tbar [data-tab]").forEach(b=>b.onclick=()=>mostrar(b.dataset.tab));
+["fTipo","fSit"].forEach(id=>$(id).onchange=renderLista);$("fBusca").oninput=renderLista;
+$("bNovo").onclick=()=>abrirForm(null);
+$("cmpLimpa").onclick=()=>{cmp.clear();renderLista()};
+$("cmpIr").onclick=()=>{const T=[...cmp].map(teste);cTipoSel=T.every(t=>t.tipo===T[0].tipo)?T[0].tipo:"";mostrar("comparar")};
+window.addEventListener("storage",e=>{if(e.key===LS){carregar();if(aba==="det")renderDet();else mostrar(aba)}});
+if(location.protocol==="file:")$("lnkPortal").href="../index.html";
+try{$("aAutor").value=localStorage.getItem("controle-testes.autor")||""}catch(e){}
+
+carregar();mostrar("lista");
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+<!--PASTA-DADOS--><script>
+/* PASTA-DADOS: guarda uma cópia de todos os controles numa pasta do computador (Chrome/Edge).
+   O navegador continua sendo onde o app trabalha; a pasta é a cópia que não se perde quando
+   o histórico é limpo ou uma versão nova do app é aberta. */
+(function(){
+"use strict";
+if(window.PastaDados)return;
+const ARQ="dados-portal-controles.json",SUB="copias",MANTER=30;
+const BANCOS=[{db:"controle-itm",store:"kv"}];
+const IGNORAR=new Set(["controles.ultimoBackup","pasta-dados.ultimo"]);
+const APPS=[["rt-reports","Relatório de Turno","relatórios"],["controle-floculantes.v1","Floculantes","registros"],["controle-britadores.v1","Britadores","registros"],["controle-ibm.v1","Controle IBM","registros"],["controle-itm.v1","Fluxo ITM","registros"],["controle-testes.v1","Registro de Testes","registros"]];
+const suporta=typeof window.showDirectoryPicker==="function";
+
+/* ---------- IndexedDB ---------- */
+function idbAbrir(nome,store,criar){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;
+  try{r=criar?indexedDB.open(nome,1):indexedDB.open(nome)}catch(e){return ok(null)}
+  r.onupgradeneeded=()=>{if(criar){if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store)}else{try{r.transaction.abort()}catch(e){}}};
+  r.onerror=()=>ok(null);r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(store)){db.close();ok(null)}else ok(db)}})}
+async function idbTudo(nome,store){const db=await idbAbrir(nome,store,false);if(!db)return null;
+  return new Promise(ok=>{const out={};const c=db.transaction(store).objectStore(store).openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else{db.close();ok(out)}};c.onerror=()=>{db.close();ok(null)}})}
+async function idbPor(nome,store,obj){const db=await idbAbrir(nome,store,true);if(!db)throw new Error("IndexedDB indisponível");
+  return new Promise((ok,err)=>{const t=db.transaction(store,"readwrite"),s=t.objectStore(store);Object.keys(obj).forEach(k=>s.put(obj[k],k));t.oncomplete=()=>{db.close();ok()};t.onerror=()=>{db.close();err(t.error)}})}
+async function idbGet(k){const db=await idbAbrir("portal-pasta","kv",true);if(!db)return null;
+  return new Promise(ok=>{const r=db.transaction("kv").objectStore("kv").get(k);r.onsuccess=()=>{db.close();ok(r.result||null)};r.onerror=()=>{db.close();ok(null)}})}
+async function idbSet(k,v){return idbPor("portal-pasta","kv",{[k]:v})}
+
+/* ---------- foto dos dados ---------- */
+function contar(k,txt){try{const j=JSON.parse(txt);if(!j||typeof j!=="object")return 0;
+  if(k==="rt-reports")return Object.keys(j).length;
+  if(k==="controle-testes.v1")return Array.isArray(j.testes)?j.testes.length:0;
+  let n=0;Object.entries(j).forEach(([c,v])=>{if(c==="pendentes"||c==="config"||!v||typeof v!=="object"||Array.isArray(v))return;Object.values(v).forEach(r=>{if(r&&typeof r==="object"&&!r.excluido)n++})});return n}catch(e){return 0}}
+async function montar(){const ls={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!IGNORAR.has(k))ls[k]=localStorage.getItem(k)}
+  const idb={};for(const b of BANCOS){const v=await idbTudo(b.db,b.store);if(v)idb[b.db+"/"+b.store]=v}
+  return {app:"Portal de Controles · Mineral do Brasil",versao:1,criadoEm:new Date().toISOString(),localStorage:ls,indexedDB:idb}}
+function total(bk){let n=0;APPS.forEach(([k])=>{if(bk&&bk.localStorage&&bk.localStorage[k]!=null)n+=contar(k,bk.localStorage[k])});
+  const an=bk&&bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)n+=Object.keys(an).length;return n}
+function resumo(bk){const l=APPS.map(([k,nome,un])=>bk.localStorage[k]!=null?`${nome}: ${contar(k,bk.localStorage[k])} ${un}`:null).filter(Boolean);
+  const an=bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)l.push(`Análises do laboratório: ${Object.values(an).filter(a=>a&&!a.excluido).length}`);return l}
+const semData=bk=>{const c={...bk};delete c.criadoEm;return JSON.stringify(c)};
+
+/* ---------- pasta ---------- */
+let dir=null,estado="sem",ultimo=null,ultimoTxt=null,erro="",ouvintes=[];
+try{ultimo=localStorage.getItem("pasta-dados.ultimo")}catch(e){}
+const avisar=()=>ouvintes.forEach(f=>{try{f(info())}catch(e){}});
+function info(){return {suporta,estado,pasta:dir?dir.name:"",ultimo,erro}}
+async function permissao(pedir){if(!dir)return false;const o={mode:"readwrite"};
+  try{if(await dir.queryPermission(o)==="granted")return true;if(pedir&&await dir.requestPermission(o)==="granted")return true}catch(e){}return false}
+async function lerArquivo(d){try{const f=await (await (d||dir).getFileHandle(ARQ)).getFile();const bk=JSON.parse(await f.text());return bk&&bk.localStorage&&bk.versao===1?bk:null}catch(e){return null}}
+async function escrever(d,nome,txt){const fh=await d.getFileHandle(nome,{create:true});const w=await fh.createWritable();await w.write(txt);await w.close()}
+const hojeISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+async function gravarNaPasta(bk){const txt=JSON.stringify(bk);
+  await escrever(dir,ARQ,txt);
+  const sub=await dir.getDirectoryHandle(SUB,{create:true});await escrever(sub,"dados-"+hojeISO()+".json",txt);
+  try{const nomes=[];for await(const [n,h] of sub.entries())if(h.kind==="file"&&/^dados-\d{4}-\d\d-\d\d\.json$/.test(n))nomes.push(n);
+    nomes.sort().slice(0,Math.max(0,nomes.length-MANTER)).forEach(n=>sub.removeEntry(n).catch(()=>{}))}catch(e){}
+  ultimo=bk.criadoEm;ultimoTxt=semData(bk);try{localStorage.setItem("pasta-dados.ultimo",ultimo)}catch(e){}}
+async function copiaSeguranca(bk,motivo){try{const sub=await dir.getDirectoryHandle(SUB,{create:true});const d=new Date(),p=n=>String(n).padStart(2,"0");
+  await escrever(sub,`${motivo}-${hojeISO()}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.json`,JSON.stringify(bk))}catch(e){}}
+async function aplicar(bk){Object.keys(bk.localStorage).forEach(k=>{if(!IGNORAR.has(k))localStorage.removeItem(k)});
+  Object.entries(bk.localStorage).forEach(([k,v])=>{if(!IGNORAR.has(k))localStorage.setItem(k,v)});
+  for(const [chave,obj] of Object.entries(bk.indexedDB||{})){const [db,store]=chave.split("/");await idbPor(db,store,obj)}}
+
+let gravando=false;
+/* Grava se algo mudou. Nunca grava um navegador vazio por cima de uma pasta com dados. */
+async function salvar(){if(!dir||gravando)return;gravando=true;
+  try{if(!await permissao(false)){estado="permissao";return}
+    const bk=await montar(),s=semData(bk);
+    if(s===ultimoTxt){estado="ok";return}
+    if(!total(bk)){const f=await lerArquivo();if(f&&total(f)){estado="vazio";return}}
+    await gravarNaPasta(bk);estado="ok";erro=""}
+  catch(e){estado="erro";erro=e.message||String(e)}
+  finally{gravando=false;avisar()}}
+
+/* Escolhe a pasta. Se ela já tem dados, pergunta qual lado vale. */
+async function escolher(){if(!suporta)throw new Error("Este navegador não grava em pasta. Use o Google Chrome ou o Microsoft Edge no computador.");
+  const d=await window.showDirectoryPicker({id:"portal-controles",mode:"readwrite",startIn:"documents"});
+  const arq=await lerArquivo(d),nav=await montar();dir=d;await idbSet("dir",d);ultimoTxt=null;
+  let acao="gravar";
+  if(arq&&total(arq)){
+    if(!total(nav))acao="carregar";
+    else{const r=prompt(`Essa pasta já tem dados salvos em ${dataBR(arq.criadoEm)}:\n  ${resumo(arq).join("\n  ")}\n\nE este navegador tem:\n  ${resumo(nav).join("\n  ")}\n\nDigite PASTA para trazer os dados da pasta para este navegador (use quando abriu uma versão nova do app ou outro computador).\nDigite NAVEGADOR para gravar os dados deste navegador na pasta.\n\nO lado que for trocado ganha uma cópia de segurança na pasta "copias".`)||"";
+      const t=r.trim().toUpperCase();acao=t==="PASTA"?"carregar":t==="NAVEGADOR"?"gravar":"nada"}}
+  if(acao==="carregar"){if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");await aplicar(arq);ultimoTxt=null;estado="ok";ultimo=arq.criadoEm;avisar();return "carregado"}
+  if(acao==="gravar"){if(arq&&total(arq))await copiaSeguranca(arq,"pasta-antes-de-gravar");await gravarNaPasta(nav);estado="ok";avisar();return "gravado"}
+  estado="ok";avisar();return "nada"}
+async function carregarDaPasta(){if(!dir||!await permissao(true))throw new Error("Sem acesso à pasta.");
+  const arq=await lerArquivo();if(!arq)throw new Error(`Não achei o arquivo ${ARQ} na pasta.`);
+  const nav=await montar();if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");
+  await aplicar(arq);ultimoTxt=semData(arq);estado="ok";avisar();return arq}
+async function liberar(){if(await permissao(true)){estado="ok";await salvar();return true}return false}
+async function esquecer(){dir=null;estado="sem";await idbSet("dir",null);avisar()}
+const dataBR=iso=>{if(!iso)return "—";const d=new Date(iso);return d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+
+/* ---------- selo no canto da tela (nos apps) ---------- */
+function selo(){if(document.getElementById("pdSelo")||document.body.dataset.pdSemSelo!=null)return;
+  const st=document.createElement("style");st.textContent=`#pdSelo{position:fixed;right:14px;bottom:14px;z-index:9999;font:600 13px/1.2 Inter,system-ui,Arial,sans-serif;border-radius:999px;padding:8px 14px;border:1.5px solid #1d7a4a;background:#e3f1e8;color:#1d6b47;box-shadow:0 4px 14px #1d262126;cursor:default;max-width:calc(100vw - 28px)}
+#pdSelo.at{border-color:#c58a10;background:#fcefd6;color:#8a5a00;cursor:pointer}#pdSelo.er{border-color:#c0392b;background:#f8e1de;color:#a12d22;cursor:pointer}@media print{#pdSelo{display:none}}`;
+  document.head.appendChild(st);const b=document.createElement("button");b.id="pdSelo";b.type="button";b.hidden=true;document.body.appendChild(b);
+  b.onclick=async()=>{if(estado==="permissao"||estado==="erro")await liberar()};
+  ouvintes.push(i=>{b.hidden=i.estado==="sem";const h=i.ultimo?new Date(i.ultimo).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"";
+    b.className=i.estado==="ok"?"":i.estado==="erro"||i.estado==="vazio"?"er":"at";
+    b.textContent=i.estado==="ok"?`Salvo na pasta ${i.pasta}${h?" · "+h:""}`:i.estado==="permissao"?"Clique para liberar a gravação na pasta":i.estado==="vazio"?"Navegador vazio: carregue os dados da pasta no Portal":"Erro ao gravar na pasta (clique para tentar de novo)";
+    b.title=i.estado==="vazio"?"A pasta tem dados e este navegador não. Abra o Portal > Pasta de dados > Carregar dados da pasta.":i.erro||""})}
+
+async function iniciar(){if(!suporta){avisar();return}
+  try{dir=await idbGet("dir")}catch(e){dir=null}
+  if(dir){estado=await permissao(false)?"ok":"permissao";if(estado==="ok")setTimeout(salvar,1500)}
+  avisar()}
+setInterval(salvar,60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")salvar()});
+window.addEventListener("storage",()=>{clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,5000)});
+let ultLS=null;setInterval(()=>{let n=0;try{for(let i=0;i<localStorage.length;i++)n+=(localStorage.getItem(localStorage.key(i))||"").length}catch(e){}if(ultLS!=null&&n!==ultLS){clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,4000)}ultLS=n},3000);
+
+window.PastaDados={info,escolher,salvar,carregarDaPasta,liberar,esquecer,lerArquivo:()=>lerArquivo(),montar,resumo,total,ouvir:f=>{ouvintes.push(f);f(info())},dataBR};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{selo();iniciar()});else{selo();iniciar()}
+})();
+</script><!--/PASTA-DADOS-->
+</body>
+</html>

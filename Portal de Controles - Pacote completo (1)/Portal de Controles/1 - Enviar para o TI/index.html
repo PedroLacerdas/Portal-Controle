@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal de Controles</title>
+<meta name="theme-color" content="#1d6b47">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --ink:#16201b;--muted:#66736d;--line:#e3e9e6;--card:#ffffffd9;--card-solid:#fff;
+  --brand:#1d6b47;--brand-dark:#14502f;--brand-soft:#e3f1e8;--brand-2:#2f8a5c;
+  --blue:#2f6db0;--amber:#c58a10;--crit:#c0392b;--ok:#1d7a4a;
+  --r:22px;--font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --sh:0 1px 2px #16201b0a,0 10px 30px #16201b0f;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--ink);font-size:15px;line-height:1.45;min-height:100vh;
+  background:radial-gradient(1200px 700px at 0% 0%,#d9efe2 0%,transparent 60%),radial-gradient(900px 600px at 100% 10%,#e2ecf3 0%,transparent 60%),radial-gradient(900px 700px at 60% 100%,#eef3e4 0%,transparent 60%),#f3f6f4;background-attachment:fixed}
+[hidden]{display:none!important}
+a{color:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* moldura */
+.shell{max-width:1480px;margin:0 auto;padding:22px 28px 48px 228px;position:relative}
+.rail{position:fixed;left:20px;top:50%;transform:translateY(-50%);width:180px;display:flex;flex-direction:column;gap:4px;padding:10px;background:var(--card);backdrop-filter:blur(14px);border-radius:22px;box-shadow:var(--sh);z-index:10}
+.rail a{display:block;padding:11px 14px;border-radius:14px;color:var(--muted);text-decoration:none;font-weight:600;font-size:.92rem;line-height:1.2}
+.rail a:hover{background:var(--brand-soft);color:var(--brand-dark)}
+.rail a.on{background:var(--ink);color:#fff}
+.rail a.sep{margin-top:6px;border-top:1px solid var(--line);border-radius:0 0 14px 14px;padding-top:13px}
+@media (max-width:1150px){.rail{display:none}.shell{padding:16px 16px 40px}}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:14px}
+.marca img{height:44px;width:auto;display:block}
+.marca .t{display:flex;flex-direction:column}
+.marca small{font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--brand)}
+.marca b{font-size:1.05rem}
+.pills{display:flex;gap:6px;background:var(--card);backdrop-filter:blur(14px);padding:6px;border-radius:999px;box-shadow:var(--sh)}
+.pills a{font-weight:600;font-size:.9rem;text-decoration:none;padding:9px 16px;border-radius:999px;color:var(--muted)}
+.pills a.on{background:var(--ink);color:#fff}
+.pills a:not(.on):hover{color:var(--ink)}
+.quem{display:flex;align-items:center;gap:10px}
+.turno{font-weight:700;font-size:.9rem;background:var(--card);box-shadow:var(--sh);padding:9px 14px;border-radius:999px;display:flex;gap:8px;align-items:center}
+.turno i{width:8px;height:8px;border-radius:50%;background:var(--brand-2);box-shadow:0 0 0 4px #2f8a5c26}
+.av{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;box-shadow:var(--sh)}
+.quem .u{display:flex;flex-direction:column;line-height:1.2;text-align:right}
+.quem .u b{font-size:.9rem}.quem .u small{color:var(--muted);font-size:.78rem}
+.sair{font-size:.8rem;color:var(--muted)}
+.pills a{white-space:nowrap}
+@media (max-width:700px){.pills{order:3;width:100%;justify-content:center}.pills a{padding:9px 12px;font-size:.85rem}.quem .u{display:none}.pills .lg{display:none}}
+
+/* destaque */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin:34px 0 22px}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:600;letter-spacing:-.03em;margin:0;line-height:1.05}
+.hero p{margin:8px 0 0;color:var(--muted);font-size:1.02rem}
+.nums{display:flex;gap:34px;flex-wrap:wrap}
+.num small{display:block;color:var(--muted);font-size:.82rem;font-weight:500;margin-bottom:2px}
+.num b{font-size:2.1rem;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;vertical-align:middle;margin-left:6px;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px;background:#d8f0e1;color:var(--ok)}
+.tag.w{background:#fcefd6;color:#8a5a00}.tag.r{background:#f8e1de;color:var(--crit)}.tag.n{background:#edf1ef;color:var(--muted)}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:1180px){.bento{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.bento{grid-template-columns:1fr}}
+.c{background:var(--card);backdrop-filter:blur(14px);border-radius:var(--r);box-shadow:var(--sh);padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0;position:relative;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
+a.c:hover{transform:translateY(-3px);box-shadow:0 1px 2px #16201b0a,0 16px 40px #16201b1c}
+.c.s2{grid-column:span 2}
+@media (max-width:620px){.c.s2{grid-column:span 1}}
+.c h3{margin:0;font-size:1.12rem;font-weight:600;letter-spacing:-.01em;padding-right:70px}
+.c .d{margin:-6px 0 0;color:var(--muted);font-size:.84rem;padding-right:60px}
+.go{position:absolute;top:16px;right:16px;padding:7px 13px;border-radius:999px;background:#f1f5f3;color:var(--ink);font-weight:700;font-size:.8rem}
+.go svg{width:16px;height:16px}
+a.c:hover .go{background:var(--ink);color:#fff}
+.big{font-size:2.6rem;font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:.95rem;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:4px}
+.lbl{font-size:.8rem;color:var(--muted)}
+.vazio{color:var(--muted);font-size:.9rem;margin:auto 0}
+.ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand)}
+.ico svg{width:22px;height:22px}
+
+/* cartão verde (chamada principal) */
+.c.verde{background:linear-gradient(160deg,#2f8a5c 0%,#1d6b47 55%,#14502f 100%);color:#fff;min-height:250px}
+.c.verde .d{color:#d6efe0}
+.c.verde .go{background:#ffffff26;color:#fff}
+.c.verde .cta{align-self:flex-start;display:inline-flex;gap:8px;align-items:center;background:#fff;color:var(--brand-dark);font-weight:700;font-size:.9rem;padding:10px 16px;border-radius:999px;margin-top:4px}
+.c.verde .cta svg{width:16px;height:16px}
+.c.verde .big small{color:#d6efe0}
+.c.verde .rod{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+
+/* relatório: medidor + barras */
+.rel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:center}
+@media (max-width:620px){.rel{grid-template-columns:1fr}}
+.gauge{width:100%;max-width:260px;justify-self:center}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:4px}
+.bars i{flex:1;border-radius:6px 6px 3px 3px;background:repeating-linear-gradient(135deg,#cfe6d8 0 3px,#e4f1e9 3px 6px);min-height:4px}
+.bars i.last{background:var(--brand)}
+.bx{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
+
+/* britadores */
+.brs{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.br{display:grid;grid-template-columns:70px 1fr 54px;gap:10px;align-items:center;font-size:.86rem}
+.br b{font-weight:700}
+.br .tr{height:10px;border-radius:999px;background:#edf2ef;overflow:hidden}
+.br .tr i{display:block;height:100%;border-radius:999px;background:var(--brand-2)}
+.br .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+
+.mini{display:flex;gap:18px;margin-top:auto;flex-wrap:wrap}
+.mini div{display:flex;flex-direction:column}
+.mini b{font-size:1.5rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* segurança */
+.sec-tit{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:38px 0 14px}
+.sec-tit h2{margin:0;font-size:1.5rem;font-weight:600;letter-spacing:-.02em}
+.sec-tit p{margin:0;color:var(--muted)}
+.seg2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:900px){.seg2{grid-template-columns:1fr}}
+.sec.bk{background:var(--card);backdrop-filter:blur(14px);border-radius:var(--r);box-shadow:var(--sh);padding:22px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.sec.bk .eyebrow{display:none}
+.sec.bk h2{margin:0;font-size:1.12rem;font-weight:600}
+.sec.bk>p{margin:0;color:var(--muted);font-size:.88rem}
+.bk .bkbox{margin-top:8px;display:flex;flex-direction:column;gap:12px}
+.bk .bkres{font-size:.92rem;line-height:1.5;background:#f3f7f5;border-radius:14px;padding:12px 14px}
+.bk .bkres.alerta{background:#fdf3dc;border:1px solid #f0d08a}
+.bk .bkact{display:flex;flex-wrap:wrap;gap:10px}
+.btn{font:700 .9rem var(--font);border-radius:999px;padding:11px 18px;cursor:pointer;border:1.5px solid var(--ink);background:var(--ink);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:hover{filter:brightness(1.15)}
+.bk .bkmsg{margin:0;font-size:.88rem;font-weight:600}
+.bk .bkmsg.ok{color:var(--brand)}.bk .bkmsg.err{color:var(--crit)}
+footer{margin-top:30px;color:var(--muted);font-size:.8rem;text-align:center}
+
+.turnohint{color:var(--muted);font-weight:600;text-align:right}
+.kpibar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:18px 0 20px}
+@media(max-width:1100px){.kpibar{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.kpibar{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--card);backdrop-filter:blur(14px);border-radius:16px;box-shadow:var(--sh);padding:14px 16px;min-width:0}
+.kpi small{display:block;color:var(--muted);font-size:.78rem;margin-bottom:4px}
+.kpi b{font-size:1.7rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:block;line-height:1.1}
+.kpi b .u{font-size:.8rem;font-weight:500;color:var(--muted);margin-left:3px}
+.kpi .s{color:var(--muted);font-size:.76rem;margin-top:2px}
+.dash{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media(max-width:900px){.dash{grid-template-columns:1fr}}
+.dcard{background:var(--card);backdrop-filter:blur(14px);border-radius:var(--r);box-shadow:var(--sh);padding:20px 22px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.dcard.wide{grid-column:1/-1}
+.ch{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ch h2{margin:0;font-size:1.15rem;font-weight:600;letter-spacing:-.01em}
+.ch .sub{color:var(--muted);font-size:.85rem}
+.lk{color:var(--brand-dark);font-weight:600;font-size:.85rem;text-decoration:none;white-space:nowrap}
+.lk:hover{text-decoration:underline}
+.sel{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--muted);font-weight:600}
+.sel select,.sel input{font:600 .88rem var(--font);padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.prodT{width:100%;border-collapse:collapse}
+.prodT th,.prodT td{padding:8px 6px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--line);font-size:.92rem}
+.prodT th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+.prodT td:first-child,.prodT th:first-child{text-align:left}
+.prodT tr.tot td{border-bottom:0;border-top:2px solid var(--line);font-weight:700}
+.trend{display:flex;align-items:flex-end;gap:5px;height:70px}
+.trend i{flex:1;border-radius:5px 5px 2px 2px;background:#cfe6d8;min-height:3px}
+.trend i.last{background:var(--brand)}
+.bx2{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
+.par .tot{font-size:2rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.par .tot .u{font-size:.85rem;color:var(--muted);font-weight:500}
+.parlist{display:flex;flex-direction:column;gap:0;margin-top:4px}
+.parlist .row{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:.9rem;padding:7px 0;border-bottom:1px solid var(--line)}
+.parlist .row:last-child{border-bottom:0}
+.parlist .row b{font-variant-numeric:tabular-nums}
+.fl3{display:flex;gap:18px;flex-wrap:wrap}
+.fl3 div{display:flex;flex-direction:column}
+.fl3 b{font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums}
+.fl3 span{color:var(--muted);font-size:.8rem}
+.navrow{display:flex;flex-wrap:wrap;gap:10px}
+.navrow a{background:var(--card);backdrop-filter:blur(14px);box-shadow:var(--sh);border-radius:12px;padding:12px 16px;font-weight:600;text-decoration:none;color:var(--ink)}
+.navrow a:hover{background:var(--ink);color:#fff}
+.dvazio{color:var(--muted);font-size:.9rem;padding:6px 0}
+.boxplot{width:100%;height:auto;display:block;font:12px var(--font)}
+.bxinfo{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.84rem}
+.bxinfo b{color:var(--ink);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body data-pd-sem-selo>
+<nav class="rail" aria-label="Controles">
+  <a href="#inicio" class="on">Início</a>
+  <a href="/relatorio/">Relatório de Turno</a>
+  <a href="/britadores/">Britadores</a>
+  <a href="/floculantes/">Floculantes</a>
+  <a href="/ibm/">Controle IBM</a>
+  <a href="/itm/">Controle ITM</a>
+  <a href="/testes/">Registro de Testes</a>
+  <a href="#seguranca" class="sep">Segurança dos dados</a>
+</nav>
+
+<div class="shell" id="inicio">
+  <header class="top">
+    <div class="marca"><img alt="Mineral do Brasil" src="data:image/png;base64,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"><div class="t"><small>Mineral do Brasil · ITM</small><b>Portal de Controles</b></div></div>
+    <nav class="pills" aria-label="Seções"><a href="#inicio" class="on">Painel</a><a href="#controles">Controles</a><a href="#seguranca">Segurança<span class="lg"> dos dados</span></a></nav>
+    <div class="quem"><span class="turno"><i></i><span id="turnoAtual">Turno —</span></span>
+      <div class="u"><b id="uNome">—</b><small id="uSub">Conectado com conta Microsoft</small><a class="sair" href="/.auth/logout">Sair</a></div>
+      <div class="av" id="uAv" aria-hidden="true">MB</div></div>
+  </header>
+
+  <section class="hero">
+    <div><h1 id="saud">Bom dia</h1><p id="hoje">—</p></div>
+    <div class="turnohint" id="diaInfo"></div>
+  </section>
+
+  <div class="kpibar" id="kpis"></div>
+
+  <div class="dash">
+    <section class="dcard wide">
+      <div class="ch"><h2>Produção do dia</h2><span class="sub" id="prodSub"></span></div>
+      <div id="prodBox"><table class="prodT" id="prodT"></table></div>
+      <div><div class="sub" style="margin-bottom:6px">Alimentação dos últimos turnos (t)</div>
+        <div class="trend" id="prodTrend"></div><div class="bx2"><span id="trB0"></span><span id="trB1"></span></div></div>
+    </section>
+
+    <section class="dcard">
+      <div class="ch"><h2>Paradas do dia</h2><a class="lk" href="/relatorio/">no Relatório →</a></div>
+      <div class="par" id="paradas"></div>
+    </section>
+
+    <section class="dcard">
+      <div class="ch"><h2>Floculantes</h2><a class="lk" href="/floculantes/">abrir →</a></div>
+      <div class="fl3" id="fl"></div>
+      <div><div class="sub" style="margin-bottom:6px">Floculante dos últimos turnos (kg)</div>
+        <div class="trend" id="flTrend"></div></div>
+    </section>
+
+    <section class="dcard wide">
+      <div class="ch"><h2>Boxplot do mês</h2>
+        <label class="sel">Variável <select id="bxVar">
+          <option value="alim">Alimentação por turno (t)</option>
+          <option value="conc">Concentrado por turno (t)</option>
+          <option value="conchora">Concentrado por hora (t/h)</option>
+          <option value="rej">Rejeito por turno (t)</option>
+          <option value="flocgt">Floculante (g/t)</option>
+        </select></label>
+        <label class="sel">Meta atual <input id="bxMeta" type="number" step="any" inputmode="decimal" placeholder="—" style="width:92px"></label>
+        <span id="bxMetaSrc" class="sub" style="font-size:.78rem"></span>
+        <a class="lk" href="/relatorio/">ver completo →</a></div>
+      <div class="bxinfo" id="bxInfo"></div>
+      <div id="bxWrap"></div>
+    </section>
+  </div>
+
+  <div class="sec-tit" id="controles"><h2>Controles</h2><p>Abra cada app para lançar ou investigar.</p></div>
+  <div class="navrow">
+    <a href="/relatorio/">Relatório de Turno</a>
+    <a href="/britadores/">Britadores</a>
+    <a href="/floculantes/">Floculantes</a>
+    <a href="/ibm/">Controle IBM</a>
+    <a href="/itm/">Controle ITM</a>
+    <a href="/testes/">Registro de Testes</a>
+  </div>
+
+  <div class="sec-tit" id="seguranca"><h2>Segurança dos dados</h2><p>Os lançamentos ficam neste navegador. Guarde uma cópia na pasta ou baixe um backup.</p></div>
+  <div class="seg2">
+<!--PD-SECAO-->
+  <section class="sec bk" id="pd">
+    <p class="eyebrow green">Segurança dos dados</p>
+    <h2>Pasta de dados no computador</h2>
+    <p>Escolha uma pasta deste computador (de preferência dentro do OneDrive). Os controles gravam sozinhos uma cópia de tudo nela,
+    a cada minuto e quando você troca de janela. Se o navegador for limpo ou você abrir uma versão nova do app, é só escolher a mesma pasta de novo
+    e carregar os dados. A pasta guarda também uma cópia por dia dos últimos 30 dias (subpasta <b>copias</b>). Funciona no Google Chrome e no Microsoft Edge.</p>
+    <div class="bkbox">
+      <div id="pdResumo" class="bkres">Verificando…</div>
+      <div class="bkact" id="pdAcoes"></div>
+      <p id="pdMsg" class="bkmsg"></p>
+    </div>
+  </section>
+<!--/PD-SECAO-->
+  <section class="sec bk" id="bk">
+    <p class="eyebrow green">Segurança dos dados</p>
+    <h2>Cópia de segurança</h2>
+    <p>Baixe uma cópia de vez em quando e guarde no OneDrive ou num pen drive. Se o navegador for limpo ou o computador trocado, é só restaurar.</p>
+    <div class="bkbox">
+      <div id="bkResumo" class="bkres">Calculando…</div>
+      <div class="bkact">
+        <button class="btn" type="button" id="bkBaixar">Baixar cópia de segurança</button>
+        <button class="btn ghost" type="button" id="bkRest">Restaurar uma cópia</button>
+        <input type="file" id="bkArq" accept=".json,application/json" hidden>
+      </div>
+      <p id="bkMsg" class="bkmsg"></p>
+    </div>
+  </section>
+  </div>
+  <footer>Mineral do Brasil · ITM · Portal de Controles</footer>
+</div>
+<script>
+/* Cópia de segurança de todos os controles: tudo que está guardado neste navegador
+   (localStorage de todos os apps + análises do laboratório do Controle ITM, que ficam no IndexedDB). */
+(function(){
+const $=id=>document.getElementById(id);
+const BANCOS=[{db:"controle-itm",store:"kv"}];
+const CHAVE_ULT="controles.ultimoBackup";
+const APPS=[["rt-reports","Relatório de Turno","relatórios"],["controle-floculantes.v1","Floculantes","registros"],["controle-britadores.v1","Britadores","registros"],["controle-ibm.v1","Controle IBM","registros"],["controle-itm.v1","Controle ITM","registros"],["controle-testes.v1","Registro de Testes","registros"]];
+function idbLer(nome,store){return new Promise(ok=>{
+  if(!window.indexedDB)return ok(null);let feito=false;const fim=v=>{if(!feito){feito=true;ok(v)}};
+  let r;try{r=indexedDB.open(nome)}catch(e){return fim(null)}
+  r.onupgradeneeded=()=>{try{r.transaction.abort()}catch(e){}fim(null)};r.onerror=()=>fim(null);
+  r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(store)){db.close();return fim(null)}
+    const out={};const c=db.transaction(store).objectStore(store).openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else{db.close();fim(out)}};c.onerror=()=>{db.close();fim(null)}};
+})}
+function idbGravar(nome,store,obj){return new Promise((ok,err)=>{
+  const r=indexedDB.open(nome,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store)};
+  r.onerror=()=>err(r.error);
+  r.onsuccess=()=>{const db=r.result;const t=db.transaction(store,"readwrite");const s=t.objectStore(store);Object.keys(obj).forEach(k=>s.put(obj[k],k));t.oncomplete=()=>{db.close();ok()};t.onerror=()=>{db.close();err(t.error)}};
+})}
+function contar(k,txt){
+  try{const j=JSON.parse(txt);if(!j||typeof j!=="object")return 0;
+    if(k==="rt-reports")return Object.keys(j).length;
+    if(k==="controle-testes.v1")return Array.isArray(j.testes)?j.testes.length:0;
+    let n=0;Object.entries(j).forEach(([c,v])=>{if(c==="pendentes"||c==="config"||!v||typeof v!=="object"||Array.isArray(v))return;Object.values(v).forEach(r=>{if(r&&typeof r==="object"&&!r.excluido)n++})});return n}catch(e){return 0}
+}
+async function montar(){
+  const ls={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k===CHAVE_ULT)continue;ls[k]=localStorage.getItem(k)}
+  const idb={};for(const b of BANCOS){const v=await idbLer(b.db,b.store);if(v)idb[b.db+"/"+b.store]=v}
+  return {app:"Portal de Controles · Mineral do Brasil",versao:1,criadoEm:new Date().toISOString(),localStorage:ls,indexedDB:idb};
+}
+function resumoDe(bk){
+  const linhas=APPS.map(([k,nome,un])=>bk.localStorage[k]!=null?`${nome}: ${contar(k,bk.localStorage[k])} ${un}`:null).filter(Boolean);
+  const an=bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;
+  if(an)linhas.push(`Análises do laboratório: ${Object.values(an).filter(a=>a&&!a.excluido).length}`);
+  return linhas;
+}
+const dataBR=iso=>{const d=new Date(iso);return d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+async function atualizar(){
+  const bk=await montar(),l=resumoDe(bk);let ult=null;try{ult=localStorage.getItem(CHAVE_ULT)}catch(e){}
+  const dias=ult?(Date.now()-new Date(ult))/864e5:null,temDados=l.length>0;
+  const el=$("bkResumo");
+  el.className="bkres"+(temDados&&(dias==null||dias>7)?" alerta":"");
+  el.innerHTML=(temDados?"<b>Guardado neste navegador:</b> "+l.join(" · "):"Nenhum lançamento guardado neste navegador ainda.")+"<br>"+
+    (ult?`Última cópia baixada: <b>${dataBR(ult)}</b>${dias>7?" (há "+Math.floor(dias)+" dias, baixe uma nova)":""}`:(temDados?"<b>Nenhuma cópia baixada ainda.</b> Baixe uma agora.":""));
+}
+$("bkBaixar").onclick=async()=>{
+  const bk=await montar();const txt=JSON.stringify(bk);
+  const d=new Date(),p=n=>String(n).padStart(2,"0");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));
+  a.download=`backup-controles-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  try{localStorage.setItem(CHAVE_ULT,bk.criadoEm)}catch(e){}
+  $("bkMsg").className="bkmsg ok";$("bkMsg").textContent=`Cópia baixada (${(txt.length/1048576).toFixed(1).replace(".",",")} MB). Guarde o arquivo no OneDrive ou num pen drive.`;
+  atualizar();
+};
+$("bkRest").onclick=()=>$("bkArq").click();
+$("bkArq").onchange=async()=>{
+  const f=$("bkArq").files[0];$("bkArq").value="";if(!f)return;
+  let bk;try{bk=JSON.parse(await f.text())}catch(e){bk=null}
+  if(!bk||!bk.localStorage||bk.versao!==1){$("bkMsg").className="bkmsg err";$("bkMsg").textContent="Esse arquivo não é uma cópia de segurança do Portal de Controles.";return}
+  const l=resumoDe(bk);
+  const r=prompt(`Cópia de ${dataBR(bk.criadoEm)}:\n${l.join("\n")}\n\nOs dados deste navegador serão TROCADOS pelos da cópia (o que foi lançado depois da cópia se perde). Antes disso o app baixa uma cópia do que está aqui agora.\n\nDigite RESTAURAR para continuar.`);
+  if(String(r||"").trim().toUpperCase()!=="RESTAURAR")return;
+  /* segurança: baixa o estado atual antes de trocar */
+  const atual=JSON.stringify(await montar());
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([atual],{type:"application/json"}));a.download="antes-de-restaurar-"+Date.now()+".json";document.body.appendChild(a);a.click();a.remove();
+  try{
+    Object.keys(bk.localStorage).forEach(k=>localStorage.removeItem(k));
+    Object.entries(bk.localStorage).forEach(([k,v])=>localStorage.setItem(k,v));
+    for(const [chave,obj] of Object.entries(bk.indexedDB||{})){const [db,store]=chave.split("/");await idbGravar(db,store,obj)}
+    $("bkMsg").className="bkmsg ok";$("bkMsg").textContent="Cópia restaurada. Abra os controles normalmente.";
+  }catch(e){console.error(e);$("bkMsg").className="bkmsg err";$("bkMsg").textContent="Não foi possível restaurar tudo ("+(e.message||e)+"). O arquivo antes-de-restaurar que foi baixado tem os dados de antes.";}
+  atualizar();
+};
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+atualizar();
+})();
+</script>
+
+<script>
+fetch("/.auth/me",{credentials:"same-origin"}).then(r=>r.ok?r.json():null).then(j=>{
+  const p=j&&j.clientPrincipal;
+  document.getElementById("uNome").textContent=p?p.userDetails:"Visitante";
+  if(!p)document.getElementById("uSub").textContent="Não conectado";
+}).catch(()=>{document.getElementById("uNome").textContent="Offline"});
+</script>
+<script>
+/* Dashboard da tela inicial: lê rt-reports e controle-floculantes do navegador e resume. Só leitura. */
+(function(){
+const $=id=>document.getElementById(id);
+const ler=k=>{try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}};
+const num=v=>{if(v==null)return NaN;const s=String(v).trim().replace(/\s/g,"").replace(",",".");return s===""?NaN:Number(s)};
+const fmt=(v,d=0)=>v==null||!isFinite(v)?"—":Number(v).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const brD=s=>s?s.slice(8,10)+"/"+s.slice(5,7):"—";
+const ORD="ZXY";
+const ag=new Date(),iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const hoje=iso(ag),mesAtual=hoje.slice(0,7);
+const vivos=o=>o&&typeof o==="object"?Object.values(o).filter(r=>r&&!r.excluido):[];
+
+const h=ag.getHours();$("saud").textContent=h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
+$("hoje").textContent=ag.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).replace(/^./,c=>c.toUpperCase());
+const min=ag.getHours()*60+ag.getMinutes(),tAt=min>=420&&min<920?"X":min>=920&&min<1420?"Y":"Z";
+$("turnoAtual").textContent="Turno "+tAt;
+
+const R=ler("rt-reports")||{};
+const reports=Object.values(R).filter(r=>r&&r.data&&r.turno&&r.vals);
+const ordena=arr=>arr.sort((a,b)=>(a.data+ORD.indexOf(a.turno)).localeCompare(b.data+ORD.indexOf(b.turno)));
+ordena(reports);
+
+/* soma horária rows 9-17: alimentação (TC-07+TC-07B), concentrado (TC-11=G), rejeito (TC-12=H) */
+function totais(r){const v=r.vals;let alim=0,conc=0,rej=0,horas=0,rod=0;
+  for(let i=9;i<=17;i++){const c=num(v["C"+i]),aa=num(v["AA"+i]),g=num(v["G"+i]),hh=num(v["H"+i]);
+    const temC=isFinite(c)||isFinite(aa);if(!temC&&!isFinite(g)&&!isFinite(hh))continue;horas++;
+    const al=(isFinite(c)?c:0)+(isFinite(aa)?aa:0);alim+=al;if(al>0)rod++;
+    if(isFinite(g))conc+=g;if(isFinite(hh))rej+=hh}
+  return {alim,conc,rej,horas,rod}}
+/* paradas rows 36-44: D=motivo, B=início, C=fim (fração do dia), equip em Y/H */
+function paradasDe(r){const v=r.vals,out=[];
+  const vazio=s=>{s=String(s==null?"":s).trim();return s===""||s==="0"||/^0{1,2}:?0{0,2}$/.test(s)};
+  for(let row=36;row<=44;row++){
+    const ini=num(v["B"+row]),fim=num(v["C"+row]);if(!isFinite(ini)||!isFinite(fim))continue;
+    let dur=fim-ini;if(dur<0)dur+=1;                 // cruza a meia-noite
+    if(!(dur>1e-9))continue;                           // 00:00 → 00:00 = linha em branco, não é parada
+    let d=v["D"+row];d=(typeof d==="string"&&!vazio(d))?d.trim():"(sem descrição)";
+    out.push({motivo:d,min:dur*1440})}
+  return out}
+
+/* dia base = último dia com relatório */
+const dias=[...new Set(reports.map(r=>r.data))].sort();
+const diaBase=dias.length?dias[dias.length-1]:hoje;
+const relRot=diaBase===hoje?"hoje":diaBase===iso(new Date(ag.getTime()-864e5))?"ontem":brD(diaBase);
+$("diaInfo").innerHTML=reports.length?`Produção referente a <b>${brD(diaBase)}</b> (${relRot})`:"";
+
+const doDia=reports.filter(r=>r.data===diaBase);
+const somaDia=doDia.reduce((s,r)=>{const t=totais(r);s.alim+=t.alim;s.conc+=t.conc;s.rej+=t.rej;return s},{alim:0,conc:0,rej:0});
+const parDia=doDia.flatMap(paradasDe),minPar=parDia.reduce((s,p)=>s+p.min,0);
+
+/* floculantes */
+const F=ler("controle-floculantes.v1");const freg=ordena(vivos(F&&F.registros).filter(r=>r.data));
+const flKg=r=>(+num(r.litros)||0)*(+num(r.conc)||0)/100;
+const flDia=freg.filter(r=>r.data===diaBase);
+const kgDia=flDia.reduce((s,r)=>s+flKg(r),0),tonDia=flDia.reduce((s,r)=>s+(num(r.ton)>0?num(r.ton):0),0);
+const gtDia=tonDia>0?kgDia*1000/tonDia:null;
+const kgMes=freg.filter(r=>r.data.slice(0,7)===mesAtual).reduce((s,r)=>s+flKg(r),0);
+
+/* ---- KPIs ---- */
+const kpi=(l,v,u,s)=>`<div class="kpi"><small>${l}</small><b>${v}${u?'<span class="u">'+u+'</span>':''}</b><div class="s">${s||""}</div></div>`;
+$("kpis").innerHTML=reports.length?
+  kpi("Alimentação do dia",fmt(somaDia.alim),"t","TC-07 + TC-07B")+
+  kpi("Concentrado do dia",fmt(somaDia.conc),"t","TC-11")+
+  kpi("Rejeito do dia",fmt(somaDia.rej),"t","TC-12")+
+  kpi("Horas paradas",fmt(minPar/60,1),"h",parDia.length+(parDia.length===1?" parada":" paradas"))+
+  kpi("Floculante g/t",fmt(gtDia,1),"","dia "+relRot)
+  :`<div class="kpi" style="grid-column:1/-1"><small>Produção</small><b>—</b><div class="s">Nenhum relatório lançado neste navegador ainda.</div></div>`;
+
+/* ---- Produção do dia: por turno ---- */
+if(doDia.length){
+  const linhas=ordena(doDia.slice()).map(r=>{const t=totais(r);return `<tr><td>Turno ${r.turno}</td><td>${fmt(t.alim)}</td><td>${fmt(t.conc)}</td><td>${fmt(t.rej)}</td></tr>`}).join("");
+  $("prodT").innerHTML=`<thead><tr><th>Turno</th><th>Alim. (t)</th><th>C.Mag (t)</th><th>Rejeito (t)</th></tr></thead><tbody>${linhas}
+    <tr class="tot"><td>Dia</td><td>${fmt(somaDia.alim)}</td><td>${fmt(somaDia.conc)}</td><td>${fmt(somaDia.rej)}</td></tr></tbody>`;
+  $("prodSub").textContent=`${doDia.length} turno${doDia.length>1?"s":""} · ${brD(diaBase)}`;
+}else{$("prodBox").innerHTML=`<p class="dvazio">Nenhum relatório lançado ainda.</p>`}
+/* trend alimentação últimos 12 turnos */
+{const L=reports.slice(-12).map(r=>({r,v:totais(r).alim})),mx=Math.max(1,...L.map(x=>x.v));
+ $("prodTrend").innerHTML=L.map((x,i)=>`<i class="${i===L.length-1?"last":""}" style="height:${Math.max(3,x.v/mx*100)}%" title="${brD(x.r.data)} ${x.r.turno}: ${fmt(x.v)} t"></i>`).join("")||"";
+ $("trB0").textContent=L.length?brD(L[0].r.data)+" "+L[0].r.turno:"";$("trB1").textContent=L.length?brD(L[L.length-1].r.data)+" "+L[L.length-1].r.turno:""}
+
+/* ---- Paradas do dia ---- */
+if(parDia.length){
+  const porMotivo={};parDia.forEach(p=>porMotivo[p.motivo]=(porMotivo[p.motivo]||0)+p.min);
+  const linhas=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]).map(([m,v])=>`<div class="row"><span>${m.replace(/[<>&]/g,"")}</span><b>${fmt(v/60,1)} h</b></div>`).join("");
+  $("paradas").innerHTML=`<div class="tot">${fmt(minPar/60,1)}<span class="u"> h paradas</span></div><div class="parlist">${linhas}</div>`;
+}else $("paradas").innerHTML=`<div class="tot">0<span class="u"> h</span></div><p class="dvazio">Nenhuma parada lançada no dia.</p>`;
+
+/* ---- Floculantes ---- */
+if(freg.length){
+  $("fl").innerHTML=`<div><b>${fmt(kgDia)}</b><span>kg no dia</span></div><div><b>${fmt(gtDia,1)}</b><span>g/t</span></div><div><b>${fmt(kgMes)}</b><span>kg no mês</span></div>`;
+  const L=freg.slice(-12),mx=Math.max(1,...L.map(flKg));
+  $("flTrend").innerHTML=L.map((r,i)=>`<i class="${i===L.length-1?"last":""}" style="height:${Math.max(3,flKg(r)/mx*100)}%" title="${brD(r.data)} ${r.turno||""}: ${fmt(flKg(r))} kg"></i>`).join("");
+}else{$("fl").innerHTML=`<p class="dvazio">Nenhum turno de floculante lançado ainda.</p>`}
+
+/* ---- Boxplot do mês ---- */
+const metas=ler("portal-dash-meta")||{},prodMetas=ler("rt-prod-metas");
+function serie(tipo){
+  if(tipo==="flocgt")return freg.filter(r=>r.data.slice(0,7)===mesAtual&&num(r.ton)>0).map(r=>flKg(r)*1000/num(r.ton));
+  if(tipo==="conchora"){const out=[];reports.filter(r=>r.data.slice(0,7)===mesAtual).forEach(r=>{const v=r.vals;for(let i=9;i<=17;i++){const g=num(v["G"+i]);if(isFinite(g)&&g>0)out.push(g)}});return out}
+  const col=tipo==="conc"?"conc":tipo==="rej"?"rej":"alim";
+  return reports.filter(r=>r.data.slice(0,7)===mesAtual).map(r=>totais(r)[col]).filter(v=>isFinite(v)&&v>0);
+}
+function pexc(sorted,p){const n=sorted.length;if(!n)return NaN;const r=p*(n+1);if(r<1)return sorted[0];if(r>=n)return sorted[n-1];
+  const k=Math.floor(r),f=r-k;return sorted[k-1]+f*(sorted[k]-sorted[k-1])}
+const NOMES={alim:"Alimentação por turno (t)",conc:"Concentrado por turno (t)",conchora:"Concentrado por hora (t/h)",rej:"Rejeito por turno (t)",flocgt:"Floculante (g/t)"};
+function desenhaBox(tipo){
+  const dados=serie(tipo).sort((a,b)=>a-b),n=dados.length,unid=tipo==="conchora"?"horas":"turnos";
+  let metaAuto=null;
+  if(prodMetas&&isFinite(num(prodMetas.cm_th))){if(tipo==="conchora")metaAuto=num(prodMetas.cm_th);else if(tipo==="conc")metaAuto=num(prodMetas.cm_th)*8;}
+  const inp=$("bxMeta");
+  if(metaAuto!=null){inp.value=String(Math.round(metaAuto*10)/10);inp.disabled=true;inp.title="Meta vinda da aba Produção do Relatório";$("bxMetaSrc").textContent=tipo==="conc"?"da aba Produção (t/h × 8 h)":"da aba Produção";}
+  else{inp.disabled=false;inp.title="";$("bxMetaSrc").textContent="";inp.value=metas[tipo]!=null&&metas[tipo]!==""?metas[tipo]:"";}
+  const meta=metaAuto!=null?metaAuto:num(metas[tipo]),temMeta=isFinite(meta)&&meta>0;
+  if(n<4){$("bxWrap").innerHTML=`<p class="dvazio">Poucos dados no mês para o boxplot (${n} ${n===1?"valor":"valores"}). Precisa de pelo menos 4.</p>`;$("bxInfo").innerHTML="";return}
+  const q1=pexc(dados,.25),q2=pexc(dados,.5),q3=pexc(dados,.75),iqr=q3-q1,lo=q1-1.5*iqr,hi=q3+1.5*iqr;
+  const dentro=dados.filter(v=>v>=lo&&v<=hi),wlo=Math.min(...dentro),whi=Math.max(...dentro),out=dados.filter(v=>v<lo||v>hi);
+  const media=dados.reduce((a,b)=>a+b,0)/n;
+  const maiorMelhor=!(tipo==="rej"||tipo==="flocgt"),novaMeta=maiorMelhor?q3:q1;
+  const extra=temMeta?[meta]:[];
+  const lo0=Math.min(wlo,...out,...extra),hi0=Math.max(whi,...out,...extra),pad=(hi0-lo0)*0.06||1,A=lo0-pad,Bv=hi0+pad;
+  const W=760,H=150,mx=70,my=30,X=v=>mx+(v-A)/(Bv-A)*(W-mx*2),cy=H/2,bh=46;
+  const esc=v=>fmt(v,tipo==="flocgt"?1:0);
+  let g=`<svg class="boxplot" viewBox="0 0 ${W} ${H}" role="img" aria-label="Boxplot de ${NOMES[tipo]}">`;
+  const ticks=5;for(let i=0;i<=ticks;i++){const v=A+(Bv-A)*i/ticks,x=X(v);g+=`<line x1="${x}" y1="${my-6}" x2="${x}" y2="${H-my+6}" stroke="#eef2f0"/><text x="${x}" y="${H-8}" text-anchor="middle" class="ax" fill="#66736d">${esc(v)}</text>`}
+  g+=`<line x1="${X(wlo)}" y1="${cy}" x2="${X(q1)}" y2="${cy}" stroke="#2f8a5c" stroke-width="2"/><line x1="${X(q3)}" y1="${cy}" x2="${X(whi)}" y2="${cy}" stroke="#2f8a5c" stroke-width="2"/>`;
+  [wlo,whi].forEach(v=>g+=`<line x1="${X(v)}" y1="${cy-12}" x2="${X(v)}" y2="${cy+12}" stroke="#2f8a5c" stroke-width="2"/>`);
+  g+=`<rect x="${X(q1)}" y="${cy-bh/2}" width="${Math.max(1,X(q3)-X(q1))}" height="${bh}" rx="6" fill="#e3f1e8" stroke="#1d6b47" stroke-width="1.5"/>`;
+  g+=`<line x1="${X(media)}" y1="${cy-bh/2}" x2="${X(media)}" y2="${cy+bh/2}" stroke="#c0392b" stroke-width="2" stroke-dasharray="4 3"/>`;
+  out.forEach(v=>g+=`<circle cx="${X(v)}" cy="${cy}" r="4" fill="#c0392b"><title>fora do padrão: ${esc(v)}</title></circle>`);
+  if(temMeta){const xm=X(meta);g+=`<line x1="${xm}" y1="${my-4}" x2="${xm}" y2="${H-my+4}" stroke="#2f6db0" stroke-width="2.5" stroke-dasharray="6 4"/><text x="${xm}" y="${H-my+20}" text-anchor="middle" class="lb" font-weight="700" fill="#2f6db0">meta ${esc(meta)}</text>`}
+  g+=`<line x1="${X(novaMeta)}" y1="${cy-bh/2-4}" x2="${X(novaMeta)}" y2="${cy+bh/2+4}" stroke="#14502f" stroke-width="3.5"/>`;
+  g+=`<text x="${X(novaMeta)}" y="${cy-bh/2-9}" text-anchor="middle" class="lb" font-weight="700" fill="#14502f">nova meta ${esc(novaMeta)}</text>`;
+  g+=`<text x="${mx}" y="18" class="ax" fill="#66736d">${NOMES[tipo]}</text></svg>`;
+  $("bxWrap").innerHTML=g;
+  const ating=temMeta?(maiorMelhor?media>=meta:media<=meta):null;
+  $("bxInfo").innerHTML=`<span><b>${n}</b> ${unid} no mês</span><span>Mín <b>${esc(wlo)}</b></span><span>Q1 <b>${esc(q1)}</b></span><span>Q3 <b>${esc(q3)}</b></span><span>Máx <b>${esc(whi)}</b></span><span>Média <b style="color:#c0392b">${esc(media)}</b></span><span>Nova meta <b style="color:#14502f">${esc(novaMeta)}</b></span>`+
+    (temMeta?`<span>Meta atual <b style="color:#2f6db0">${esc(meta)}</b></span><span style="color:${ating?"#1d7a4a":"#c0392b"};font-weight:700">média ${ating?"dentro":"fora"} da meta</span>`:"")+
+    (out.length?`<span><b style="color:#c0392b">${out.length}</b> fora do padrão</span>`:"");
+}
+$("bxVar").onchange=()=>desenhaBox($("bxVar").value);
+$("bxMeta").onchange=()=>{const t=$("bxVar").value,v=$("bxMeta").value;if(v===""||!(num(v)>0))delete metas[t];else metas[t]=num(v);try{localStorage.setItem("portal-dash-meta",JSON.stringify(metas))}catch(e){}desenhaBox(t)};
+desenhaBox("alim");
+
+/* menu: marca seção visível */
+const links=[...document.querySelectorAll('.pills a,.rail a[href^="#"]')];
+const marca=()=>{const y=window.scrollY+200,seg=($("seguranca")||{}).offsetTop||1e9,ctl=($("controles")||{}).offsetTop||1e9;
+  const at=y>=seg?"#seguranca":y>=ctl?"#controles":"#inicio";links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")===at))};
+window.addEventListener("scroll",marca,{passive:true});marca();
+})();
+</script>
+<!--PASTA-DADOS--><script>
+/* PASTA-DADOS: guarda uma cópia de todos os controles numa pasta do computador (Chrome/Edge).
+   O navegador continua sendo onde o app trabalha; a pasta é a cópia que não se perde quando
+   o histórico é limpo ou uma versão nova do app é aberta. */
+(function(){
+"use strict";
+if(window.PastaDados)return;
+const ARQ="dados-portal-controles.json",SUB="copias",MANTER=30;
+const BANCOS=[{db:"controle-itm",store:"kv"}];
+const IGNORAR=new Set(["controles.ultimoBackup","pasta-dados.ultimo"]);
+const APPS=[["rt-reports","Relatório de Turno","relatórios"],["controle-floculantes.v1","Floculantes","registros"],["controle-britadores.v1","Britadores","registros"],["controle-ibm.v1","Controle IBM","registros"],["controle-itm.v1","Fluxo ITM","registros"],["controle-testes.v1","Registro de Testes","registros"]];
+const suporta=typeof window.showDirectoryPicker==="function";
+
+/* ---------- IndexedDB ---------- */
+function idbAbrir(nome,store,criar){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;
+  try{r=criar?indexedDB.open(nome,1):indexedDB.open(nome)}catch(e){return ok(null)}
+  r.onupgradeneeded=()=>{if(criar){if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store)}else{try{r.transaction.abort()}catch(e){}}};
+  r.onerror=()=>ok(null);r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(store)){db.close();ok(null)}else ok(db)}})}
+async function idbTudo(nome,store){const db=await idbAbrir(nome,store,false);if(!db)return null;
+  return new Promise(ok=>{const out={};const c=db.transaction(store).objectStore(store).openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else{db.close();ok(out)}};c.onerror=()=>{db.close();ok(null)}})}
+async function idbPor(nome,store,obj){const db=await idbAbrir(nome,store,true);if(!db)throw new Error("IndexedDB indisponível");
+  return new Promise((ok,err)=>{const t=db.transaction(store,"readwrite"),s=t.objectStore(store);Object.keys(obj).forEach(k=>s.put(obj[k],k));t.oncomplete=()=>{db.close();ok()};t.onerror=()=>{db.close();err(t.error)}})}
+async function idbGet(k){const db=await idbAbrir("portal-pasta","kv",true);if(!db)return null;
+  return new Promise(ok=>{const r=db.transaction("kv").objectStore("kv").get(k);r.onsuccess=()=>{db.close();ok(r.result||null)};r.onerror=()=>{db.close();ok(null)}})}
+async function idbSet(k,v){return idbPor("portal-pasta","kv",{[k]:v})}
+
+/* ---------- foto dos dados ---------- */
+function contar(k,txt){try{const j=JSON.parse(txt);if(!j||typeof j!=="object")return 0;
+  if(k==="rt-reports")return Object.keys(j).length;
+  if(k==="controle-testes.v1")return Array.isArray(j.testes)?j.testes.length:0;
+  let n=0;Object.entries(j).forEach(([c,v])=>{if(c==="pendentes"||c==="config"||!v||typeof v!=="object"||Array.isArray(v))return;Object.values(v).forEach(r=>{if(r&&typeof r==="object"&&!r.excluido)n++})});return n}catch(e){return 0}}
+async function montar(){const ls={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!IGNORAR.has(k))ls[k]=localStorage.getItem(k)}
+  const idb={};for(const b of BANCOS){const v=await idbTudo(b.db,b.store);if(v)idb[b.db+"/"+b.store]=v}
+  return {app:"Portal de Controles · Mineral do Brasil",versao:1,criadoEm:new Date().toISOString(),localStorage:ls,indexedDB:idb}}
+function total(bk){let n=0;APPS.forEach(([k])=>{if(bk&&bk.localStorage&&bk.localStorage[k]!=null)n+=contar(k,bk.localStorage[k])});
+  const an=bk&&bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)n+=Object.keys(an).length;return n}
+function resumo(bk){const l=APPS.map(([k,nome,un])=>bk.localStorage[k]!=null?`${nome}: ${contar(k,bk.localStorage[k])} ${un}`:null).filter(Boolean);
+  const an=bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)l.push(`Análises do laboratório: ${Object.values(an).filter(a=>a&&!a.excluido).length}`);return l}
+const semData=bk=>{const c={...bk};delete c.criadoEm;return JSON.stringify(c)};
+
+/* ---------- pasta ---------- */
+let dir=null,estado="sem",ultimo=null,ultimoTxt=null,erro="",ouvintes=[];
+try{ultimo=localStorage.getItem("pasta-dados.ultimo")}catch(e){}
+const avisar=()=>ouvintes.forEach(f=>{try{f(info())}catch(e){}});
+function info(){return {suporta,estado,pasta:dir?dir.name:"",ultimo,erro}}
+async function permissao(pedir){if(!dir)return false;const o={mode:"readwrite"};
+  try{if(await dir.queryPermission(o)==="granted")return true;if(pedir&&await dir.requestPermission(o)==="granted")return true}catch(e){}return false}
+async function lerArquivo(d){try{const f=await (await (d||dir).getFileHandle(ARQ)).getFile();const bk=JSON.parse(await f.text());return bk&&bk.localStorage&&bk.versao===1?bk:null}catch(e){return null}}
+async function escrever(d,nome,txt){const fh=await d.getFileHandle(nome,{create:true});const w=await fh.createWritable();await w.write(txt);await w.close()}
+const hojeISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+async function gravarNaPasta(bk){const txt=JSON.stringify(bk);
+  await escrever(dir,ARQ,txt);
+  const sub=await dir.getDirectoryHandle(SUB,{create:true});await escrever(sub,"dados-"+hojeISO()+".json",txt);
+  try{const nomes=[];for await(const [n,h] of sub.entries())if(h.kind==="file"&&/^dados-\d{4}-\d\d-\d\d\.json$/.test(n))nomes.push(n);
+    nomes.sort().slice(0,Math.max(0,nomes.length-MANTER)).forEach(n=>sub.removeEntry(n).catch(()=>{}))}catch(e){}
+  ultimo=bk.criadoEm;ultimoTxt=semData(bk);try{localStorage.setItem("pasta-dados.ultimo",ultimo)}catch(e){}}
+async function copiaSeguranca(bk,motivo){try{const sub=await dir.getDirectoryHandle(SUB,{create:true});const d=new Date(),p=n=>String(n).padStart(2,"0");
+  await escrever(sub,`${motivo}-${hojeISO()}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.json`,JSON.stringify(bk))}catch(e){}}
+async function aplicar(bk){Object.keys(bk.localStorage).forEach(k=>{if(!IGNORAR.has(k))localStorage.removeItem(k)});
+  Object.entries(bk.localStorage).forEach(([k,v])=>{if(!IGNORAR.has(k))localStorage.setItem(k,v)});
+  for(const [chave,obj] of Object.entries(bk.indexedDB||{})){const [db,store]=chave.split("/");await idbPor(db,store,obj)}}
+
+let gravando=false;
+/* Grava se algo mudou. Nunca grava um navegador vazio por cima de uma pasta com dados. */
+async function salvar(){if(!dir||gravando)return;gravando=true;
+  try{if(!await permissao(false)){estado="permissao";return}
+    const bk=await montar(),s=semData(bk);
+    if(s===ultimoTxt){estado="ok";return}
+    if(!total(bk)){const f=await lerArquivo();if(f&&total(f)){estado="vazio";return}}
+    await gravarNaPasta(bk);estado="ok";erro=""}
+  catch(e){estado="erro";erro=e.message||String(e)}
+  finally{gravando=false;avisar()}}
+
+/* Escolhe a pasta. Se ela já tem dados, pergunta qual lado vale. */
+async function escolher(){if(!suporta)throw new Error("Este navegador não grava em pasta. Use o Google Chrome ou o Microsoft Edge no computador.");
+  const d=await window.showDirectoryPicker({id:"portal-controles",mode:"readwrite",startIn:"documents"});
+  const arq=await lerArquivo(d),nav=await montar();dir=d;await idbSet("dir",d);ultimoTxt=null;
+  let acao="gravar";
+  if(arq&&total(arq)){
+    if(!total(nav))acao="carregar";
+    else{const r=prompt(`Essa pasta já tem dados salvos em ${dataBR(arq.criadoEm)}:\n  ${resumo(arq).join("\n  ")}\n\nE este navegador tem:\n  ${resumo(nav).join("\n  ")}\n\nDigite PASTA para trazer os dados da pasta para este navegador (use quando abriu uma versão nova do app ou outro computador).\nDigite NAVEGADOR para gravar os dados deste navegador na pasta.\n\nO lado que for trocado ganha uma cópia de segurança na pasta "copias".`)||"";
+      const t=r.trim().toUpperCase();acao=t==="PASTA"?"carregar":t==="NAVEGADOR"?"gravar":"nada"}}
+  if(acao==="carregar"){if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");await aplicar(arq);ultimoTxt=null;estado="ok";ultimo=arq.criadoEm;avisar();return "carregado"}
+  if(acao==="gravar"){if(arq&&total(arq))await copiaSeguranca(arq,"pasta-antes-de-gravar");await gravarNaPasta(nav);estado="ok";avisar();return "gravado"}
+  estado="ok";avisar();return "nada"}
+async function carregarDaPasta(){if(!dir||!await permissao(true))throw new Error("Sem acesso à pasta.");
+  const arq=await lerArquivo();if(!arq)throw new Error(`Não achei o arquivo ${ARQ} na pasta.`);
+  const nav=await montar();if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");
+  await aplicar(arq);ultimoTxt=semData(arq);estado="ok";avisar();return arq}
+async function liberar(){if(await permissao(true)){estado="ok";await salvar();return true}return false}
+async function esquecer(){dir=null;estado="sem";await idbSet("dir",null);avisar()}
+const dataBR=iso=>{if(!iso)return "—";const d=new Date(iso);return d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+
+/* ---------- selo no canto da tela (nos apps) ---------- */
+function selo(){if(document.getElementById("pdSelo")||document.body.dataset.pdSemSelo!=null)return;
+  const st=document.createElement("style");st.textContent=`#pdSelo{position:fixed;right:14px;bottom:14px;z-index:9999;font:600 13px/1.2 Inter,system-ui,Arial,sans-serif;border-radius:999px;padding:8px 14px;border:1.5px solid #1d7a4a;background:#e3f1e8;color:#1d6b47;box-shadow:0 4px 14px #1d262126;cursor:default;max-width:calc(100vw - 28px)}
+#pdSelo.at{border-color:#c58a10;background:#fcefd6;color:#8a5a00;cursor:pointer}#pdSelo.er{border-color:#c0392b;background:#f8e1de;color:#a12d22;cursor:pointer}@media print{#pdSelo{display:none}}`;
+  document.head.appendChild(st);const b=document.createElement("button");b.id="pdSelo";b.type="button";b.hidden=true;document.body.appendChild(b);
+  b.onclick=async()=>{if(estado==="permissao"||estado==="erro")await liberar()};
+  ouvintes.push(i=>{b.hidden=i.estado==="sem";const h=i.ultimo?new Date(i.ultimo).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"";
+    b.className=i.estado==="ok"?"":i.estado==="erro"||i.estado==="vazio"?"er":"at";
+    b.textContent=i.estado==="ok"?`Salvo na pasta ${i.pasta}${h?" · "+h:""}`:i.estado==="permissao"?"Clique para liberar a gravação na pasta":i.estado==="vazio"?"Navegador vazio: carregue os dados da pasta no Portal":"Erro ao gravar na pasta (clique para tentar de novo)";
+    b.title=i.estado==="vazio"?"A pasta tem dados e este navegador não. Abra o Portal > Pasta de dados > Carregar dados da pasta.":i.erro||""})}
+
+async function iniciar(){if(!suporta){avisar();return}
+  try{dir=await idbGet("dir")}catch(e){dir=null}
+  if(dir){estado=await permissao(false)?"ok":"permissao";if(estado==="ok")setTimeout(salvar,1500)}
+  avisar()}
+setInterval(salvar,60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")salvar()});
+window.addEventListener("storage",()=>{clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,5000)});
+let ultLS=null;setInterval(()=>{let n=0;try{for(let i=0;i<localStorage.length;i++)n+=(localStorage.getItem(localStorage.key(i))||"").length}catch(e){}if(ultLS!=null&&n!==ultLS){clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,4000)}ultLS=n},3000);
+
+window.PastaDados={info,escolher,salvar,carregarDaPasta,liberar,esquecer,lerArquivo:()=>lerArquivo(),montar,resumo,total,ouvir:f=>{ouvintes.push(f);f(info())},dataBR};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{selo();iniciar()});else{selo();iniciar()}
+})();
+</script><!--/PASTA-DADOS-->
+<!--PD-UI--><script>
+(function(){const $=id=>document.getElementById(id);if(!window.PastaDados)return;const PD=window.PastaDados;
+const msg=(c,t)=>{$("pdMsg").className="bkmsg "+c;$("pdMsg").textContent=t};
+const btn=(id,txt,ghost)=>`<button class="btn${ghost?" ghost":""}" type="button" id="${id}">${txt}</button>`;
+async function pinta(i){const el=$("pdResumo"),ac=$("pdAcoes");
+  if(!i.suporta){el.className="bkres alerta";el.innerHTML="Este navegador não consegue gravar numa pasta. Abra o Portal no <b>Google Chrome</b> ou no <b>Microsoft Edge</b> do computador.";ac.innerHTML="";return}
+  if(i.estado==="sem"){el.className="bkres alerta";el.innerHTML="<b>Nenhuma pasta escolhida.</b> Os dados estão só dentro deste navegador.";ac.innerHTML=btn("pdEsc","Escolher pasta");}
+  else if(i.estado==="permissao"){el.className="bkres alerta";el.innerHTML=`Pasta <b>${i.pasta}</b> escolhida, mas o navegador pede para liberar o acesso de novo.`;ac.innerHTML=btn("pdLib","Liberar acesso à pasta")+btn("pdEsc","Trocar pasta",1);}
+  else if(i.estado==="vazio"){el.className="bkres alerta";el.innerHTML=`<b>Este navegador está vazio</b> e a pasta <b>${i.pasta}</b> tem dados. Carregue os dados da pasta.`;ac.innerHTML=btn("pdCar","Carregar dados da pasta")+btn("pdEsc","Trocar pasta",1);}
+  else{el.className="bkres"+(i.estado==="erro"?" alerta":"");
+    let arq=null;try{arq=await PD.lerArquivo()}catch(e){}
+    el.innerHTML=`Gravando na pasta <b>${i.pasta}</b>. Último salvamento: <b>${PD.dataBR(i.ultimo)}</b>`+(arq?`<br>Na pasta: ${PD.resumo(arq).join(" · ")||"nenhum lançamento"}`:"")+(i.estado==="erro"?`<br><b>Erro ao gravar:</b> ${i.erro}`:"");
+    ac.innerHTML=btn("pdSal","Salvar agora")+btn("pdCar","Carregar dados da pasta",1)+btn("pdEsc","Trocar pasta",1);}
+  const on=(id,f)=>{if($(id))$(id).onclick=async()=>{try{await f()}catch(e){if(e&&e.name==="AbortError")return;msg("err",e.message||String(e))}}};
+  on("pdEsc",async()=>{const r=await PD.escolher();if(r==="carregado"){msg("ok","Dados da pasta carregados neste navegador.");setTimeout(()=>location.reload(),900)}else if(r==="gravado")msg("ok","Pasta escolhida e dados gravados nela.");else msg("","Pasta escolhida. Nada foi trocado.")});
+  on("pdLib",async()=>{if(await PD.liberar())msg("ok","Acesso liberado. Os dados estão sendo gravados na pasta.");else msg("err","O acesso não foi liberado.")});
+  on("pdSal",async()=>{await PD.salvar();msg("ok","Salvo.")});
+  on("pdCar",async()=>{const arq=await PD.lerArquivo();
+    if(!confirm(`Carregar os dados da pasta (salvos em ${PD.dataBR(arq&&arq.criadoEm)}) para este navegador?\n\nO que está neste navegador agora vai para uma cópia na subpasta "copias" antes de ser trocado.`))return;
+    await PD.carregarDaPasta();msg("ok","Dados da pasta carregados.");setTimeout(()=>location.reload(),900)});
+}
+PD.ouvir(pinta);})();
+</script><!--/PD-UI-->
+</body>
+</html>

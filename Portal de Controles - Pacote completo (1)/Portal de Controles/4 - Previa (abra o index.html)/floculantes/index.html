@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controle de Floculantes</title>
+<meta name="theme-color" content="#1d6b47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Visual alinhado ao Portal de Controles (Mineral do Brasil · ITM) */
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#1d2621; --muted:#5f6a66; --line:#dde4e8; --line-strong:#2b322e;
+  --brand:#1d6b47; --brand-dark:#2b5a3b; --brand-soft:#e3f1e8;
+  --blue:#2f6db0; --blue-soft:#e3edf9; --amber:#c58a10; --amber-soft:#fcefd6; --purple:#7650c4; --purple-soft:#eee7fb;
+  --accent:#1d6b47; --accent-soft:#1d6b4718; --point:#8a958f; --sunken:#f4f7f8;
+  --ok:#1d7a4a; --ok-bg:#e3f1e8; --warn:#b07800; --warn-bg:#f8e7b866; --crit:#c0392b; --crit-bg:#c0392b1c;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.wrap{max-width:1500px;margin:0 auto;padding:36px 56px 64px;display:flex;flex-direction:column;gap:22px}
+@media (max-width:760px){.wrap{padding:20px 16px 48px}}
+
+/* cabeçalho */
+.brand{display:flex;gap:24px;align-items:center}
+.brand .logo{width:172px;height:auto;flex:none;display:block}
+.brand .logo{image-rendering:auto}@media (max-width:760px){.brand .logo{width:96px}.brand{gap:14px}}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:0}
+.eyebrow.green{color:var(--brand)}
+h1{font-size:2.05rem;font-weight:700;letter-spacing:-.02em;color:var(--brand-dark);margin:6px 0 10px;line-height:1.1}
+.sub{color:var(--muted);font-size:1.12rem;margin:0}
+@media (max-width:760px){h1{font-size:1.5rem}.sub{font-size:.95rem}}
+
+/* barra de ações */
+.tbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+.tbtn{display:inline-flex;align-items:center;gap:10px;font:500 1rem var(--font);color:var(--ink);background:transparent;border:1.5px solid var(--line-strong);border-radius:10px;padding:9px 16px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn svg{width:19px;height:19px;flex:none}
+.tbtn:hover{background:var(--surface)}
+.tbtn[aria-selected="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.tbtn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* seletor de britadores */
+.pfiltro{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.segs{display:inline-flex;border:1.5px solid var(--line-strong);border-radius:10px;overflow:hidden}
+.segb{font:500 .92rem var(--font);border:0;background:transparent;padding:8px 14px;cursor:pointer;color:var(--ink)}
+.segb+.segb{border-left:1px solid var(--line)}
+.segb[aria-pressed="true"]{background:var(--brand);color:#fff;font-weight:600}
+.pfcampos{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pfcampos input,.pfcampos select,#pfTurno{padding:7px 10px}
+.pfcampos .nav{font:600 1rem var(--font);border:1.5px solid var(--line-strong);background:transparent;border-radius:8px;width:34px;height:34px;cursor:pointer}
+label.inl{flex-direction:row;align-items:center;gap:8px}
+#pfApres{margin-left:auto}
+body.apres .tbar,body.apres #banner{display:none!important}
+body.apres .wrap{max-width:none;padding:22px 34px}
+body.apres .kpi .v{font-size:2.3rem}
+body.apres .ativo h2{font-size:2.4rem}
+.chips{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;scrollbar-color:var(--brand) transparent}
+.chip-b{flex:0 0 auto;min-width:190px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:4px}
+.chip-b .n{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.chip-b .s{font-size:.82rem;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.chip-b[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 6px 16px #1d6b4733}
+.chip-b[aria-pressed="true"] .s{color:#dcefe4}
+.chip-b[aria-pressed="true"] .dot{box-shadow:0 0 0 2px #fff}
+
+/* britador ativo */
+.ativo{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.ativo h2{font-size:2rem;font-weight:500;margin:6px 0 4px;letter-spacing:-.01em}
+.ativo p{margin:0;color:var(--muted)}
+.pill{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+.pill.warn{background:var(--amber-soft);color:var(--warn)}.pill.crit{background:var(--crit-bg);color:var(--crit)}.pill.na{background:var(--sunken);color:var(--muted)}
+
+/* indicadores */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1.5px solid var(--line-strong);border-radius:16px;padding:30px 26px;display:flex;gap:18px;align-items:center;min-width:0}
+.ico{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ico svg{width:24px;height:24px}
+.ico.g{background:var(--brand-soft);color:var(--brand)}.ico.b{background:var(--blue-soft);color:var(--blue)}.ico.a{background:var(--amber-soft);color:var(--amber)}.ico.p{background:var(--purple-soft);color:var(--purple)}
+.kpi .l{color:var(--muted);font-size:.95rem}
+.kpi .v{font-size:1.85rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .v small{font-size:.95rem;font-weight:400;color:var(--muted);letter-spacing:0}
+
+/* painéis */
+.banner{border:1px solid var(--amber);background:var(--amber-soft);padding:12px 16px;border-radius:12px;font-size:.92rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-size:1.15rem;font-weight:700;margin:0;color:var(--brand-dark)}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.hhnav label.inl,label.inl{flex-direction:row;align-items:center;gap:8px}
+.hhres{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+@media (max-width:900px){.hhres{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hhres div{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.hhres small{display:block;color:var(--muted);font-size:.8rem}
+.hhres b{font-size:1.35rem;font-variant-numeric:tabular-nums}
+.hhres .alto{border-color:var(--crit);background:var(--crit-bg)}
+.hhchart{width:100%;position:relative;min-height:260px}
+.hhchart svg{display:block;width:100%;height:auto}
+.hhchart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.sw.crit{background:var(--crit);height:10px;width:12px}
+.sw.lim{background:repeating-linear-gradient(90deg,var(--crit) 0 5px,transparent 5px 8px)}
+tr.alto td{background:var(--crit-bg)}
+tr.clic{cursor:pointer}tr.clic:hover td{background:var(--brand-soft)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;background:var(--accent);display:inline-block;border-radius:2px}
+.sw.pt{width:7px;height:7px;border-radius:50%;background:var(--point)}
+.sw.base{background:var(--ink);height:2px}
+.sw.warnb{height:10px;background:var(--warn-bg);border:1px solid var(--warn)}
+.sw.critb{height:10px;background:var(--crit-bg);border:1px solid var(--crit)}
+.sw.proj{background:repeating-linear-gradient(90deg,var(--crit) 0 4px,transparent 4px 7px)}
+#chart{width:100%;min-height:340px;position:relative}
+#chart svg{display:block;width:100%;height:auto}
+#chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-115%)}
+.empty{padding:40px 12px;text-align:center;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* formulários */
+label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted);font-weight:500}
+input,select{font:500 .95rem var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+.fields{display:flex;flex-wrap:wrap;gap:14px}
+.fields>label{flex:1 1 160px}
+.btn{font:600 .92rem var(--font);border-radius:8px;padding:10px 18px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:#fff;display:inline-flex;align-items:center;gap:8px}
+.btn svg{width:17px;height:17px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line-strong)}
+.btn.small{padding:5px 11px;font-size:.8rem}
+.btn.danger{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.msg{font-size:.88rem;color:var(--muted)}.msg.err{color:var(--crit)}.msg.ok{color:var(--ok)}
+.hint{font-size:.86rem;color:var(--muted);margin:0;max-width:75ch}
+.meta{font-size:.86rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{color:var(--ok);background:var(--ok-bg)}.chip.warn{color:var(--warn);background:var(--amber-soft)}.chip.crit{color:var(--crit);background:var(--crit-bg)}.chip.na{color:var(--muted);background:var(--sunken)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
+td.num,th.num{text-align:right}
+.sieve td{padding:4px 8px}
+.sieve input{width:100%;padding:6px 9px}
+tr.cut td{background:var(--brand-soft)}
+.result{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:16px 18px;background:var(--brand-soft);border-radius:12px}
+.result .big{font-size:2rem;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+.seg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.segopt{flex-direction:row;cursor:pointer}
+.segopt input{position:absolute;opacity:0;pointer-events:none}
+.segopt span{display:inline-block;font:500 .9rem var(--font);color:var(--ink);border:1.5px solid var(--line-strong);border-radius:10px;padding:7px 14px}
+.segopt input:checked+span{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.segopt input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+.syncwrap{display:inline-flex;align-items:center;gap:10px;margin-left:auto}
+.syncst{font-size:.82rem;font-weight:600;padding:6px 10px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+.syncst.na{background:var(--sunken);color:var(--muted)}.syncst.warn{background:var(--amber-soft);color:var(--warn)}.syncst.crit{background:var(--crit-bg);color:var(--crit)}
+@media (max-width:760px){.syncwrap{margin-left:0}}
+.crushers{display:flex;flex-direction:column;gap:8px}
+.crushers .r{display:flex;gap:8px;align-items:center}
+.crushers input{flex:1}
+.kpis+.kpis{margin-top:-2px}
+.chart-box{width:100%;min-height:300px;position:relative}
+.chart-box svg{display:block;width:100%;height:auto}
+.chart-box text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+textarea{font:500 .95rem var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:84px;resize:vertical}
+.estq{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:18px 20px;background:var(--brand-soft);border-radius:12px}
+.estq .big{font-size:2.2rem;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+.estq.warn{background:var(--amber-soft)}.estq.warn .big{color:var(--warn)}
+.estq.crit{background:var(--crit-bg)}.estq.crit .big{color:var(--crit)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <img class="logo" alt="Mineral do Brasil" src="data:image/png;base64,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">
+      <div>
+        <p class="eyebrow">Mineral do Brasil · ITM</p>
+        <h1>Controle de Floculantes</h1>
+        <p class="sub">Consumo, estoque e dosagem de floculante por turno</p>
+      </div>
+    </div>
+    <nav class="tbar" role="tablist" aria-label="Seções">
+      <!-- Ajuste o link abaixo para o endereço do Portal de Controles -->
+      <a class="tbtn" href="../index.html">Controles</a>
+      <button class="tbtn" role="tab" data-tab="painel" aria-selected="true">Painel</button>
+      <button class="tbtn" role="tab" data-tab="turno" aria-selected="false">Registrar turno</button>
+      <button class="tbtn" role="tab" data-tab="estoque" aria-selected="false">Estoque</button>
+      <button class="tbtn" role="tab" data-tab="horas" aria-selected="false">Hora a hora</button>
+      <button class="tbtn" role="tab" data-tab="perdas" aria-selected="false">Perdas (R$)</button>
+      <button class="tbtn" role="tab" data-tab="historico" aria-selected="false">Histórico</button>
+      <button class="tbtn" type="button" id="topImport" title="Importar a Planilha Mestre ou um relatório Excel">Importar planilha</button>
+      <button class="tbtn" role="tab" data-tab="config" aria-selected="false">Configurar</button>
+      <span class="syncwrap"><span id="syncSt" class="syncst na" role="status">Salvo no aparelho</span>
+      <button class="tbtn" type="button" id="syncBtn">Sincronizar</button></span>
+    </nav>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <!-- PAINEL -->
+  <section id="tab-painel" class="tabpane" style="display:flex;flex-direction:column;gap:22px">
+    <div class="pfiltro">
+      <div class="segs" role="group" aria-label="Ver por">
+        <button type="button" class="segb" data-modo="per">Últimos dias</button><button type="button" class="segb" data-modo="mes">Mês</button><button type="button" class="segb" data-modo="dia">Dia</button><button type="button" class="segb" data-modo="int">Intervalo</button>
+      </div>
+      <div class="pfcampos" id="pfCampos"></div>
+      <label class="inl">Turno <select id="pfTurno"><option value="">Todos</option><option>Z</option><option>X</option><option>Y</option></select></label>
+      <button class="tbtn" type="button" id="pfApres" title="Tela cheia para apresentar"><span>Apresentar</span></button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Período"></div>
+    <div class="ativo">
+      <div>
+        <p class="eyebrow green">Período ativo</p>
+        <h2 id="atNome">—</h2>
+        <p id="atSub">—</p>
+      </div>
+      <span class="pill" id="atPill">—</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div><div class="l">Estoque</div><div class="v" id="k1">—</div></div></div>
+      <div class="kpi"><div><div class="l">Consumo médio diário</div><div class="v" id="k2">—</div></div></div>
+      <div class="kpi"><div><div class="l">Dias de estoque</div><div class="v" id="k3">—</div></div></div>
+      <div class="kpi"><div><div class="l">Média g/t</div><div class="v" id="k4">—</div></div></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div><div class="l">Toneladas tratadas</div><div class="v" id="k5">—</div></div></div>
+      <div class="kpi"><div><div class="l">Volume médio turno X</div><div class="v" id="kX">—</div></div></div>
+      <div class="kpi"><div><div class="l">Volume médio turno Y</div><div class="v" id="kY">—</div></div></div>
+      <div class="kpi"><div><div class="l">Volume médio turno Z</div><div class="v" id="kZ">—</div></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="pT1">Consumo diário (kg)</h2>
+        <div class="legend"><span><i class="sw" style="height:10px;width:12px;background:var(--brand)"></i>Consumo do dia</span><span><i class="sw base" style="background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 7px)"></i>Média diária</span></div>
+      </div>
+      <div id="chCons" class="chart-box"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="pT2">Dosagem por turno (g/t)</h2>
+        <div class="legend"><span><i class="sw" style="background:var(--brand)"></i>Turno X</span><span><i class="sw" style="background:var(--blue)"></i>Turno Y</span><span><i class="sw" style="background:var(--amber)"></i>Turno Z</span></div>
+      </div>
+      <div id="chVaz" class="chart-box"></div>
+    </div>
+    <div class="panel">
+      <h2 id="pT3">Últimos registros</h2>
+      <div class="tablebox"><table><thead><tr><th>Data</th><th>Turno</th><th class="num">Volume (L)</th><th class="num">Toneladas</th><th class="num">Consumo (kg)</th><th class="num">g/t</th></tr></thead><tbody id="ultRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- REGISTRAR TURNO -->
+  <section id="tab-turno" class="tabpane" hidden>
+    <form class="panel" id="formTurno" novalidate>
+      <h2>Registrar turno</h2>
+      <div class="grid2">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="fields">
+            <label>Data<input type="date" id="tData"></label>
+            <label>Turno<select id="tTurno"><option>X</option><option>Y</option><option>Z</option></select></label>
+          </div>
+          <div class="fields">
+            <label>Volume total aplicado no turno (L)<input type="number" step="any" min="0" inputmode="decimal" id="tLitros"></label>
+            <label>Toneladas tratadas no turno (t)<input type="number" step="any" min="0" inputmode="decimal" id="tTon"></label>
+          </div>
+          <div class="fields">
+            <label>Concentração da solução (%)<input type="number" step="any" min="0" inputmode="decimal" id="tConc"></label>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="result"><span class="big" id="tRes">—</span><span class="meta" id="tResL">kg de floculante no turno</span></div>
+          <p class="meta" id="tGt">Dosagem: —</p>
+          <p class="hint" id="tHint">Consumo do turno (kg) = volume (L) × concentração da solução (%) ÷ 100, considerando a solução com cerca de 1 kg/L. Dosagem (g/t) = consumo (kg) × 1000 ÷ toneladas. A concentração vem preenchida com o valor padrão de Configurar e pode ser alterada para o turno. Ao salvar, o consumo é debitado do estoque.</p>
+          <div class="actions"><button class="btn" type="submit" id="tSalvar">Salvar e debitar do estoque</button><button class="btn ghost" type="button" id="tLimpar">Limpar</button><span class="msg" id="tMsg"></span></div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- ESTOQUE -->
+  <section id="tab-estoque" class="tabpane" hidden>
+    <div class="grid2">
+      <form class="panel" id="formEnt" novalidate>
+        <h2>Entrada de estoque</h2>
+        <div class="estq" id="estqBox"><span class="big" id="estqVal">—</span><span class="meta" id="estqSub">em estoque</span></div>
+        <div class="fields">
+          <label>Data<input type="date" id="eData"></label>
+          <label>Quantidade recebida (kg)<input type="number" step="any" inputmode="decimal" id="eKg"></label>
+        </div>
+        <div class="fields">
+          <label>Lote<input type="text" id="eLote" placeholder="Ex.: L2026-145"></label>
+          <label>Houve coleta de amostra do estoque?
+            <span class="seg" role="radiogroup" aria-label="Houve coleta de amostra do estoque">
+              <label class="segopt"><input type="radio" name="eColeta" id="eColNao" value="nao" checked><span>Não</span></label>
+              <label class="segopt"><input type="radio" name="eColeta" id="eColSim" value="sim"><span>Sim</span></label>
+            </span>
+          </label>
+        </div>
+        <div class="fields" id="eColBox" hidden>
+          <label>Quantidade coletada (kg)<input type="number" step="any" min="0" inputmode="decimal" id="eColKg" placeholder="Opcional — é descontada do estoque"></label>
+          <label>Data da coleta<input type="date" id="eColData"></label>
+        </div>
+        <label>Observação<input type="text" id="eObs" placeholder="Ex.: nota fiscal, fornecedor, motivo da coleta"></label>
+        <div class="actions"><button class="btn" type="submit">Registrar entrada</button><span class="msg" id="eMsg"></span></div>
+        <p class="hint">Marque <b>Sim</b> em coleta quando uma amostra do lote for retirada para análise; a quantidade coletada, se informada, é descontada do estoque. Para corrigir o estoque após uma contagem física, registre a diferença como entrada (use valor negativo para baixar).</p>
+      </form>
+      <div class="panel">
+        <h2>Entradas registradas</h2>
+        <div class="tablebox"><table><thead><tr><th>Data</th><th>Lote</th><th class="num">Quantidade (kg)</th><th>Coleta</th><th>Obs.</th><th></th></tr></thead><tbody id="entRows"></tbody></table></div>
+        <span class="msg" id="entMsg"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="tab-historico" class="tabpane" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Importar planilha</h2>
+        <div class="actions">
+          <button class="btn" type="button" id="mBtn">Escolher arquivo Excel</button>
+          <input type="file" id="mFile" accept=".xlsx,.xlsm,.xls" multiple hidden>
+        </div>
+      </div>
+      <p class="hint"><b>Relatório de Turno</b> (o relatório mensal ou o Excel baixado do app Relatório de Turno): cada turno vira um registro com o volume da coluna Floculante (L) e as toneladas da coluna definida em Configurar. <b>Planilha Mestre</b>: importa as abas Turnos e Estoque. O que já foi importado (pelo botão ou pela API da planilha) é atualizado, sem duplicar. Confira o resumo antes de confirmar.</p>
+      <div id="mOut"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Registros de turno</h2>
+        <div class="actions">
+          <select id="hFiltro" aria-label="Filtrar turno"><option value="">Todos os turnos</option><option>X</option><option>Y</option><option>Z</option></select>
+          <button class="btn ghost small" id="hCsv" type="button">Exportar CSV</button>
+          <button class="btn danger small" id="hZerar" type="button" title="Apaga todos os turnos registrados">Apagar todos os turnos</button>
+        </div>
+      </div>
+      <div class="tablebox"><table><thead><tr><th>Data</th><th>Turno</th><th class="num">Volume (L)</th><th class="num">Toneladas</th><th class="num">Conc. (%)</th><th class="num">Consumo (kg)</th><th class="num">g/t</th><th></th></tr></thead><tbody id="hRows"></tbody></table></div>
+      <span class="msg" id="hMsg"></span>
+    </div>
+  </section>
+
+  <!-- HORA A HORA -->
+  <section id="tab-horas" class="tabpane" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="hhTit">Consulta por dia e turno</h2>
+        <div class="actions hhnav">
+          <button class="btn ghost small" type="button" id="hhAnt" aria-label="Turno anterior">‹ Anterior</button>
+          <label class="inl">Data<input type="date" id="hhData"></label>
+          <label class="inl">Turno<select id="hhTurno"><option value="dia">Dia todo</option><option>Z</option><option>X</option><option>Y</option></select></label>
+          <button class="btn ghost small" type="button" id="hhProx" aria-label="Próximo turno">Próximo ›</button>
+        </div>
+      </div>
+      <div class="hhres" id="hhRes"></div>
+      <div class="legend"><span><i class="sw"></i>g/t da hora</span><span><i class="sw lim"></i>Limite <b id="hhLimL">50</b> g/t</span><span><i class="sw crit"></i>Hora acima do limite</span></div>
+      <div class="hhchart" id="hhChart"></div>
+      <div class="tablebox"><table><thead><tr><th>Turno</th><th>Hora</th><th class="num">Floculante (L)</th><th class="num">Rej. Filtro (t)</th><th class="num">Consumo (kg)</th><th class="num">g/t</th><th>Situação</th></tr></thead><tbody id="hhRows"></tbody></table></div>
+      <p class="hint" id="hhMsg"></p>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Turnos com horas acima de <span id="haLim">50</span> g/t</h2>
+        <div class="actions"><label class="inl">De<input type="date" id="haDe"></label><label class="inl">Até<input type="date" id="haAte"></label></div>
+      </div>
+      <p class="hint">Clique num turno para abrir as horas dele acima. Horas sem rejeito (Rej. Filtro zero ou negativo) não têm g/t e não entram na contagem.</p>
+      <div class="tablebox"><table><thead><tr><th>Data</th><th>Turno</th><th class="num">Horas acima</th><th>Horas</th><th class="num">Maior g/t</th><th class="num">g/t do turno</th></tr></thead><tbody id="haRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- PERDAS -->
+  <section id="tab-perdas" class="tabpane" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="pfiltro">
+      <div class="segs" role="group" aria-label="Período"><button type="button" class="segb" data-pm="mes">Mês</button><button type="button" class="segb" data-pm="int">Intervalo</button></div>
+      <div class="pfcampos" id="pdCampos"></div>
+      <label class="inl">Turno <select id="pdTurno"><option value="">Todos</option><option>Z</option><option>X</option><option>Y</option></select></label>
+    </div>
+    <div class="ativo"><div><p class="eyebrow green">Perda estimada por sobredosagem · calculada pelo setpoint</p><h2 id="pdTit">—</h2><p id="pdSub">—</p></div><div class="actions"><span class="pill" id="pdPreco">—</span><button class="btn" type="button" id="pdAlt">Alterar preço do kg</button></div></div>
+    <div class="hhres" id="pdRes"></div>
+    <div class="grid2">
+      <div class="panel">
+        <h2>Preço do floculante (R$/kg)</h2>
+        <p class="hint">Cada compra pode ter um preço. Cada dia usa o último preço com data igual ou anterior a ele, então mudar o preço não altera os meses anteriores.</p>
+        <div class="tablebox"><table><thead><tr><th>Vale a partir de</th><th class="num">R$/kg</th><th>Observação</th><th></th></tr></thead><tbody id="prRows"></tbody></table></div>
+        <div class="fields"><label>A partir de<input type="date" id="prData"></label><label>R$/kg<input type="number" step="0.01" min="0" id="prValor" placeholder="24,78"></label><label>Observação<input type="text" id="prObs" maxlength="80" placeholder="Ex.: NF 1234, lote L-1003"></label></div>
+        <div class="actions"><button class="btn" type="button" id="prAdd">Adicionar preço</button><span class="msg" id="prMsg"></span></div>
+      </div>
+      <div class="panel">
+        <h2>Como a perda é calculada</h2>
+        <p class="hint">Em cada hora: consumo permitido = limite (<b id="pdLim">50</b> g/t) × toneladas de Rej. Filtro da hora ÷ 1000. Quando a hora passa do limite, <b>excesso (kg)</b> = consumo real − permitido e <b>perda (R$)</b> = excesso × preço do kg do dia.</p>
+        <p class="hint"><b>Sem rejeito</b>: horas com floculante e Rej. Filtro zero ou negativo. Não entram como perda (pode ser medição), mas aparecem à parte em kg e R$.</p>
+        <p class="hint"><b>Setpoint × compras:</b> a coluna Floculante (L) da planilha é o setpoint da bomba, não o volume medido. Se o consumo pelo setpoint ficar bem acima das compras do período, a bomba está entregando menos que o setpoint (ou entrou estoque de outro mês), e a perda em R$ fica superestimada na mesma proporção.</p>
+        <p class="hint">Turno importado sem as horas: a conta é feita pelo total do turno. É uma <b>estimativa</b>: depende da qualidade das toneladas de Rej. Filtro da planilha.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Perda por dia (R$)</h2><div class="legend"><span><i class="sw crit"></i>Perda estimada no dia</span></div></div>
+      <div class="hhchart" id="pdChart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Turnos com perda</h2><span class="hint">Ordenado pela maior perda. Clique para abrir o turno na aba Hora a hora.</span></div>
+      <div class="tablebox"><table><thead><tr><th>Data</th><th>Turno</th><th class="num">Horas acima</th><th class="num">Excesso (kg)</th><th class="num">Perda (R$)</th><th class="num">Sem rejeito (kg)</th><th class="num">R$/kg</th></tr></thead><tbody id="pdRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="tab-config" class="tabpane" hidden>
+    <form class="panel" id="formCfg" novalidate>
+      <h2>Configuração</h2>
+      <div class="fields">
+        <label>Concentração padrão da solução (%)<input type="number" step="any" min="0" id="cfgConc"></label>
+                <label>Limite de dosagem por hora (g/t)<input type="number" step="any" min="0" id="cfgLimGt" placeholder="50"></label>
+        <label>Preço do floculante (R$/kg)<input type="number" step="0.01" min="0" id="cfgPreco" placeholder="24,78"></label>
+        <label>Coluna de toneladas no Relatório de Turno<input type="text" id="cfgColTon" placeholder="Rej. Filtro"></label>
+        <label>Estoque inicial (kg)<input type="number" step="any" id="cfgEst"></label>
+        <label>Período padrão do painel (dias)<input type="number" step="1" min="1" id="cfgPer"></label>
+        <label>Alerta de estoque baixo (dias)<input type="number" step="1" min="1" id="cfgAlerta"></label>
+      </div>
+      <div class="panel" style="padding:14px;gap:10px;border-color:var(--line-strong)">
+        <h2 style="font-size:1rem">Fator do floculante por período (×)</h2>
+        <p class="hint">Volume do turno (L) = soma das horas da coluna Floculante (L) × fator do período. Use uma linha para cada mudança de concentração (ex.: 1 a partir de 01/03, 1,5 a partir de 01/07). Cada turno usa o fator vigente na sua data; ao mudar aqui, todos os turnos já importados são recalculados na hora.</p>
+        <div class="tablebox"><table><thead><tr><th>Vale a partir de</th><th class="num">Fator</th><th></th></tr></thead><tbody id="cfgFatRows"></tbody></table></div>
+        <div class="fields"><label>A partir de (em branco = desde o início)<input type="date" id="cfgFatDe"></label><label>Fator (×)<input type="number" step="any" min="0" id="cfgFatVal" placeholder="1,5"></label></div>
+        <div class="actions"><button class="btn" type="button" id="cfgFatAdd">Adicionar fator</button><span class="msg" id="cfgFatMsg"></span></div>
+      </div>
+      <p class="hint"><b>Preço do floculante:</b> o valor novo vale a partir de hoje; os dias anteriores continuam com o preço antigo (o histórico de preços fica na aba Perdas). <b>Exemplo com os padrões (fator 1,5 e concentração 0,1%):</b> a planilha mostra 4.000 L na hora → 4.000 × 1,5 = 6.000 L → 6.000 × 0,1 ÷ 100 = 6 kg → com 44 t de Rej. Filtro, 6.000 g ÷ 44 t = 136,4 g/t, o mesmo valor da conta da sala de controle. Não coloque o 1,5 também na concentração, senão ele entra duas vezes. Fator do total de floculante: nas planilhas do Relatório de Turno, volume do turno (L) = soma das horas da coluna Floculante (L) × fator (padrão 1,5). Vale para o Floculantes e para o total do Relatório de Turno neste aparelho; turnos já importados mudam quando a planilha for importada de novo. Coluna de toneladas: título da coluna do Relatório de Turno usada no g/t dos turnos importados (soma das horas com valor positivo). A concentração padrão já vem preenchida no Registrar turno e pode ser trocada em cada lançamento. Ela transforma o volume em kg de produto: kg = litros × concentração ÷ 100. Cada turno guarda a concentração usada, então mudar o padrão não altera lançamentos antigos. Estoque atual = estoque inicial + entradas − consumo de todos os turnos registrados. O status fica em atenção quando o estoque cobre menos que o dobro dos dias de alerta, e crítico abaixo dos dias de alerta. Consumo médio diário = consumo do período ÷ dias com registro. Média g/t = consumo total (g) ÷ toneladas totais.</p>
+      <div class="actions"><button class="btn" type="submit">Salvar configuração</button><span class="msg" id="cfgMsg"></span></div>
+    </form>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   SINCRONIZAÇÃO COM O BANCO DE DADOS
+   Os dados ficam SEMPRE salvos no próprio aparelho (funciona sem rede).
+   Quando houver rede e um servidor configurado abaixo, as alterações
+   pendentes são enviadas e as novidades do servidor são baixadas.
+   Enquanto o banco não estiver definido, deixe url vazia.
+
+   Contrato esperado do servidor (o mesmo do Controle de Britadores):
+     POST {url}/sync      corpo: {"ops":[{"op":"upsert"|"delete","colecao":"registros"|"entradas"|"testes"|"config","id":"...","dados":{...}}]}
+     GET  {url}/mudancas?desde=<ISO ou vazio>
+                          resposta: {"agora":"<ISO>","registros":[{"colecao":"...","id":"...","dados":{...,"atualizadoEm":"<ISO>","excluido":false}}]}
+   ========================================================= */
+const SERVIDOR = {
+  url: "",   // PRÉVIA: sem servidor, dados ficam só neste navegador
+  token: "",
+  intervaloSeg: 120
+};
+
+(function(){
+const DEF={concSolucao:0.1,fatorFloc:1.5,fatores:[{de:"2000-01-01",valor:1.5}],limiteGt:50,precos:[{de:"2000-01-01",valor:24.78,obs:"Preço inicial"}],estoqueInicial:0,periodo:30,alertaDias:7,colunaTon:"Rej. Filtro"};
+const PERIODOS=[7,15,30,90];
+let pf={modo:"per",mes:"",dia:"",de:"",ate:"",turno:""};
+let cfg={...DEF}, per=DEF.periodo, exemplo=false, regs=[], ents=[], tests=[];
+const $=id=>document.getElementById(id);
+const fmt=(v,d=1)=>v==null||isNaN(v)||!isFinite(v)?"—":v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const dayNum=s=>{const [y,m,d]=s.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
+const fromDay=n=>new Date(n*864e5).toISOString().slice(0,10);
+const brDate=s=>s?s.slice(8,10)+"/"+s.slice(5,7)+"/"+s.slice(0,4):"—";
+const short=s=>s.slice(8,10)+"/"+s.slice(5,7);
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=id=>{const v=String($(id).value).replace(",",".").trim();if(v==="")return null;const n=parseFloat(v);return isNaN(n)?null:n};
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
+function msg(id,cls,t){const m=$(id);m.className="msg "+cls;m.textContent=t}
+
+/* ---------- cálculos (mesmas regras do app Android) ---------- */
+// kg de produto no turno: litros de solução × concentração (%) ÷ 100 (solução ~1 kg/L)
+/* Fator do floculante por período (ex.: meses com concentração 1,5 e meses com 1). Os turnos importados guardam o fator usado
+   na importação; a conta é refeita com o fator vigente na data, então mudar a tabela corrige os turnos sem reimportar. */
+function fatorEm(d){
+  const fs=(Array.isArray(cfg.fatores)&&cfg.fatores.length?cfg.fatores:[{de:"2000-01-01",valor:+cfg.fatorFloc>0?+cfg.fatorFloc:1.5}])
+    .filter(x=>+x.valor>0&&x.de<=(d||"9999")).sort((a,b)=>a.de<b.de?-1:1);
+  return fs.length?+fs[fs.length-1].valor:1.5;
+}
+const ajusteFator=r=>+r.fator>0?fatorEm(r.data)/+r.fator:1;
+const litrosDe=r=>r.litros!=null?+r.litros*ajusteFator(r):(+r.vazao*+r.horas);
+const consumoDe=r=>r.litros!=null?litrosDe(r)*+r.conc/100:(r.consumoMedido!=null?+r.consumoMedido:(+r.vazao*+r.horas*+r.conc/100));
+const gtDe=r=>+r.ton>0?consumoDe(r)*1000/+r.ton:NaN;
+/* ---------- filtro do painel: últimos dias, mês, dia ou intervalo, e turno ---------- */
+const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const ultimoDia=m=>{const [y,mm]=m.split("-").map(Number);return new Date(Date.UTC(y,mm,0)).toISOString().slice(0,10)};
+function padroesFiltro(){
+  const datas=regs.map(r=>r.data).sort(),u=datas[datas.length-1]||today();
+  if(!pf.mes)pf.mes=u.slice(0,7);
+  if(!pf.dia)pf.dia=u;
+  if(!pf.de){pf.de=pf.mes+"-01";pf.ate=ultimoDia(pf.mes)}
+}
+function intervalo(){
+  padroesFiltro();
+  if(pf.modo==="mes")return {ini:pf.mes+"-01",fim:ultimoDia(pf.mes)};
+  if(pf.modo==="dia")return {ini:pf.dia,fim:pf.dia};
+  if(pf.modo==="int")return pf.de<=pf.ate?{ini:pf.de,fim:pf.ate}:{ini:pf.ate,fim:pf.de};
+  const fim=today();return {ini:fromDay(dayNum(fim)-per+1),fim};
+}
+function tituloFiltro(c){
+  const t=pf.turno?` · turno ${pf.turno}`:"";
+  if(pf.modo==="mes"){const [y,m]=pf.mes.split("-");return MESES[+m-1].replace(/^./,x=>x.toUpperCase())+" de "+y+t}
+  if(pf.modo==="dia")return "Dia "+brDate(pf.dia)+t;
+  if(pf.modo==="int")return brDate(c.ini)+" a "+brDate(c.fim)+t;
+  return "Últimos "+per+" dias"+t;
+}
+function renderFiltro(){
+  document.querySelectorAll(".segb").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.modo===pf.modo));b.onclick=()=>{pf.modo=b.dataset.modo;render()}});
+  const box=$("pfCampos");padroesFiltro();
+  if(pf.modo==="mes"){
+    const ms=[...new Set(regs.map(r=>r.data.slice(0,7)).concat([pf.mes]))].sort().reverse();
+    box.innerHTML=`<button class="nav" type="button" data-pf="-1" aria-label="Mês anterior">‹</button><select id="pfMes" aria-label="Mês">${ms.map(m=>`<option value="${m}" ${m===pf.mes?"selected":""}>${MESES[+m.slice(5)-1]} ${m.slice(0,4)}</option>`).join("")}</select><button class="nav" type="button" data-pf="1" aria-label="Próximo mês">›</button>`;
+    $("pfMes").onchange=e=>{pf.mes=e.target.value;render()};
+  }else if(pf.modo==="dia"){
+    box.innerHTML=`<button class="nav" type="button" data-pf="-1" aria-label="Dia anterior">‹</button><input type="date" id="pfDia" value="${pf.dia}" aria-label="Dia"><button class="nav" type="button" data-pf="1" aria-label="Próximo dia">›</button>`;
+    $("pfDia").onchange=e=>{if(e.target.value){pf.dia=e.target.value;render()}};
+  }else if(pf.modo==="int"){
+    box.innerHTML=`<label class="inl">De <input type="date" id="pfDe" value="${pf.de}"></label><label class="inl">até <input type="date" id="pfAte" value="${pf.ate}"></label>`;
+    $("pfDe").onchange=e=>{if(e.target.value){pf.de=e.target.value;render()}};$("pfAte").onchange=e=>{if(e.target.value){pf.ate=e.target.value;render()}};
+  }else box.innerHTML="";
+  box.querySelectorAll("[data-pf]").forEach(b=>b.onclick=()=>{
+    const p=+b.dataset.pf;
+    if(pf.modo==="mes"){const [y,m]=pf.mes.split("-").map(Number),d=new Date(Date.UTC(y,m-1+p,1));pf.mes=d.toISOString().slice(0,7)}
+    else{const ds=[...new Set(regs.map(r=>r.data))].sort();const j=p>0?ds.find(x=>x>pf.dia):[...ds].reverse().find(x=>x<pf.dia);pf.dia=j||fromDay(dayNum(pf.dia)+p)}
+    render();
+  });
+  $("pfTurno").value=pf.turno;$("chips").hidden=pf.modo!=="per";
+}
+function calcular(){
+  const totalCons=regs.reduce((s,r)=>s+consumoDe(r),0);
+  const totalEnt=ents.reduce((s,e)=>s+(+e.kg||0)-(e.coleta?(+e.coletaKg||0):0),0);
+  const estoque=(+cfg.estoqueInicial||0)+totalEnt-totalCons;
+  const {ini,fim}=intervalo();
+  const rp=regs.filter(r=>r.data>=ini&&r.data<=fim&&(!pf.turno||r.turno===pf.turno));
+  const dias=[...new Set(rp.map(r=>r.data))];
+  const cons=rp.reduce((s,r)=>s+consumoDe(r),0);
+  const ton=rp.reduce((s,r)=>s+(+r.ton||0),0);
+  const porDia=dias.length?cons/dias.length:NaN;
+  const diasEst=porDia>0?estoque/porDia:NaN;
+  const vol=t=>avg(rp.filter(r=>r.turno===t).map(litrosDe));
+  let status="na";
+  if(isFinite(diasEst))status=diasEst<cfg.alertaDias?"crit":diasEst<cfg.alertaDias*2?"warn":"ok";
+  else if(estoque<=0&&regs.length)status="crit";
+  return {estoque,ini,fim,rp,dias,cons,ton,porDia,diasEst,gt:ton>0?cons*1000/ton:NaN,vX:vol("X"),vY:vol("Y"),vZ:vol("Z"),status};
+}
+
+/* ---------- armazenamento local (offline) ---------- */
+const LS="controle-floculantes.v1";
+const novoId=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+const agoraISO=()=>new Date().toISOString();
+let base={registros:{},entradas:{},testes:{},config:null,pendentes:[],ultimaSync:""};
+function carregar(){try{const j=JSON.parse(localStorage.getItem(LS)||"null");if(j)base={...base,...j}}catch(e){console.error(e)}}
+function gravar(){
+  try{localStorage.setItem(LS,JSON.stringify(base));return true}
+  catch(e){console.error(e);aviso("Não foi possível salvar no aparelho (memória cheia ou bloqueada). Exporte o CSV e libere espaço.");return false}
+}
+function salvarReg(col,dados){
+  const r={...dados,id:dados.id||novoId(),atualizadoEm:agoraISO(),excluido:false};
+  base[col][r.id]=r;base.pendentes.push({op:"upsert",colecao:col,id:r.id,dados:r});
+  if(!gravar())throw new Error("memória do aparelho indisponível");return r;
+}
+function excluirReg(col,id){
+  const r=base[col][id];if(!r)return;
+  r.excluido=true;r.atualizadoEm=agoraISO();
+  base.pendentes.push({op:"delete",colecao:col,id,dados:r});gravar();
+}
+function salvarConfig(c){
+  base.config={...c,atualizadoEm:agoraISO()};
+  base.pendentes.push({op:"upsert",colecao:"config",id:"main",dados:base.config});gravar();
+}
+const ativos=col=>Object.values(base[col]).filter(r=>!r.excluido);
+
+let sincronizando=false,erroSync="";
+async function sincronizar(manual){
+  if(sincronizando)return;
+  if(!SERVIDOR.url){statusSync();if(manual)aviso("Nenhum servidor configurado. Os dados estão salvos neste aparelho.");return}
+  if(!navigator.onLine){statusSync();return}
+  sincronizando=true;statusSync();
+  const u=SERVIDOR.url.replace(/\/$/,""),h={"Content-Type":"application/json"};if(SERVIDOR.token)h.Authorization="Bearer "+SERVIDOR.token;
+  try{
+    const ops=base.pendentes.slice();
+    if(ops.length){
+      const r=await fetch(u+"/sync",{method:"POST",headers:h,body:JSON.stringify({ops}),credentials:"same-origin"});
+      if(!r.ok)throw new Error(r.status===401||r.status===403?"LOGIN":"Servidor respondeu "+r.status+" ao enviar");
+      base.pendentes.splice(0,ops.length);gravar();
+    }
+    const r2=await fetch(u+"/mudancas?desde="+encodeURIComponent(base.ultimaSync||""),{headers:h,credentials:"same-origin"});
+    if(!r2.ok)throw new Error(r2.status===401||r2.status===403?"LOGIN":"Servidor respondeu "+r2.status+" ao baixar");
+    const j=await r2.json();
+    const pend=new Set(base.pendentes.map(p=>p.colecao+"/"+p.id));
+    (j.registros||[]).forEach(x=>{
+      if(!x||!x.dados||pend.has(x.colecao+"/"+x.id))return;
+      if(x.colecao==="config"){if(!base.config||(x.dados.atualizadoEm||"")>(base.config.atualizadoEm||""))base.config=x.dados;return}
+      if(!base[x.colecao])return;
+      const loc=base[x.colecao][x.id];
+      if(!loc||(x.dados.atualizadoEm||"")>=(loc.atualizadoEm||""))base[x.colecao][x.id]={...x.dados,id:x.id};
+    });
+    if(j.agora)base.ultimaSync=j.agora;
+    gravar();erroSync="";aplicarConfig();apply();
+  }catch(e){console.error(e);erroSync=e.message||"falha de conexão"}
+  sincronizando=false;statusSync();
+}
+function statusSync(){
+  const el=$("syncSt"),n=base.pendentes.length;let cls="",t;el.title="";
+  if(!SERVIDOR.url){t=`Salvo no aparelho${n?" · "+n+" alteração(ões) aguardando servidor":""}`;cls="na"}
+  else if(sincronizando)t="Sincronizando…";
+  else if(!navigator.onLine){t=`Offline${n?" · "+n+" pendente(s)":" · tudo salvo no aparelho"}`;cls="warn"}
+  else if(erroSync==="LOGIN"){t=`Entre de novo para sincronizar${n?" · "+n+" pendente(s)":""}`;cls="warn";el.title="Clique para entrar com sua conta Microsoft"}
+  else if(erroSync){t=`Erro ao sincronizar · ${n} pendente(s)`;cls="crit";el.title=erroSync}
+  else if(n){t=`${n} pendente(s)`;cls="warn"}
+  else t="Sincronizado"+(base.ultimaSync?" · "+new Date(base.ultimaSync).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"");
+  el.className="syncst "+cls;el.textContent=t;
+  el.style.cursor=erroSync==="LOGIN"?"pointer":"";
+  el.onclick=erroSync==="LOGIN"?()=>{location.href="/.auth/login/aad?post_login_redirect_uri="+encodeURIComponent(location.pathname)}:null;
+}
+window.addEventListener("storage",ev=>{if(ev.key===LS){carregar();aplicarConfig();apply()}});
+function aviso(t){const bn=$("banner");bn.hidden=false;bn.textContent=t}
+function aplicarConfig(){
+  if(base.config){const {atualizadoEm,...c}=base.config;cfg={...DEF,...c}}
+  if(base.config&&!Array.isArray(base.config.fatores))cfg.fatores=[{de:"2000-01-01",valor:+cfg.fatorFloc>0?+cfg.fatorFloc:1.5}];   // configuração antiga: um fator só
+  try{localStorage.setItem("controles.fatoresFloculante",JSON.stringify(cfg.fatores));localStorage.setItem("controles.fatorFloculante",String(fatorEm(today())))}catch(e){}   // o Relatório de Turno usa a mesma tabela
+  if(!PERIODOS.includes(per)&&per!==cfg.periodo)per=cfg.periodo;
+  if(!$("tab-config").hidden)renderCfg();
+}
+
+/* ---------- dados de exemplo (só aparecem sem registros) ---------- */
+function gerarExemplo(){
+  let s=11;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  const h=dayNum(today()),R=[],E=[],T=[];
+  for(let i=44;i>=0;i--){const d=fromDay(h-i);
+    [["X",9600],["Y",9100],["Z",10100]].forEach(([t,v])=>R.push({id:"x"+i+t,data:d,turno:t,litros:Math.round(v+(rnd()-.5)*1300),conc:0.1,ton:Math.round(2400+(rnd()-.5)*500)}))}
+  E.push({id:"e1",data:fromDay(h-45),kg:1500,lote:"L-0921",coleta:true,coletaKg:1,coletaData:fromDay(h-45),obs:"Exemplo"},{id:"e2",data:fromDay(h-18),kg:800,lote:"L-1003",coleta:false,obs:"Exemplo"});
+  T.push({id:"t1",data:fromDay(h-30),produto:"Produto A",doseGt:4,conc:0.1,status:"Aprovado",resultado:"Exemplo: sedimentação boa"},
+         {id:"t2",data:fromDay(h-10),produto:"Produto B",doseGt:3.5,conc:0.08,status:"Em andamento",resultado:"Exemplo"});
+  return {R,E,T};
+}
+
+/* ---------- gráficos ---------- */
+function eixoX(ini,fim){const a=dayNum(ini),b=dayNum(fim),o=[];for(let d=a;d<=b;d++)o.push(fromDay(d));return o}
+function grafico(box,dias,series,opt){
+  box.innerHTML="";
+  const W=Math.max(320,box.clientWidth||800),H=W<560?240:290,m={l:52,r:16,t:16,b:28};
+  const vals=series.flatMap(s=>s.v.filter(x=>x!=null&&isFinite(x)));
+  if(!vals.length){box.innerHTML='<div class="empty">Sem registros no período.</div>';return}
+  let y0=opt.zero?0:Math.min(...vals),y1=Math.max(...vals);if(opt.ref!=null&&isFinite(opt.ref))y1=Math.max(y1,opt.ref);
+  const pad=(y1-y0)*0.12||1;if(!opt.zero)y0-=pad;y1+=pad;
+  const n=dias.length,bw=(W-m.l-m.r)/n;
+  const X=i=>m.l+bw*(i+.5),Y=v=>m.t+(y1-v)/(y1-y0)*(H-m.t-m.b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.titulo)}">`;
+  for(let k=0;k<=4;k++){const v=y0+(y1-y0)*k/4;s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v,v<10?1:0)}</text>`}
+  const passo=Math.max(1,Math.ceil(n/(W<560?5:9)));
+  dias.forEach((d,i)=>{if(i%passo===0)s+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle">${short(d)}</text>`});
+  series.forEach(se=>{
+    if(se.tipo==="barra")se.v.forEach((v,i)=>{if(v!=null&&v>0)s+=`<rect x="${X(i)-bw*.36}" y="${Y(v)}" width="${bw*.72}" height="${Y(y0)-Y(v)}" rx="2" fill="${se.cor}"/>`});
+    else{let seg=[];const flush=()=>{if(seg.length>1)s+=`<polyline fill="none" stroke="${se.cor}" stroke-width="2.4" stroke-linejoin="round" points="${seg.join(" ")}"/>`;seg=[]};
+      se.v.forEach((v,i)=>{if(v==null||!isFinite(v)){flush();return}seg.push(X(i)+","+Y(v));s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="2.4" fill="${se.cor}"/>`});flush()}
+  });
+  if(opt.ref!=null&&isFinite(opt.ref))s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(opt.ref)}" y2="${Y(opt.ref)}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="5 4"/><text x="${W-m.r-4}" y="${Y(opt.ref)-5}" text-anchor="end" style="fill:var(--ink)">média ${fmt(opt.ref)} ${opt.unid}</text>`;
+  s+=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/></svg>`;
+  box.innerHTML=s;
+  const tip=document.createElement("div");tip.className="tip";tip.hidden=true;box.appendChild(tip);
+  const svg=box.querySelector("svg");
+  svg.addEventListener("pointermove",ev=>{const rc=svg.getBoundingClientRect(),k=W/rc.width,i=Math.max(0,Math.min(n-1,Math.floor(((ev.clientX-rc.left)*k-m.l)/bw)));
+    const t=opt.tip(i);if(!t){tip.hidden=true;return}
+    tip.hidden=false;tip.style.left=X(i)/k+"px";tip.style.top=(m.t+20)/k+"px";tip.textContent=t});
+  svg.addEventListener("pointerleave",()=>tip.hidden=true);
+}
+
+/* ---------- render ---------- */
+const ROT={ok:"Estoque OK",warn:"Estoque em atenção",crit:"Estoque crítico",na:"Sem consumo no período"};
+function render(){
+  const c=calcular();
+  const bn=$("banner");
+  if(exemplo){bn.hidden=false;bn.innerHTML="<b>Dados de exemplo.</b> O painel mostra uma simulação até o primeiro turno ser registrado em <b>Registrar turno</b>.";}
+  else if(!bn.dataset.fixo)bn.hidden=true;
+  // chips de período
+  const ch=$("chips");ch.innerHTML="";
+  [...new Set([...PERIODOS,cfg.periodo])].sort((a,b)=>a-b).forEach(p=>{
+    const b=document.createElement("button");b.type="button";b.className="chip-b";b.setAttribute("aria-pressed",String(p===per));
+    const rp=regs.filter(r=>r.data>=fromDay(dayNum(today())-p+1));
+    const cons=rp.reduce((s,r)=>s+consumoDe(r),0);
+    b.innerHTML=`<span class="n">${p} dias</span><span class="s">${rp.length} turno(s) · ${fmt(cons,0)} kg</span>`;
+    b.onclick=()=>{per=p;pf.modo="per";render()};ch.appendChild(b);
+  });
+  renderFiltro();
+  $("atNome").textContent=tituloFiltro(c);
+  $("atSub").textContent=`${brDate(c.ini)} a ${brDate(c.fim)} · ${c.dias.length} dia(s) com registro · ${c.rp.length} turno(s)`;
+  const pill=$("atPill");pill.className="pill "+(c.status==="ok"?"":c.status);pill.textContent=ROT[c.status];
+  $("k1").innerHTML=`${fmt(c.estoque,1)}<small> kg</small>`;
+  $("k2").innerHTML=`${fmt(c.porDia,1)}<small> kg/dia</small>`;
+  $("k3").innerHTML=`${fmt(c.diasEst,0)}<small> dias</small>`;
+  $("k4").innerHTML=`${fmt(c.gt,1)}<small> g/t</small>`;
+  $("k5").innerHTML=`${fmt(c.ton,0)}<small> t</small>`;
+  $("kX").innerHTML=`${fmt(c.vX,0)}<small> L/turno</small>`;$("kY").innerHTML=`${fmt(c.vY,0)}<small> L/turno</small>`;$("kZ").innerHTML=`${fmt(c.vZ,0)}<small> L/turno</small>`;
+  // gráficos
+  const ehDia=pf.modo==="dia";
+  $("pT1").textContent=ehDia?"Dosagem hora a hora (g/t)":"Consumo diário (kg)";
+  $("pT1").nextElementSibling.hidden=ehDia;$("chVaz").closest(".panel").hidden=ehDia;
+  $("pT3").textContent=pf.modo==="per"&&!pf.turno?"Últimos registros":"Turnos no período";
+  const dias=eixoX(c.ini,c.fim);
+  const porDia={};c.rp.forEach(r=>{const x=porDia[r.data]||(porDia[r.data]={cons:0,ton:0,n:0,v:{X:[],Y:[],Z:[]}});x.cons+=consumoDe(r);x.ton+=+r.ton||0;x.n++;if(x.v[r.turno]&&isFinite(gtDe(r)))x.v[r.turno].push(gtDe(r))});
+  if(ehDia){const hs=[...c.rp].sort((a,b)=>ORDEM_T.indexOf(a.turno)-ORDEM_T.indexOf(b.turno)).flatMap(r=>(calcHoras(r)||[]).map(h=>({...h,turno:r.turno})));
+    if(hs.length)grafHoras($("chCons"),hs,true);else $("chCons").innerHTML=`<div class="empty">${c.rp.length?"Turnos deste dia sem as horas: importe a planilha de novo para ver hora a hora.":"Sem registros neste dia."}</div>`}
+  else grafico($("chCons"),dias,[{tipo:"barra",cor:"var(--brand)",v:dias.map(d=>porDia[d]?porDia[d].cons:null)}],
+    {zero:true,ref:c.porDia,unid:"kg",titulo:"Consumo diário",tip:i=>{const x=porDia[dias[i]];return x?`${brDate(dias[i])} · ${fmt(x.cons)} kg · ${fmt(x.ton>0?x.cons*1000/x.ton:NaN)} g/t · ${x.n} turno(s)`:`${brDate(dias[i])} · sem registro`}});
+  const vs=t=>dias.map(d=>porDia[d]&&porDia[d].v[t].length?avg(porDia[d].v[t]):null);
+  grafico($("chVaz"),dias,[{cor:"var(--brand)",v:vs("X")},{cor:"var(--blue)",v:vs("Y")},{cor:"var(--amber)",v:vs("Z")}],
+    {zero:false,ref:c.gt,unid:"g/t",titulo:"Dosagem por turno",tip:i=>{const x=porDia[dias[i]];if(!x)return`${brDate(dias[i])} · sem registro`;return`${brDate(dias[i])} · X ${fmt(avg(x.v.X),1)} · Y ${fmt(avg(x.v.Y),1)} · Z ${fmt(avg(x.v.Z),1)} g/t`}});
+  // tabelas
+  const ord=[...regs].sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:a.turno.localeCompare(b.turno));
+  const linha=(r,del)=>`<tr><td>${brDate(r.data)}</td><td>${esc(r.turno)}</td><td class="num">${fmt(litrosDe(r),0)}</td><td class="num">${fmt(+r.ton,0)}</td>${del?`<td class="num">${fmt(+r.conc,2)}</td>`:""}<td class="num">${fmt(consumoDe(r),1)}</td><td class="num">${fmt(gtDe(r),1)}</td>${del?`<td style="text-align:right">${exemplo?"":`<button class="btn ghost small" type="button" data-col="registros" data-id="${r.id}">Excluir</button>`}</td>`:""}</tr>`;
+  const ordP=pf.modo==="per"&&!pf.turno?ord.slice(0,15):[...c.rp].sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:ORDEM_T.indexOf(b.turno)-ORDEM_T.indexOf(a.turno)).slice(0,93);
+  $("ultRows").innerHTML=ordP.map(r=>linha(r,false)).join("")||`<tr><td colspan="6" class="empty">Nenhum turno registrado.</td></tr>`;
+  const f=$("hFiltro").value;
+  $("hRows").innerHTML=ord.filter(r=>!f||r.turno===f).map(r=>linha(r,true)).join("")||`<tr><td colspan="8" class="empty">Nenhum turno registrado.</td></tr>`;
+  // estoque
+  const box=$("estqBox");box.className="estq "+(c.status==="ok"||c.status==="na"?"":c.status);
+  $("estqVal").textContent=fmt(c.estoque,1)+" kg";
+  $("estqSub").textContent=isFinite(c.diasEst)?`em estoque · cerca de ${fmt(c.diasEst,0)} dias no consumo atual`:"em estoque";
+  $("entRows").innerHTML=[...ents].sort((a,b)=>a.data<b.data?1:-1).map(e=>`<tr><td>${brDate(e.data)}</td><td>${esc(e.lote||"—")}</td><td class="num">${fmt(+e.kg,1)}</td><td>${e.coleta?`<span class="chip warn">Sim${+e.coletaKg>0?" · "+fmt(+e.coletaKg,1)+" kg":""}</span>${e.coletaData&&e.coletaData!==e.data?`<div class="meta">${brDate(e.coletaData)}</div>`:""}`:'<span class="chip na">Não</span>'}</td><td>${esc(e.obs||"")}</td><td style="text-align:right">${exemplo?"":`<button class="btn ghost small" type="button" data-col="entradas" data-id="${e.id}">Excluir</button>`}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhuma entrada registrada.</td></tr>`;
+  document.querySelectorAll("[data-col][data-id]").forEach(ligarExcluir);
+  statusSync();
+}
+function ligarExcluir(btn){
+  btn.onclick=()=>{
+    if(btn.dataset.armed!=="1"){btn.dataset.armed="1";btn.textContent="Confirmar";btn.classList.add("danger");
+      setTimeout(()=>{if(btn.isConnected){btn.dataset.armed="";btn.textContent="Excluir";btn.classList.remove("danger")}},4000);return}
+    excluirReg(btn.dataset.col,btn.dataset.id);apply();sincronizar();
+  };
+}
+function apply(){
+  const R=ativos("registros"),E=ativos("entradas"),T=ativos("testes");
+  exemplo=!(R.length||E.length||T.length);
+  if(exemplo){const ex=gerarExemplo();regs=ex.R;ents=ex.E;tests=ex.T}else{regs=R;ents=E;tests=T}
+  render();
+  if(!$("tab-horas").hidden)renderHoras();
+  if(!$("tab-perdas").hidden)renderPerdas();
+}
+
+/* ---------- formulários ---------- */
+function prevTurno(){
+  const l=num("tLitros"),t=num("tTon"),c=num("tConc");
+  const cons=l!=null&&c!=null?l*c/100:null;
+  $("tRes").textContent=cons==null?"—":fmt(cons,1)+" kg";
+  $("tResL").textContent=c!=null?`kg de floculante no turno (solução a ${fmt(c,2)} %)`:"kg de floculante no turno";
+  $("tGt").textContent="Dosagem: "+(cons!=null&&t>0?fmt(cons*1000/t,1)+" g/t":"—");
+}
+["tLitros","tTon","tConc"].forEach(id=>$(id).addEventListener("input",prevTurno));
+$("tLimpar").onclick=()=>{["tLitros","tTon"].forEach(id=>$(id).value="");$("tConc").value=cfg.concSolucao;prevTurno()};
+$("formTurno").onsubmit=ev=>{
+  ev.preventDefault();
+  const litros=num("tLitros"),ton=num("tTon"),conc=num("tConc");
+  if(!$("tData").value)return msg("tMsg","err","Informe a data.");
+  if(litros==null||litros<0)return msg("tMsg","err","Informe o volume total aplicado no turno, em litros.");
+  if(ton==null||ton<=0)return msg("tMsg","err","Informe as toneladas tratadas no turno.");
+  if(conc==null||conc<=0)return msg("tMsg","err","Informe a concentração da solução (%).");
+  try{
+    const r=salvarReg("registros",{data:$("tData").value,turno:$("tTurno").value,litros,ton,conc,criadoEm:agoraISO()});
+    apply();sincronizar();
+    msg("tMsg","ok",`Turno ${r.turno} salvo: ${fmt(consumoDe(r),1)} kg (${fmt(gtDe(r),1)} g/t) debitados do estoque.`);
+    ["tLitros","tTon"].forEach(id=>$(id).value="");prevTurno();
+  }catch(e){msg("tMsg","err","Não foi possível salvar: "+e.message)}
+};
+function mostraColeta(){$("eColBox").hidden=!$("eColSim").checked;if($("eColSim").checked&&!$("eColData").value)$("eColData").value=$("eData").value||today()}
+document.querySelectorAll('input[name="eColeta"]').forEach(r=>r.onchange=mostraColeta);
+$("formEnt").onsubmit=ev=>{
+  ev.preventDefault();const kg=num("eKg");
+  if(!$("eData").value)return msg("eMsg","err","Informe a data.");
+  if(kg==null||kg===0)return msg("eMsg","err","Informe os kg recebidos.");
+  const coleta=$("eColSim").checked,coletaKg=coleta?num("eColKg"):null;
+  if(coleta&&coletaKg!=null&&coletaKg<0)return msg("eMsg","err","A quantidade coletada não pode ser negativa.");
+  try{salvarReg("entradas",{data:$("eData").value,kg,lote:$("eLote").value.trim(),coleta,coletaKg,coletaData:coleta?($("eColData").value||$("eData").value):null,obs:$("eObs").value.trim()});apply();sincronizar();
+    msg("eMsg","ok","Entrada registrada"+(coleta?" com coleta de amostra":"")+".");
+    ["eKg","eLote","eObs","eColKg"].forEach(id=>$(id).value="");$("eColNao").checked=true;mostraColeta()}
+  catch(e){msg("eMsg","err","Não foi possível salvar: "+e.message)}
+};
+function renderFatores(){
+  const fs=[...(cfg.fatores||[])].map((x,i)=>({...x,i})).sort((a,b)=>a.de<b.de?1:-1);
+  $("cfgFatRows").innerHTML=fs.map(x=>`<tr><td>${x.de<="2000-01-01"?"desde o início":brDate(x.de)}</td><td class="num"><b>${fmt(+x.valor,2)}</b></td><td>${fs.length>1?`<button class="btn ghost small" type="button" data-fdel="${x.i}">Excluir</button>`:""}</td></tr>`).join("");
+  $("cfgFatRows").querySelectorAll("[data-fdel]").forEach(b=>b.onclick=()=>{if(!confirm("Excluir este fator?"))return;const n=[...cfg.fatores];n.splice(+b.dataset.fdel,1);salvarFatores(n)});
+}
+function salvarFatores(lista){const {atualizadoEm,...c}=cfg;salvarConfig({...c,fatores:lista,fatorFloc:fatorEm(today())});aplicarConfig();renderFatores();apply();sincronizar()}
+$("cfgFatAdd").onclick=()=>{
+  const d=$("cfgFatDe").value||"2000-01-01",v=num("cfgFatVal");
+  if(v==null||v<=0)return msg("cfgFatMsg","err","Informe o fator (maior que zero).");
+  salvarFatores((cfg.fatores||[]).filter(x=>x.de!==d).concat([{de:d,valor:v}]));
+  $("cfgFatVal").value="";$("cfgFatDe").value="";msg("cfgFatMsg","ok",`Fator ${fmt(v,2)} ${d<="2000-01-01"?"desde o início":"a partir de "+brDate(d)} salvo. Turnos recalculados.`);
+};
+function renderCfg(){renderFatores();$("cfgConc").value=cfg.concSolucao;$("cfgLimGt").value=cfg.limiteGt;$("cfgPreco").value=precoEm(today());$("cfgColTon").value=cfg.colunaTon||"Rej. Filtro";$("cfgEst").value=cfg.estoqueInicial;$("cfgPer").value=cfg.periodo;$("cfgAlerta").value=cfg.alertaDias}
+$("formCfg").onsubmit=ev=>{
+  ev.preventDefault();
+  const cc=num("cfgConc");if(cc==null||cc<=0)return msg("cfgMsg","err","Informe a concentração da solução (maior que zero).");
+  const lg=num("cfgLimGt");if(lg==null||lg<=0)return msg("cfgMsg","err","Informe o limite de dosagem por hora (g/t), maior que zero.");
+  const pz=num("cfgPreco");if(pz==null||pz<=0)return msg("cfgMsg","err","Informe o preço do floculante por kg (maior que zero).");
+  let precos=cfg.precos||DEF.precos;
+  if(Math.abs(pz-precoEm(today()))>1e-9)precos=precos.filter(p=>p.de!==today()).concat([{de:today(),valor:pz,obs:"Alterado em Configurar"}]);   // novo preço vale a partir de hoje
+  const n={precos,colunaTon:$("cfgColTon").value.trim()||"Rej. Filtro",concSolucao:cc,fatores:cfg.fatores,fatorFloc:fatorEm(today()),limiteGt:lg,estoqueInicial:num("cfgEst")??0,periodo:Math.max(1,parseInt($("cfgPer").value)||30),alertaDias:Math.max(1,parseInt($("cfgAlerta").value)||7)};
+  salvarConfig(n);aplicarConfig();per=n.periodo;$("tConc").value=n.concSolucao;apply();prevTurno();sincronizar();msg("cfgMsg","ok","Configuração salva.");
+};
+$("hFiltro").onchange=render;
+/* Apaga todos os turnos (para recomeçar importando as planilhas do ano). Estoque e testes ficam. */
+$("hZerar").onclick=()=>{
+  const R=ativos("registros");if(!R.length){msg("hMsg","err","Não há turnos registrados.");return}
+  if(!confirm(`Apagar TODOS os ${R.length} turnos registrados (volume, toneladas e horas)? Estoque e testes ficam como estão. Não dá para desfazer.`))return;
+  if((prompt("Para confirmar, digite APAGAR (em maiúsculas):","")||"").trim()!=="APAGAR"){msg("hMsg","err","Nada foi apagado.");return}
+  const agora=new Date().toISOString();
+  R.forEach(r=>{const x=base.registros[r.id];x.excluido=true;x.atualizadoEm=agora;base.pendentes.push({op:"delete",colecao:"registros",id:r.id,dados:x})});
+  gravar();apply();sincronizar();msg("hMsg","ok",`${R.length} turnos apagados. Agora importe as planilhas (pelo Relatório de Turno ou aqui em Importar planilha).`);
+};
+$("hCsv").onclick=()=>{
+  const lin=[["data","turno","volume_l","toneladas","conc_pct","consumo_kg","g_t"].join(";")].concat(
+    [...regs].sort((a,b)=>a.data<b.data?-1:1).map(r=>[r.data,r.turno,litrosDe(r),r.ton,r.conc,consumoDe(r).toFixed(2),isFinite(gtDe(r))?gtDe(r).toFixed(2):""].map(x=>String(x).replace(".",",")).join(";")));
+  const url=URL.createObjectURL(new Blob(["﻿"+lin.join("\n")],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="floculantes-turnos.csv";document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+
+
+/* botão "Importar planilha" da barra de cima: abre a aba certa e o seletor de arquivo */
+$("topImport").onclick=()=>{document.querySelector('.tbar [data-tab="historico"]').click();$("mFile").click();document.getElementById("mFile").closest(".panel").scrollIntoView({behavior:"smooth",block:"start"})};
+/* ---------- importação da Planilha Mestre (mesmos ids da API/ponte: não duplica) ---------- */
+const MESTRE = [{"aba": "Turnos Floculante", "col": "registros", "idColecao": "registros", "chave": ["data", "turno"], "colunas": {"Data": {"campo": "data", "tipo": "data"}, "Turno": {"campo": "turno", "tipo": "texto"}, "Volume (L)": {"campo": "litros", "tipo": "numero"}, "Toneladas": {"campo": "ton", "tipo": "numero"}, "Concentração (%)": {"campo": "conc", "tipo": "numero"}, "Observação": {"campo": "obs", "tipo": "texto", "opcional": true}}}, {"aba": "Estoque Floculante", "col": "entradas", "idColecao": "entradas", "chave": ["data", "lote"], "colunas": {"Data": {"campo": "data", "tipo": "data"}, "Lote": {"campo": "lote", "tipo": "texto"}, "Quantidade (kg)": {"campo": "kg", "tipo": "numero"}, "Houve coleta?": {"campo": "coleta", "tipo": "simnao"}, "Quantidade coletada (kg)": {"campo": "coletaKg", "tipo": "numero"}, "Data da coleta": {"campo": "coletaData", "tipo": "data", "opcional": true}, "Observação": {"campo": "obs", "tipo": "texto", "opcional": true}}}, {"aba": "Testes Floculante", "col": "testes", "idColecao": "testes", "chave": ["data", "produto"], "colunas": {"Data": {"campo": "data", "tipo": "data"}, "Produto": {"campo": "produto", "tipo": "texto"}, "Dosagem (g/t)": {"campo": "doseGt", "tipo": "numero"}, "Concentração (%)": {"campo": "conc", "tipo": "numero"}, "Status": {"campo": "status", "tipo": "texto"}, "Resultado": {"campo": "resultado", "tipo": "texto", "opcional": true}}}];
+function sha1hex(str){
+  const b=new TextEncoder().encode(str),l=b.length,n=((l+8>>6)+1)*16,w=new Array(n).fill(0);
+  for(let i=0;i<l;i++)w[i>>2]|=b[i]<<(24-(i%4)*8);
+  w[l>>2]|=0x80<<(24-(l%4)*8);w[n-1]=l*8;
+  let h0=0x67452301,h1=0xEFCDAB89,h2=0x98BADCFE,h3=0x10325476,h4=0xC3D2E1F0;const x=new Array(80);
+  const rl=(v,s)=>(v<<s)|(v>>>(32-s));
+  for(let i=0;i<n;i+=16){
+    for(let t=0;t<80;t++)x[t]=t<16?w[i+t]|0:rl(x[t-3]^x[t-8]^x[t-14]^x[t-16],1);
+    let a=h0,b2=h1,c=h2,d=h3,e=h4;
+    for(let t=0;t<80;t++){
+      const f=t<20?(b2&c)|(~b2&d):t<40?b2^c^d:t<60?(b2&c)|(b2&d)|(c&d):b2^c^d;
+      const k=t<20?0x5A827999:t<40?0x6ED9EBA1:t<60?0x8F1BBCDC:0xCA62C1D6;
+      const tmp=(rl(a,5)+f+e+k+x[t])|0;e=d;d=c;c=rl(b2,30);b2=a;a=tmp;
+    }
+    h0=(h0+a)|0;h1=(h1+b2)|0;h2=(h2+c)|0;h3=(h3+d)|0;h4=(h4+e)|0;
+  }
+  return [h0,h1,h2,h3,h4].map(v=>(v>>>0).toString(16).padStart(8,"0")).join("");
+}
+const mNorm=s=>String(s??"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function mConv(v,tipo){
+  if(v==null||v==="")return null;
+  if(tipo==="data"){
+    if(typeof v==="number"&&v>20000&&v<80000){const p=XLSX.SSF.parse_date_code(v);return p.y+"-"+String(p.m).padStart(2,"0")+"-"+String(p.d).padStart(2,"0")}
+    const iso=String(v).trim().match(/^(\d{4}-\d{2}-\d{2})/);if(iso)return iso[1];          // 2026-10-25 (Excel baixado do app)
+    const m=String(v).match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+    if(m){let y=+m[3];if(y<100)y+=2000;return y+"-"+String(+m[2]).padStart(2,"0")+"-"+String(+m[1]).padStart(2,"0")}
+    return null;
+  }
+  if(tipo==="numero"){
+    if(typeof v==="number")return v;
+    let s=String(v).trim().replace(/\s/g,"");
+    if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");else if(/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");
+    const n=parseFloat(s);return isNaN(n)?null:n;
+  }
+  if(tipo==="simnao")return ["sim","s","x","1","true","verdadeiro","yes"].includes(mNorm(v));
+  if(tipo==="id")return mNorm(v)||null;
+  return String(v).trim();
+}
+function mLerAba(wb,mp){
+  const ws=wb.Sheets[mp.aba];if(!ws)return null;
+  const linhas=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,blankrows:false});
+  if(!linhas.length)return {mp,regs:[]};
+  const cab=linhas[0].map(mNorm);
+  const col=(nome,obrig=true)=>{const i=cab.indexOf(mNorm(nome));if(i<0&&obrig)throw new Error(`Coluna "${nome}" não encontrada na aba "${mp.aba}".`);return i<0?null:i};
+  const cols=Object.entries(mp.colunas).map(([nome,d])=>({i:col(nome,!d.opcional),...d}));
+  const malhas=Object.entries(mp.malhas||{}).map(([nome,mm])=>({i:col(nome),mm}));
+  const iF=mp.fundo?col(mp.fundo):null;
+  const regs=[];
+  for(const row of linhas.slice(1)){
+    if(!row||row.every(v=>v==null||String(v).trim()===""))continue;
+    if(row.some(v=>typeof v==="string"&&v.trim().toUpperCase().startsWith("EXEMPLO")))continue;
+    const d={};
+    for(const c of cols){
+      let v=c.i==null?null:row[c.i];
+      if(c.mapa&&v!=null&&v!==""){const k=Object.keys(c.mapa).find(k=>mNorm(k)===mNorm(v));v=k?c.mapa[k]:v}
+      d[c.campo]=c.mapa&&c.tipo==="texto"?(v==null||v===""?null:String(v)):mConv(v,c.tipo);
+    }
+    if(mp.chave.some(k=>d[k]==null||d[k]===""))continue;
+    if(malhas.length){
+      const ret=malhas.map(m=>mConv(row[m.i],"numero")||0),fundo=mConv(row[iF],"numero")||0,total=ret.reduce((s,x)=>s+x,0)+fundo;
+      if(!(total>0))continue;
+      const fino=ret.reduce((s,x,j)=>s+(malhas[j].mm<=mp.corte+1e-9?x:0),0)+fundo;
+      Object.assign(d,{peneiras:malhas.map(m=>m.mm),retidos:ret,fundo,total,corte:mp.corte,passante:Math.round(fino/total*10000)/100});
+    }
+    d.id="xl-"+sha1hex(mp.idColecao+"|"+mp.chave.map(k=>String(d[k])).join("|")).slice(0,16);
+    d.origem="planilha";
+    regs.push(d);
+  }
+  return {mp,regs};
+}
+let mPendente=null;
+function mestreNoArquivo(wb){return MESTRE.some(mp=>wb.SheetNames.includes(mp.aba))}
+function mestrePrevia(livros,out){
+  const grupos=[],erros=[];
+  for(const wb of livros)for(const mp of MESTRE){
+    try{const g=mLerAba(wb,mp);if(g)grupos.push(g)}catch(e){erros.push(e.message)}
+  }
+  const campos=r=>JSON.stringify(Object.keys(r).filter(k=>!["id","atualizadoEm","excluido","origem"].includes(k)).sort().map(k=>[k,r[k]]));
+  const resumo=grupos.map(({mp,regs})=>{
+    let novos=0,alt=0,iguais=0;
+    regs.forEach(r=>{const a=base[mp.col][r.id];if(!a||a.excluido)novos++;else if(campos(a)!==campos(r))alt++;else iguais++});
+    return {mp,regs,novos,alt,iguais};
+  });
+  mPendente=resumo;
+  const total=resumo.reduce((s,g)=>s+g.novos+g.alt,0);
+  out.innerHTML=`<div class="tablebox"><table><thead><tr><th>Aba</th><th class="num">Linhas</th><th class="num">Novas</th><th class="num">Alteradas</th><th class="num">Já no app</th></tr></thead><tbody>
+    ${resumo.map(g=>`<tr><td>${esc(g.mp.aba)}</td><td class="num">${g.regs.length}</td><td class="num">${g.novos}</td><td class="num">${g.alt}</td><td class="num">${g.iguais}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">Nenhuma aba da Planilha Mestre com dados.</td></tr>'}</tbody></table></div>
+    ${erros.length?`<p class="msg err">${esc(erros.join(" "))}</p>`:""}
+    <div class="actions" style="margin-top:10px"><button class="btn" type="button" id="mGo" ${total?"":"disabled"}>Importar ${total} registro(s)</button><button class="btn ghost" type="button" id="mCancel">Cancelar</button><span class="msg" id="mMsg">${total?"":"Nada novo para importar."}</span></div>`;
+  $("mCancel").onclick=()=>{mPendente=null;out.innerHTML=""};
+  $("mGo").onclick=()=>{
+    let n=0;const agora=new Date().toISOString();
+    mPendente.forEach(g=>g.regs.forEach(r=>{
+      const a=base[g.mp.col][r.id];
+      if(a&&!a.excluido&&campos(a)===campos(r))return;
+      const reg={...r,atualizadoEm:agora,excluido:false};
+      base[g.mp.col][r.id]=reg;base.pendentes.push({op:"upsert",colecao:g.mp.col,id:r.id,dados:reg});n++;
+    }));
+    gravar();apply();sincronizar();mPendente=null;
+    out.innerHTML=`<p class="msg ok">${n} registro(s) importado(s) da Planilha Mestre.</p>`;
+  };
+}
+
+$("mBtn").onclick=()=>$("mFile").click();
+$("mFile").onchange=async e=>{
+  const fs=[...e.target.files];e.target.value="";if(!fs.length)return;
+  if(!window.XLSX){$("mOut").innerHTML='<p class="msg err">O leitor de Excel não carregou. Abra o app com internet uma vez e tente de novo.</p>';return}
+  const livros=[];for(const f of fs){try{livros.push(XLSX.read(await f.arrayBuffer(),{type:"array"}))}catch(err){console.error(err)}}
+  const m=livros.filter(mestreNoArquivo);
+  if(m.length){mestrePrevia(m,$("mOut"));return}          // Planilha Mestre
+  relPrevia(livros.map(wb=>({wb})),$("mOut"));             // Relatório de Turno (mensal ou Excel baixado do app)
+};
+
+/* ---------- importação das planilhas do Relatório de Turno (relatório mensal e Excel baixado do app) ----------
+   Cada aba com "Data:" e "Turno:" preenchidos vira um turno: litros = Total da coluna Floculante (L)
+   (vazão de cada hora em L/h; somando as horas tem-se os litros do turno) e toneladas = soma das horas
+   positivas da coluna configurada (padrão Rej. Filtro). Mesmo id da API da planilha: não duplica. */
+const horaTxt=v=>{const m=Math.round((((v%1)+1)%1)*1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+const horasIguais=(a,b)=>JSON.stringify((a||[]).map(h=>[+h.litros||0,h.ton==null?null:+h.ton]))===JSON.stringify((b||[]).map(h=>[+h.litros||0,h.ton==null?null:+h.ton]));
+function relLerAba(ws,nomeAba){
+  const cel={},txt={};
+  for(const a in ws){if(a[0]==="!")continue;const c=XLSX.utils.decode_cell(a),v=ws[a].v;if(v==null||v==="")continue;cel[c.r+","+c.c]=v;if(typeof v==="string")txt[c.r+","+c.c]=mNorm(v)}
+  const ord=Object.keys(txt).map(k=>k.split(",").map(Number)).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const aoLado=rot=>{const alvo=mNorm(rot);for(const [r,c] of ord)if(txt[r+","+c]===alvo)for(let k=c+1;k<c+8;k++){const v=cel[r+","+k];if(v!=null&&v!=="")return v}return null};
+  const coluna=rots=>{for(const rot of rots){const alvo=mNorm(rot);const p=ord.find(([r,c])=>txt[r+","+c]===alvo)||ord.find(([r,c])=>txt[r+","+c].startsWith(alvo));if(p)return p}return null};
+  const totalCol=([r0,c],soPos)=>{
+    const lt=ord.find(([r,k])=>r>r0&&k<c&&txt[r+","+k]==="total");const fim=lt?lt[0]:r0+40;
+    if(lt&&!soPos){const v=mConv(cel[lt[0]+","+c],"numero");if(v!=null)return v}
+    let s=0,n=0;for(let r=r0+1;r<fim;r++){const v=cel[r+","+c];if(typeof v==="string"&&isNaN(mConv(v,"numero")))continue;const x=mConv(v,"numero");if(x!=null&&(x>0||!soPos)){s+=x;n++}}
+    return n?s:null;
+  };
+  const data=mConv(aoLado("Data:"),"data");
+  const turno=String(aoLado("Turno:")||"").trim().toUpperCase().slice(0,1);
+  const pV=coluna(["Floculante (L)","Floculante"]);
+  if(!data||!/^[XYZ]$/.test(turno)||!pV)return null;
+  const pT=coluna(String(cfg.colunaTon||"Rej. Filtro").split(";").map(s=>s.trim()).filter(Boolean).concat(["Rej.Baia"]));
+  const fator=fatorEm(data),soma=totalCol(pV,true);
+  const litros=soma==null?null:Math.round(soma*fator*100)/100;
+  if(litros==null||litros<=0)return {aba:nomeAba,data,turno,vazio:true};
+  const ton=pT?totalCol(pT,true):null;
+  /* hora a hora: linhas entre o cabeçalho e a linha Total que têm a hora preenchida (coluna "Hora") */
+  const pH=coluna(["Hora"]),horas=[];
+  if(pH){
+    const lt=ord.find(([r,k])=>r>pV[0]&&k<pV[1]&&txt[r+","+k]==="total"),fim=lt?lt[0]:pV[0]+40;
+    for(let r=pV[0]+1;r<fim;r++){
+      const hv=cel[r+","+pH[1]];if(typeof hv!=="number")continue;
+      const xl=mConv(cel[r+","+pV[1]],"numero"),tn=pT?mConv(cel[r+","+pT[1]],"numero"):null;
+      horas.push({hora:horaTxt(hv),litros:xl!=null&&xl>0?Math.round(xl*fator*100)/100:0,ton:tn==null?null:Math.round(tn*100)/100});
+    }
+  }
+  return {aba:nomeAba,data,turno,litros,ton:ton==null?null:Math.round(ton*100)/100||null,conc:+cfg.concSolucao,fator,horas,origem:"planilha",
+    id:"xl-"+sha1hex("registros|"+data+"|"+turno).slice(0,16)};
+}
+function relPrevia(livros,out){
+  const regs={},vazios=[],corrigidas=[];
+  /* Abas com nome dd-mm + turno (02-01Z): se a Data digitada não bater com o nome, vale o nome, com o ano mais comum do arquivo
+     (pega 07/01/2025 ou 27/01/2027 digitados numa planilha de janeiro de 2026). */
+  const nomeAba=r=>/^(\d{2})-(\d{2})([XYZ])$/i.exec(String(r.aba).trim());
+  livros.forEach(({wb})=>{
+    const lidas=wb.SheetNames.map(sn=>relLerAba(wb.Sheets[sn],sn)).filter(Boolean),anos={};
+    lidas.forEach(r=>{if(nomeAba(r))anos[r.data.slice(0,4)]=(anos[r.data.slice(0,4)]||0)+1});
+    const ano=Object.keys(anos).sort((a,b)=>anos[b]-anos[a])[0];
+    lidas.forEach(r=>{
+      const m=nomeAba(r),certa=m&&ano?ano+"-"+m[2]+"-"+m[1]:null;
+      if(certa&&r.data!==certa&&!isNaN(Date.parse(certa+"T12:00:00Z"))){corrigidas.push(`${r.aba}: ${brDate(r.data)} → ${brDate(certa)}`);r.data=certa;if(r.id)r.id="xl-"+sha1hex("registros|"+certa+"|"+r.turno).slice(0,16)}
+      if(r.vazio)vazios.push(`${brDate(r.data)} ${r.turno}`);else regs[r.id]=r;
+    });
+  });
+  const lista=Object.values(regs).sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:a.turno.localeCompare(b.turno));
+  if(!lista.length){out.innerHTML=`<p class="msg err">Nenhum turno com Floculante (L) preenchido foi encontrado${vazios.length?" (turnos sem floculante: "+esc(vazios.join(", "))+")":""}. Confira se é a planilha do Relatório de Turno.</p>`;return}
+  const st=r=>{const a=base.registros[r.id];if(!a||a.excluido)return"novo";return(+a.litros===+r.litros&&+(a.ton||0)===+(r.ton||0)&&+a.conc===+r.conc&&horasIguais(a.horas,r.horas))?"igual":"alterado"};
+  const n=lista.filter(r=>st(r)!=="igual").length,semTon=lista.filter(r=>!r.ton).length;
+  out.innerHTML=`<div class="tablebox"><table><thead><tr><th>Data</th><th>Turno</th><th class="num">Volume (L)</th><th class="num">Toneladas</th><th class="num">Consumo (kg)</th><th class="num">g/t</th><th>Situação</th></tr></thead><tbody>
+    ${lista.map(r=>{const kg=consumoDe(r),s=st(r);return`<tr><td>${brDate(r.data)}</td><td>${esc(r.turno)}</td><td class="num">${fmt(r.litros,0)}</td><td class="num">${r.ton?fmt(r.ton,0):"—"}</td><td class="num">${fmt(kg,1)}</td><td class="num">${r.ton?fmt(kg*1000/r.ton,1):"—"}</td>
+      <td><span class="chip ${s==="novo"?"ok":s==="alterado"?"warn":"na"}">${s==="novo"?"Novo":s==="alterado"?"Alterado":"Já no app"}</span></td></tr>`}).join("")}</tbody></table></div>
+    ${semTon?`<p class="msg err">${semTon} turno(s) sem toneladas na coluna "${esc(cfg.colunaTon||"Rej. Filtro")}": entram sem g/t. Troque a coluna em Configurar se for outra.</p>`:""}
+    ${corrigidas.length?`<p class="hint">Data digitada diferente do nome da aba; vale a do nome: ${esc(corrigidas.join("; "))}.</p>`:""}
+    ${vazios.length?`<p class="hint">Ignorados por não terem Floculante (L): ${esc(vazios.join(", "))}.</p>`:""}
+    <div class="actions" style="margin-top:10px"><button class="btn" type="button" id="rGo" ${n?"":"disabled"}>Importar ${n} turno(s)</button><button class="btn ghost" type="button" id="rCancel">Cancelar</button><span class="msg">${n?"":"Nada novo para importar."}</span></div>`;
+  $("rCancel").onclick=()=>{out.innerHTML=""};
+  $("rGo").onclick=()=>{
+    const agora=new Date().toISOString();let k=0;
+    lista.forEach(r=>{if(st(r)==="igual")return;const reg={...r,atualizadoEm:agora,excluido:false};base.registros[r.id]=reg;base.pendentes.push({op:"upsert",colecao:"registros",id:r.id,dados:reg});k++});
+    gravar();apply();sincronizar();out.innerHTML=`<p class="msg ok">${k} turno(s) importado(s) do Relatório de Turno.</p>`;
+  };
+}
+
+/* ---------- hora a hora ---------- */
+const ORDEM_T=["Z","X","Y"];                       // ordem dos turnos no dia: Z (madrugada), X, Y
+const limGt=()=>+cfg.limiteGt>0?+cfg.limiteGt:50;
+function horasDe(r){
+  if(Array.isArray(r.horas)&&r.horas.length)return r.horas;
+  if(!exemplo)return null;
+  /* exemplo: reparte o turno em 9 horas com variação, algumas com pouco rejeito */
+  let s=[...(r.id||"x")].reduce((a,c)=>a+c.charCodeAt(0),7);const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  const ini={Z:23*60+40,X:7*60+40,Y:15*60+40}[r.turno]||0,pl=[],pt=[];
+  for(let i=0;i<9;i++){pl.push(0.6+rnd());pt.push(rnd()<0.12?0.02+rnd()*0.05:0.6+rnd())}
+  const sl=pl.reduce((a,b)=>a+b,0),st=pt.reduce((a,b)=>a+b,0);
+  return pl.map((p,i)=>{const m=(ini+i*60)%1440;return{hora:String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"),litros:Math.round(+r.litros*p/sl),ton:Math.round(+r.ton*pt[i]/st*10)/10}});
+}
+function calcHoras(r){
+  const hs=horasDe(r);if(!hs)return null;
+  const aj=ajusteFator(r);
+  return hs.map(h=>{const litros=(+h.litros||0)*aj,kg=litros*+r.conc/100,ton=h.ton==null?null:+h.ton;
+    const gt=ton>0&&kg>0?kg*1000/ton:null;return {...h,litros,kg,gt,alto:gt!=null&&gt>limGt()}});
+}
+function turnoSel(){return regs.find(r=>r.data===$("hhData").value&&r.turno===$("hhTurno").value)}
+function moverTurno(passo){
+  if($("hhTurno").value==="dia"){
+    const dias=[...new Set(regs.map(r=>r.data))].sort();if(!dias.length)return;
+    const d=$("hhData").value;let j=passo>0?dias.findIndex(x=>x>d):dias.length-1-[...dias].reverse().findIndex(x=>x<d);
+    if(passo>0&&j<0)j=dias.length-1;if(passo<0&&j>=dias.length)j=0;
+    $("hhData").value=dias[Math.max(0,Math.min(dias.length-1,j))];renderHoras();return;
+  }
+  const ord=[...regs].sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:ORDEM_T.indexOf(a.turno)-ORDEM_T.indexOf(b.turno));
+  if(!ord.length)return;
+  const k=$("hhData").value+"|"+ORDEM_T.indexOf($("hhTurno").value);
+  let i=ord.findIndex(r=>r.data+"|"+ORDEM_T.indexOf(r.turno)>=k);
+  if(i<0)i=ord.length;
+  const atual=ord[i]&&ord[i].data===$("hhData").value&&ord[i].turno===$("hhTurno").value;
+  const j=passo>0?(atual?i+1:i):i-1;
+  const r=ord[Math.max(0,Math.min(ord.length-1,j))];$("hhData").value=r.data;$("hhTurno").value=r.turno;renderHoras();
+}
+function renderHoras(){
+  $("hhLimL").textContent=fmt(limGt(),0);$("haLim").textContent=fmt(limGt(),0);
+  if(!$("hhData").value){const u=[...regs].sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:ORDEM_T.indexOf(b.turno)-ORDEM_T.indexOf(a.turno))[0];if(u){$("hhData").value=u.data;$("hhTurno").value=u.turno}}
+  const dia=$("hhTurno").value==="dia";
+  const lista=dia?regs.filter(x=>x.data===$("hhData").value).sort((a,b)=>ORDEM_T.indexOf(a.turno)-ORDEM_T.indexOf(b.turno)):[turnoSel()].filter(Boolean);
+  const r=lista.length?{data:$("hhData").value,turno:dia?"dia":lista[0].turno,litros:lista.reduce((a,x)=>a+litrosDe(x),0),ton:lista.reduce((a,x)=>a+(+x.ton||0),0),
+    kg:lista.reduce((a,x)=>a+consumoDe(x),0),conc:lista[0].conc}:null;   // litros já ajustados pelo fator de cada turno
+  $("hhTit").textContent=r?(dia?`Dia ${brDate(r.data)} · turnos ${lista.map(x=>x.turno).join(", ")}`:`Turno ${r.turno} de ${brDate(r.data)}`):"Consulta por dia e turno";
+  if(!r){$("hhRes").innerHTML="";$("hhChart").innerHTML='<div class="empty">Nenhum registro nesse dia e turno.</div>';$("hhRows").innerHTML="";$("hhMsg").textContent="";}
+  else{
+    const partes=lista.map(x=>({x,hs:calcHoras(x)})),semH=partes.filter(p=>!p.hs).map(p=>p.x.turno);
+    const hs=partes.some(p=>p.hs)?partes.flatMap(p=>(p.hs||[]).map(h=>({...h,turno:p.x.turno}))):null;
+    const kg=r.kg,gt=+r.ton>0?kg*1000/+r.ton:null,n=hs?hs.filter(h=>h.alto).length:0;
+    $("hhRes").innerHTML=`<div><small>Floculante ${dia?"no dia":"no turno"}</small><b>${fmt(litrosDe(r),0)}</b> L</div><div><small>Rej. Filtro</small><b>${fmt(+r.ton,1)}</b> t</div><div><small>Consumo (conc. ${fmt(+r.conc,2)}%)</small><b>${fmt(kg,1)}</b> kg</div><div><small>Dosagem ${dia?"do dia":"do turno"}</small><b>${fmt(gt,1)}</b> g/t</div><div class="${n?"alto":""}"><small>Horas acima de ${fmt(limGt(),0)} g/t</small><b>${hs?n:"—"}</b>${hs?" de "+hs.length:""}</div>`;
+    if(!hs){$("hhChart").innerHTML='<div class="empty">Este turno foi lançado só com o total, sem as horas. Para ver hora a hora, importe de novo a planilha do Relatório de Turno.</div>';$("hhRows").innerHTML="";$("hhMsg").textContent="";}
+    else{
+      grafHoras($("hhChart"),hs,dia);
+      $("hhRows").innerHTML=hs.map((h,i)=>`<tr class="${h.alto?"alto":""}"${dia&&i&&hs[i-1].turno!==h.turno?' style="border-top:2px solid var(--line-strong)"':""}><td>${esc(h.turno)}</td><td><b>${esc(h.hora)}</b></td><td class="num">${fmt(h.litros,0)}</td><td class="num">${h.ton==null?"—":fmt(h.ton,1)}</td><td class="num">${fmt(h.kg,2)}</td><td class="num"><b>${h.gt==null?"—":fmt(h.gt,1)}</b></td><td>${h.gt==null?'<span class="chip na">'+(h.litros>0?"sem rejeito":"sem floculante")+"</span>":h.alto?'<span class="chip crit">acima do limite</span>':'<span class="chip ok">ok</span>'}</td></tr>`).join("");
+      $("hhMsg").textContent=(semH.length?`Turno(s) ${semH.join(", ")} sem as horas (importado só com o total): entra(m) no resumo, mas não na tabela. `:"")+`Por hora: floculante (L) = valor da hora × fator ${fmt(fatorEm(r.data),1)}; consumo (kg) = L × ${fmt(+r.conc,2)}% ÷ 100; g/t = kg × 1000 ÷ toneladas de Rej. Filtro da hora.`;
+    }
+  }
+  /* turnos com horas acima do limite no período */
+  if(!$("haAte").value){$("haAte").value=today();$("haDe").value=fromDay(dayNum(today())-30)}
+  const de=$("haDe").value,ate=$("haAte").value;
+  const lin=regs.filter(x=>x.data>=de&&x.data<=ate).map(x=>{const hs=calcHoras(x);if(!hs)return null;const al=hs.filter(h=>h.alto);if(!al.length)return null;
+    const k=consumoDe(x);return {x,al,maior:Math.max(...al.map(h=>h.gt)),gt:+x.ton>0?k*1000/+x.ton:null}}).filter(Boolean)
+    .sort((a,b)=>a.x.data<b.x.data?1:a.x.data>b.x.data?-1:ORDEM_T.indexOf(b.x.turno)-ORDEM_T.indexOf(a.x.turno));
+  $("haRows").innerHTML=lin.map(l=>`<tr class="clic" data-d="${l.x.data}" data-t="${esc(l.x.turno)}"><td>${brDate(l.x.data)}</td><td>${esc(l.x.turno)}</td><td class="num"><span class="chip crit">${l.al.length}</span></td><td>${l.al.map(h=>esc(h.hora)).join(", ")}</td><td class="num">${fmt(l.maior,1)}</td><td class="num">${fmt(l.gt,1)}</td></tr>`).join("")||`<tr><td colspan="6" class="empty">Nenhuma hora acima de ${fmt(limGt(),0)} g/t no período.</td></tr>`;
+  $("haRows").querySelectorAll("[data-d]").forEach(tr=>tr.onclick=()=>{$("hhData").value=tr.dataset.d;$("hhTurno").value=tr.dataset.t;renderHoras();$("tab-horas").scrollIntoView({behavior:"smooth",block:"start"})});
+}
+function grafHoras(box,hs,dia){
+  const W=Math.max(320,box.clientWidth||800),H=W<560?220:260,m={l:52,r:16,t:16,b:28},L=limGt();
+  const v=hs.map(h=>h.gt).filter(x=>x!=null);const y1=Math.max(L*1.25,...v)*1.08||1;
+  const n=hs.length,bw=(W-m.l-m.r)/n,Y=x=>m.t+(1-x/y1)*(H-m.t-m.b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Dosagem g/t por hora">`;
+  for(let i=0;i<=4;i++){const x=y1*i/4;s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(x)}" y2="${Y(x)}" stroke="#e7ecef"/><text x="${m.l-6}" y="${Y(x)+4}" text-anchor="end">${Math.round(x)}</text>`}
+  hs.forEach((h,i)=>{const cx=m.l+bw*i+bw/2,w=Math.min(46,bw*0.62);
+    if(h.gt!=null){const y=Y(Math.min(h.gt,y1));s+=`<rect x="${cx-w/2}" y="${y}" width="${w}" height="${H-m.b-y}" rx="3" fill="${h.alto?"#c0392b":"#1d6b47"}"><title>${esc(h.hora)} · ${fmt(h.gt,1)} g/t</title></rect><text x="${cx}" y="${y-5}" text-anchor="middle" style="fill:#1d2621;font-weight:600">${fmt(h.gt,0)}</text>`}
+    else s+=`<text x="${cx}" y="${H-m.b-6}" text-anchor="middle">—</text>`;
+    const passo=Math.ceil(n/(W/52));
+    if(i%passo===0)s+=`<text x="${cx}" y="${H-10}" text-anchor="middle">${esc(h.hora)}</text>`;
+    if(dia&&(i===0||hs[i-1].turno!==h.turno)){const x0=m.l+bw*i;if(i)s+=`<line x1="${x0}" x2="${x0}" y1="${m.t}" y2="${H-m.b}" stroke="#2b322e" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>`;s+=`<text x="${x0+6}" y="${m.t+10}" style="fill:#2b5a3b;font-weight:700">Turno ${esc(h.turno)}</text>`}});
+  s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(L)}" y2="${Y(L)}" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="6 4"/><text x="${W-m.r}" y="${Y(L)-5}" text-anchor="end" style="fill:#c0392b;font-weight:600">limite ${fmt(L,0)} g/t</text>`;
+  box.innerHTML=s+"</svg>";
+}
+$("hhData").onchange=renderHoras;$("hhTurno").onchange=renderHoras;$("haDe").onchange=renderHoras;$("haAte").onchange=renderHoras;
+$("pfTurno").onchange=e=>{pf.turno=e.target.value;render()};
+$("pfApres").onclick=()=>{
+  const on=!document.body.classList.contains("apres");
+  document.body.classList.toggle("apres",on);$("pfApres").querySelector("span").textContent=on?"Sair da apresentação":"Apresentar";
+  try{if(on&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});else if(!on&&document.fullscreenElement)document.exitFullscreen()}catch(e){}
+  setTimeout(render,200);
+};
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("apres")){document.body.classList.remove("apres");$("pfApres").querySelector("span").textContent="Apresentar";setTimeout(render,200)}});
+$("hhAnt").onclick=()=>moverTurno(-1);$("hhProx").onclick=()=>moverTurno(1);
+
+/* ---------- perdas em R$ por sobredosagem ---------- */
+let pd={modo:"mes",mes:"",de:"",ate:"",turno:""};
+const fmtR=v=>v==null||!isFinite(v)?"—":"R$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+function precoEm(d){const ps=(Array.isArray(cfg.precos)&&cfg.precos.length?cfg.precos:DEF.precos).filter(p=>p.de<=d).sort((a,b)=>a.de<b.de?-1:1);return ps.length?+ps[ps.length-1].valor:+((cfg.precos||DEF.precos)[0]||{}).valor}
+function perdaTurno(r){
+  const L=limGt(),preco=precoEm(r.data),hs=calcHoras(r);
+  let exc=0,semRej=0,acima=0,pelaHora=!!hs;
+  if(hs)hs.forEach(h=>{if(h.gt!=null){if(h.gt>L){exc+=h.kg-L*h.ton/1000;acima++}}else if(h.kg>0)semRej+=h.kg});
+  else{const kg=consumoDe(r),t=+r.ton;if(t>0&&kg*1000/t>L)exc=kg-L*t/1000;else if(!(t>0)&&kg>0)semRej=kg}
+  return {r,exc,semRej,acima,preco,perda:exc*preco,semRejR:semRej*preco,pelaHora};
+}
+function renderPerdas(){
+  const datas=regs.map(r=>r.data).sort(),u=datas[datas.length-1]||today();
+  if(!pd.mes)pd.mes=u.slice(0,7);if(!pd.de){pd.de=pd.mes+"-01";pd.ate=ultimoDia(pd.mes)}
+  document.querySelectorAll("[data-pm]").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.pm===pd.modo));b.onclick=()=>{pd.modo=b.dataset.pm;renderPerdas()}});
+  const box=$("pdCampos");
+  if(pd.modo==="mes"){
+    const ms=[...new Set(regs.map(r=>r.data.slice(0,7)).concat([pd.mes]))].sort().reverse();
+    box.innerHTML=`<button class="nav" type="button" data-pp="-1" aria-label="Mês anterior">‹</button><select id="pdMes" aria-label="Mês">${ms.map(m=>`<option value="${m}" ${m===pd.mes?"selected":""}>${MESES[+m.slice(5)-1]} ${m.slice(0,4)}</option>`).join("")}</select><button class="nav" type="button" data-pp="1" aria-label="Próximo mês">›</button>`;
+    $("pdMes").onchange=e=>{pd.mes=e.target.value;renderPerdas()};
+    box.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const [y,m]=pd.mes.split("-").map(Number);pd.mes=new Date(Date.UTC(y,m-1+(+b.dataset.pp),1)).toISOString().slice(0,7);renderPerdas()});
+  }else{
+    box.innerHTML=`<label class="inl">De <input type="date" id="pdDe" value="${pd.de}"></label><label class="inl">até <input type="date" id="pdAte" value="${pd.ate}"></label>`;
+    $("pdDe").onchange=e=>{if(e.target.value){pd.de=e.target.value;renderPerdas()}};$("pdAte").onchange=e=>{if(e.target.value){pd.ate=e.target.value;renderPerdas()}};
+  }
+  $("pdTurno").value=pd.turno;
+  let ini=pd.modo==="mes"?pd.mes+"-01":pd.de,fim=pd.modo==="mes"?ultimoDia(pd.mes):pd.ate;if(ini>fim)[ini,fim]=[fim,ini];
+  const rp=regs.filter(r=>r.data>=ini&&r.data<=fim&&(!pd.turno||r.turno===pd.turno));
+  const P=rp.map(perdaTurno),sum=k=>P.reduce((a,x)=>a+x[k],0);
+  const perda=sum("perda"),exc=sum("exc"),semR=sum("semRejR"),semK=sum("semRej"),ac=sum("acima"),cons=rp.reduce((a,r)=>a+consumoDe(r),0);
+  const custoTot=rp.reduce((a,r)=>a+consumoDe(r)*precoEm(r.data),0);
+  const comp=ents.filter(e=>e.data>=ini&&e.data<=fim).reduce((a,e)=>a+(+e.kg||0),0);
+  $("pdTit").textContent=fmtR(perda);
+  $("pdSub").textContent=`${pd.modo==="mes"?MESES[+pd.mes.slice(5)-1].replace(/^./,x=>x.toUpperCase())+" de "+pd.mes.slice(0,4):brDate(ini)+" a "+brDate(fim)}${pd.turno?" · turno "+pd.turno:""} · ${rp.length} turno(s) · limite ${fmt(limGt(),0)} g/t`;
+  $("pdLim").textContent=fmt(limGt(),0);$("pdPreco").textContent=`Preço atual: R$ ${fmt(precoEm(today()),2)}/kg`;
+  $("pdRes").innerHTML=`<div class="alto"><small>Perda estimada</small><b>${fmtR(perda)}</b></div><div><small>Excesso de floculante</small><b>${fmt(exc,1)}</b> kg</div><div><small>Horas acima do limite</small><b>${ac}</b></div><div><small>Sem rejeito (à parte)</small><b>${fmtR(semR)}</b><small>${fmt(semK,1)} kg</small></div><div><small>Consumo pelo setpoint</small><b>${fmt(cons,1)}</b> kg<small>${fmtR(custoTot)} · perda = ${custoTot>0?fmt(perda/custoTot*100,1):"—"}% desse valor</small></div><div><small>Compras no período (aba Estoque)</small><b>${fmt(comp,1)}</b> kg<small>${comp>0?"setpoint = "+fmt(cons/comp,2)+"× as compras":"nenhuma entrada lançada no período"}</small></div>`;
+  /* gráfico por dia */
+  const dias=eixoX(ini,fim),pdia={};P.forEach(x=>{pdia[x.r.data]=(pdia[x.r.data]||0)+x.perda});
+  const bx=$("pdChart"),W=Math.max(320,bx.clientWidth||800),H=W<560?220:260,m={l:64,r:16,t:16,b:28},vals=dias.map(d=>pdia[d]||0),y1=Math.max(1,...vals)*1.12;
+  if(!rp.length)bx.innerHTML='<div class="empty">Sem turnos no período.</div>';
+  else{const bw=(W-m.l-m.r)/dias.length,Y=v=>m.t+(1-v/y1)*(H-m.t-m.b),passo=Math.ceil(dias.length/(W/56));
+    let sv=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Perda estimada por dia">`;
+    for(let i=0;i<=4;i++){const v=y1*i/4;sv+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e7ecef"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${Math.round(v).toLocaleString("pt-BR")}</text>`}
+    dias.forEach((d,i)=>{const cx=m.l+bw*i+bw/2,w=Math.max(2,Math.min(30,bw*0.7)),v=vals[i];
+      if(v>0){const y=Y(v);sv+=`<rect x="${cx-w/2}" y="${y}" width="${w}" height="${H-m.b-y}" rx="2" fill="#c0392b"><title>${brDate(d)} · ${fmtR(v)}</title></rect>`}
+      if(i%passo===0)sv+=`<text x="${cx}" y="${H-10}" text-anchor="middle">${d.slice(8,10)}/${d.slice(5,7)}</text>`});
+    bx.innerHTML=sv+"</svg>"}
+  /* turnos */
+  const L2=P.filter(x=>x.perda>0||x.semRej>0).sort((a,b)=>b.perda-a.perda);
+  $("pdRows").innerHTML=L2.slice(0,200).map(x=>`<tr class="clic" data-d="${x.r.data}" data-t="${esc(x.r.turno)}"><td>${brDate(x.r.data)}</td><td>${esc(x.r.turno)}</td><td class="num">${x.pelaHora?x.acima:'<span class="msg">turno</span>'}</td><td class="num">${fmt(x.exc,2)}</td><td class="num"><b>${fmtR(x.perda)}</b></td><td class="num">${x.semRej>0?fmt(x.semRej,1):"—"}</td><td class="num">${fmt(x.preco,2)}</td></tr>`).join("")||`<tr><td colspan="7" class="empty">Nenhuma perda no período.</td></tr>`;
+  $("pdRows").querySelectorAll("[data-d]").forEach(tr=>tr.onclick=()=>{$("hhData").value=tr.dataset.d;$("hhTurno").value=tr.dataset.t;document.querySelector('.tbar [data-tab="horas"]').click()});
+  /* preços */
+  const ps=(cfg.precos||[]).map((p,i)=>({...p,i})).sort((a,b)=>a.de<b.de?1:-1);
+  $("prRows").innerHTML=ps.map(p=>`<tr><td>${p.de<="2000-01-01"?"desde o início":brDate(p.de)}</td><td class="num"><b>${fmt(+p.valor,2)}</b></td><td>${esc(p.obs||"")}</td><td>${ps.length>1?`<button class="btn ghost small" type="button" data-prdel="${p.i}">Excluir</button>`:""}</td></tr>`).join("");
+  $("prRows").querySelectorAll("[data-prdel]").forEach(b=>b.onclick=()=>{if(!confirm("Excluir este preço?"))return;const n=[...cfg.precos];n.splice(+b.dataset.prdel,1);salvarPrecos(n)});
+}
+function salvarPrecos(lista){const {atualizadoEm,...c}=cfg;salvarConfig({...c,precos:lista});aplicarConfig();renderPerdas();sincronizar()}
+$("prAdd").onclick=()=>{
+  const d=$("prData").value,v=num("prValor");
+  if(!d)return msg("prMsg","err","Informe a data a partir da qual o preço vale.");
+  if(v==null||v<=0)return msg("prMsg","err","Informe o preço por kg (maior que zero).");
+  const n=(cfg.precos||[]).filter(p=>p.de!==d).concat([{de:d,valor:v,obs:$("prObs").value.trim()}]);
+  salvarPrecos(n);$("prValor").value="";$("prObs").value="";msg("prMsg","ok",`Preço de R$ ${fmt(v,2)}/kg a partir de ${brDate(d)} salvo.`);
+};
+$("pdTurno").onchange=e=>{pd.turno=e.target.value;renderPerdas()};
+$("pdAlt").onclick=()=>{$("prData").value=today();$("prValor").closest(".panel").scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>$("prValor").focus(),300)};
+
+/* ---------- abas ---------- */
+document.querySelectorAll(".tbar [data-tab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tbar [data-tab]").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
+  document.querySelectorAll(".tabpane").forEach(p=>p.hidden=p.id!=="tab-"+b.dataset.tab);
+  if(b.dataset.tab==="painel")render();
+  if(b.dataset.tab==="config")renderCfg();
+  if(b.dataset.tab==="horas")renderHoras();
+  if(b.dataset.tab==="perdas")renderPerdas();
+});
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,150)});
+
+/* ---------- inicialização ---------- */
+["tData","eData","prData"].forEach(id=>$(id).value=today());
+carregar();aplicarConfig();per=cfg.periodo;$("tConc").value=cfg.concSolucao;apply();prevTurno();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+window.addEventListener("online",()=>sincronizar());
+window.addEventListener("offline",statusSync);
+$("syncBtn").onclick=()=>sincronizar(true);
+setInterval(()=>{if(SERVIDOR.url)sincronizar()},Math.max(15,SERVIDOR.intervaloSeg)*1000);
+sincronizar();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service worker não registrado:",e))}
+})();
+</script>
+<!--PASTA-DADOS--><script>
+/* PASTA-DADOS: guarda uma cópia de todos os controles numa pasta do computador (Chrome/Edge).
+   O navegador continua sendo onde o app trabalha; a pasta é a cópia que não se perde quando
+   o histórico é limpo ou uma versão nova do app é aberta. */
+(function(){
+"use strict";
+if(window.PastaDados)return;
+const ARQ="dados-portal-controles.json",SUB="copias",MANTER=30;
+const BANCOS=[{db:"controle-itm",store:"kv"}];
+const IGNORAR=new Set(["controles.ultimoBackup","pasta-dados.ultimo"]);
+const APPS=[["rt-reports","Relatório de Turno","relatórios"],["controle-floculantes.v1","Floculantes","registros"],["controle-britadores.v1","Britadores","registros"],["controle-ibm.v1","Controle IBM","registros"],["controle-itm.v1","Fluxo ITM","registros"],["controle-testes.v1","Registro de Testes","registros"]];
+const suporta=typeof window.showDirectoryPicker==="function";
+
+/* ---------- IndexedDB ---------- */
+function idbAbrir(nome,store,criar){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;
+  try{r=criar?indexedDB.open(nome,1):indexedDB.open(nome)}catch(e){return ok(null)}
+  r.onupgradeneeded=()=>{if(criar){if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store)}else{try{r.transaction.abort()}catch(e){}}};
+  r.onerror=()=>ok(null);r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(store)){db.close();ok(null)}else ok(db)}})}
+async function idbTudo(nome,store){const db=await idbAbrir(nome,store,false);if(!db)return null;
+  return new Promise(ok=>{const out={};const c=db.transaction(store).objectStore(store).openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else{db.close();ok(out)}};c.onerror=()=>{db.close();ok(null)}})}
+async function idbPor(nome,store,obj){const db=await idbAbrir(nome,store,true);if(!db)throw new Error("IndexedDB indisponível");
+  return new Promise((ok,err)=>{const t=db.transaction(store,"readwrite"),s=t.objectStore(store);Object.keys(obj).forEach(k=>s.put(obj[k],k));t.oncomplete=()=>{db.close();ok()};t.onerror=()=>{db.close();err(t.error)}})}
+async function idbGet(k){const db=await idbAbrir("portal-pasta","kv",true);if(!db)return null;
+  return new Promise(ok=>{const r=db.transaction("kv").objectStore("kv").get(k);r.onsuccess=()=>{db.close();ok(r.result||null)};r.onerror=()=>{db.close();ok(null)}})}
+async function idbSet(k,v){return idbPor("portal-pasta","kv",{[k]:v})}
+
+/* ---------- foto dos dados ---------- */
+function contar(k,txt){try{const j=JSON.parse(txt);if(!j||typeof j!=="object")return 0;
+  if(k==="rt-reports")return Object.keys(j).length;
+  if(k==="controle-testes.v1")return Array.isArray(j.testes)?j.testes.length:0;
+  let n=0;Object.entries(j).forEach(([c,v])=>{if(c==="pendentes"||c==="config"||!v||typeof v!=="object"||Array.isArray(v))return;Object.values(v).forEach(r=>{if(r&&typeof r==="object"&&!r.excluido)n++})});return n}catch(e){return 0}}
+async function montar(){const ls={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!IGNORAR.has(k))ls[k]=localStorage.getItem(k)}
+  const idb={};for(const b of BANCOS){const v=await idbTudo(b.db,b.store);if(v)idb[b.db+"/"+b.store]=v}
+  return {app:"Portal de Controles · Mineral do Brasil",versao:1,criadoEm:new Date().toISOString(),localStorage:ls,indexedDB:idb}}
+function total(bk){let n=0;APPS.forEach(([k])=>{if(bk&&bk.localStorage&&bk.localStorage[k]!=null)n+=contar(k,bk.localStorage[k])});
+  const an=bk&&bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)n+=Object.keys(an).length;return n}
+function resumo(bk){const l=APPS.map(([k,nome,un])=>bk.localStorage[k]!=null?`${nome}: ${contar(k,bk.localStorage[k])} ${un}`:null).filter(Boolean);
+  const an=bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)l.push(`Análises do laboratório: ${Object.values(an).filter(a=>a&&!a.excluido).length}`);return l}
+const semData=bk=>{const c={...bk};delete c.criadoEm;return JSON.stringify(c)};
+
+/* ---------- pasta ---------- */
+let dir=null,estado="sem",ultimo=null,ultimoTxt=null,erro="",ouvintes=[];
+try{ultimo=localStorage.getItem("pasta-dados.ultimo")}catch(e){}
+const avisar=()=>ouvintes.forEach(f=>{try{f(info())}catch(e){}});
+function info(){return {suporta,estado,pasta:dir?dir.name:"",ultimo,erro}}
+async function permissao(pedir){if(!dir)return false;const o={mode:"readwrite"};
+  try{if(await dir.queryPermission(o)==="granted")return true;if(pedir&&await dir.requestPermission(o)==="granted")return true}catch(e){}return false}
+async function lerArquivo(d){try{const f=await (await (d||dir).getFileHandle(ARQ)).getFile();const bk=JSON.parse(await f.text());return bk&&bk.localStorage&&bk.versao===1?bk:null}catch(e){return null}}
+async function escrever(d,nome,txt){const fh=await d.getFileHandle(nome,{create:true});const w=await fh.createWritable();await w.write(txt);await w.close()}
+const hojeISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+async function gravarNaPasta(bk){const txt=JSON.stringify(bk);
+  await escrever(dir,ARQ,txt);
+  const sub=await dir.getDirectoryHandle(SUB,{create:true});await escrever(sub,"dados-"+hojeISO()+".json",txt);
+  try{const nomes=[];for await(const [n,h] of sub.entries())if(h.kind==="file"&&/^dados-\d{4}-\d\d-\d\d\.json$/.test(n))nomes.push(n);
+    nomes.sort().slice(0,Math.max(0,nomes.length-MANTER)).forEach(n=>sub.removeEntry(n).catch(()=>{}))}catch(e){}
+  ultimo=bk.criadoEm;ultimoTxt=semData(bk);try{localStorage.setItem("pasta-dados.ultimo",ultimo)}catch(e){}}
+async function copiaSeguranca(bk,motivo){try{const sub=await dir.getDirectoryHandle(SUB,{create:true});const d=new Date(),p=n=>String(n).padStart(2,"0");
+  await escrever(sub,`${motivo}-${hojeISO()}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.json`,JSON.stringify(bk))}catch(e){}}
+async function aplicar(bk){Object.keys(bk.localStorage).forEach(k=>{if(!IGNORAR.has(k))localStorage.removeItem(k)});
+  Object.entries(bk.localStorage).forEach(([k,v])=>{if(!IGNORAR.has(k))localStorage.setItem(k,v)});
+  for(const [chave,obj] of Object.entries(bk.indexedDB||{})){const [db,store]=chave.split("/");await idbPor(db,store,obj)}}
+
+let gravando=false;
+/* Grava se algo mudou. Nunca grava um navegador vazio por cima de uma pasta com dados. */
+async function salvar(){if(!dir||gravando)return;gravando=true;
+  try{if(!await permissao(false)){estado="permissao";return}
+    const bk=await montar(),s=semData(bk);
+    if(s===ultimoTxt){estado="ok";return}
+    if(!total(bk)){const f=await lerArquivo();if(f&&total(f)){estado="vazio";return}}
+    await gravarNaPasta(bk);estado="ok";erro=""}
+  catch(e){estado="erro";erro=e.message||String(e)}
+  finally{gravando=false;avisar()}}
+
+/* Escolhe a pasta. Se ela já tem dados, pergunta qual lado vale. */
+async function escolher(){if(!suporta)throw new Error("Este navegador não grava em pasta. Use o Google Chrome ou o Microsoft Edge no computador.");
+  const d=await window.showDirectoryPicker({id:"portal-controles",mode:"readwrite",startIn:"documents"});
+  const arq=await lerArquivo(d),nav=await montar();dir=d;await idbSet("dir",d);ultimoTxt=null;
+  let acao="gravar";
+  if(arq&&total(arq)){
+    if(!total(nav))acao="carregar";
+    else{const r=prompt(`Essa pasta já tem dados salvos em ${dataBR(arq.criadoEm)}:\n  ${resumo(arq).join("\n  ")}\n\nE este navegador tem:\n  ${resumo(nav).join("\n  ")}\n\nDigite PASTA para trazer os dados da pasta para este navegador (use quando abriu uma versão nova do app ou outro computador).\nDigite NAVEGADOR para gravar os dados deste navegador na pasta.\n\nO lado que for trocado ganha uma cópia de segurança na pasta "copias".`)||"";
+      const t=r.trim().toUpperCase();acao=t==="PASTA"?"carregar":t==="NAVEGADOR"?"gravar":"nada"}}
+  if(acao==="carregar"){if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");await aplicar(arq);ultimoTxt=null;estado="ok";ultimo=arq.criadoEm;avisar();return "carregado"}
+  if(acao==="gravar"){if(arq&&total(arq))await copiaSeguranca(arq,"pasta-antes-de-gravar");await gravarNaPasta(nav);estado="ok";avisar();return "gravado"}
+  estado="ok";avisar();return "nada"}
+async function carregarDaPasta(){if(!dir||!await permissao(true))throw new Error("Sem acesso à pasta.");
+  const arq=await lerArquivo();if(!arq)throw new Error(`Não achei o arquivo ${ARQ} na pasta.`);
+  const nav=await montar();if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");
+  await aplicar(arq);ultimoTxt=semData(arq);estado="ok";avisar();return arq}
+async function liberar(){if(await permissao(true)){estado="ok";await salvar();return true}return false}
+async function esquecer(){dir=null;estado="sem";await idbSet("dir",null);avisar()}
+const dataBR=iso=>{if(!iso)return "—";const d=new Date(iso);return d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+
+/* ---------- selo no canto da tela (nos apps) ---------- */
+function selo(){if(document.getElementById("pdSelo")||document.body.dataset.pdSemSelo!=null)return;
+  const st=document.createElement("style");st.textContent=`#pdSelo{position:fixed;right:14px;bottom:14px;z-index:9999;font:600 13px/1.2 Inter,system-ui,Arial,sans-serif;border-radius:999px;padding:8px 14px;border:1.5px solid #1d7a4a;background:#e3f1e8;color:#1d6b47;box-shadow:0 4px 14px #1d262126;cursor:default;max-width:calc(100vw - 28px)}
+#pdSelo.at{border-color:#c58a10;background:#fcefd6;color:#8a5a00;cursor:pointer}#pdSelo.er{border-color:#c0392b;background:#f8e1de;color:#a12d22;cursor:pointer}@media print{#pdSelo{display:none}}`;
+  document.head.appendChild(st);const b=document.createElement("button");b.id="pdSelo";b.type="button";b.hidden=true;document.body.appendChild(b);
+  b.onclick=async()=>{if(estado==="permissao"||estado==="erro")await liberar()};
+  ouvintes.push(i=>{b.hidden=i.estado==="sem";const h=i.ultimo?new Date(i.ultimo).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"";
+    b.className=i.estado==="ok"?"":i.estado==="erro"||i.estado==="vazio"?"er":"at";
+    b.textContent=i.estado==="ok"?`Salvo na pasta ${i.pasta}${h?" · "+h:""}`:i.estado==="permissao"?"Clique para liberar a gravação na pasta":i.estado==="vazio"?"Navegador vazio: carregue os dados da pasta no Portal":"Erro ao gravar na pasta (clique para tentar de novo)";
+    b.title=i.estado==="vazio"?"A pasta tem dados e este navegador não. Abra o Portal > Pasta de dados > Carregar dados da pasta.":i.erro||""})}
+
+async function iniciar(){if(!suporta){avisar();return}
+  try{dir=await idbGet("dir")}catch(e){dir=null}
+  if(dir){estado=await permissao(false)?"ok":"permissao";if(estado==="ok")setTimeout(salvar,1500)}
+  avisar()}
+setInterval(salvar,60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")salvar()});
+window.addEventListener("storage",()=>{clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,5000)});
+let ultLS=null;setInterval(()=>{let n=0;try{for(let i=0;i<localStorage.length;i++)n+=(localStorage.getItem(localStorage.key(i))||"").length}catch(e){}if(ultLS!=null&&n!==ultLS){clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,4000)}ultLS=n},3000);
+
+window.PastaDados={info,escolher,salvar,carregarDaPasta,liberar,esquecer,lerArquivo:()=>lerArquivo(),montar,resumo,total,ouvir:f=>{ouvintes.push(f);f(info())},dataBR};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{selo();iniciar()});else{selo();iniciar()}
+})();
+</script><!--/PASTA-DADOS-->
+</body>
+</html>

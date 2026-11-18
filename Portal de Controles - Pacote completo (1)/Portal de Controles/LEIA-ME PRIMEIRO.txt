@@ -1,0 +1,126 @@
+PORTAL DE CONTROLES - Mineral do Brasil · ITM
+Britadores + Floculantes + Relatório de Turno + Controle IBM + Controle ITM + Registro de Testes, com API, banco de dados e importação de planilha
+==========================================================================
+
+Este pacote tem 4 pastas:
+
+1 - Enviar para o TI
+    É O APP. Mande esta pasta inteira (compactada em .zip) para o TI publicar no Azure.
+    O arquivo LEIA-ME.md dentro dela é o passo a passo para eles:
+      - criar o banco (Azure Cosmos DB, nível gratuito)
+      - publicar o site (Azure Static Web Apps, plano Free)
+      - configurar COSMOS_CONEXAO e API_TOKEN
+    Depois de publicado, peça ao TI:
+      a) o endereço do site (https://....azurestaticapps.net)
+      b) o API_TOKEN que eles configuraram
+
+2 - Ponte da planilha (fica no seu computador)
+    >>> POR ENQUANTO NÃO É USADA: os dados entram só por importação de planilha nos apps. <<<
+    NÃO mande para o TI. Fica num computador que tenha o OneDrive sincronizado.
+    Lê a Planilha Mestre e o Relatório de turno a cada 5 minutos e envia para o app.
+    Quando o TI passar o endereço e o token, preencha no config.json:
+      "nuvem": { "url": "https://SEU-SITE.azurestaticapps.net/api/floculantes", "token": "API_TOKEN" }
+    Confira também os caminhos em "arquivo" (relatório de turno e Planilha Mestre).
+    Rode o iniciar.bat.
+    Dica: copie esta pasta para C:\api_planilha (fora do OneDrive).
+
+3 - Planilha Mestre
+    Planilha para digitar as coletas (granulometria, eventos dos britadores,
+    estoque e turnos de floculante). Guarde numa pasta do OneDrive,
+    no caminho configurado no config.json da ponte.
+    Duas formas de levar os dados para o app:
+      - automática: a ponte (pasta 2) lê a planilha a cada 5 minutos;
+      - manual: botão "Escolher arquivo Excel" no próprio app
+          Britadores  -> aba Lançar coleta -> Importar planilha Excel
+          Floculantes -> botão Importar planilha (barra de cima)
+    O Floculantes também importa o Excel baixado do Relatório de Turno e o relatório mensal:
+    volume = Total da coluna Floculante (L); toneladas = coluna definida em Configurar (padrão Rej. Filtro).
+    Para a ponte ler os Excel baixados do Relatório, salve-os em OneDrive/Controles/Relatorios/.
+
+    Relatório mensal da sala de controle (MB-PCM-...-Relatório de turno digitado - Mês.xlsx):
+      - Relatório de Turno -> Relatórios salvos -> Importar planilhas (.xlsx): cada aba de turno vira um
+        relatório salvo e alimenta Produção, Paradas e Boxplot. Aceita o layout antigo (até jan/2026) e o novo:
+        no antigo, a vazão das linhas A/B, a massa alim. <2mm e a TAG das paradas vão para as células novas;
+        a divisão TC-07/A e TC-07/B e as prévias de SiO2 não existem no modelo novo e ficam de fora.
+      - Ao importar no Relatório de Turno, os turnos de floculante vão junto para o Floculantes
+        (volume = soma das horas da coluna Floculante (L) × fator, padrão 1,5; o fator muda em
+        Floculantes -> Configurar). Importar o mesmo arquivo no Floculantes também funciona e não duplica.
+      - Britadores continua manual (Planilha Mestre ou Lançar coleta).
+      Se a Data digitada numa aba não bater com o nome da aba (ex.: aba 07-01X com data 07/01/2025),
+      vale o dia e o mês do nome; o aviso mostra quais abas foram corrigidas.
+    As duas usam o mesmo identificador por linha: importar pelos dois caminhos não duplica.
+
+4 - Previa (abra o index.html)
+    Só para VER como o app vai ficar. Dê dois cliques no index.html.
+    Funciona sem internet e sem login; os dados ficam só neste navegador
+    (aparecem dados de exemplo até você lançar algo).
+    NÃO é para mandar para o TI.
+
+CONTROLE IBM (instalação de britagem)
+    O fluxograma da IBM (Rev. 01) com uma caixa editável em cada equipamento de desgaste:
+    AL-01A/B (trilhos da grelha), BM-01A/B (mandíbulas fixa e móvel), BR-CO (manto e côncavo)
+    e PN-01 a PN-04 (tela de cada deck).
+      - Fluxograma: escolha a data, digite as medições em mm nas caixas e clique em Salvar lançamentos.
+        Botão Troca na caixa: troca (reinicia o desgaste), inversão, ajuste de APF/GAP, reparo.
+      - Caixas: arraste pelo título para mudar de lugar (fica salvo); "Reorganizar caixas" volta ao início.
+        Ao acrescentar componentes, a caixa cresce e as de baixo descem sozinhas.
+      - Dashboard: situação de cada equipamento, gráfico da evolução, previsão de troca e vida média.
+      - Configurar: valor novo e limite de troca de cada componente. Os valores que vêm são de
+        referência; confira com o manual e a manutenção antes de usar.
+    Até o primeiro lançamento ele mostra dados de exemplo.
+
+BALANÇO DE MASSA ITM
+    Diagrama limpo da usina montado do balanço de massa da planilha, dividido em 9 etapas
+    (alimentação, classificação, linhas A e B, concentrado, alto campo, rejeito e filtragem):
+    cada fluxo (1 a 58 + água total) numa caixinha com a vazão e cada equipamento numa caixa
+    com o uso da capacidade. "para..." e "de..." levam de uma etapa à outra. O desenho original
+    da planilha continua no botão "Desenho da planilha".
+      - Fluxograma: escolha data, turno (ou dia todo) e hora (média, pior hora ou uma hora).
+        Verde = dentro da capacidade, amarelo = atenção (padrão 90%), vermelho = acima da capacidade (coluna Projeto).
+        "Valores: Projeto" mostra o balanço da própria planilha contra as capacidades.
+      - Os fluxos medidos no Relatório de Turno entram sozinhos, hora a hora, quando os relatórios
+        estão importados no MESMO navegador: TC-07 + TC-07B (fluxo 3), TC-08 (4), TC-09 (5),
+        TC-10 (13), TC-11 (20), TC-12 (54), vazão linha A (14) e B (22) e água (AG).
+      - Medições: os demais fluxos são digitados, um valor por turno.
+      - Fe no rejeito: importe as planilhas mensais do laboratório (Resultados Planta Nova, Pulmão
+        Planta, WHC Jones). Cada resultado é ligado ao dia/turno do Relatório de Turno e dá para comparar
+        o Fe (ou SiO2...) de cada ponto por modo de operação do SM-03, pilha do pulmão, faixa de
+        alimentação, recuperação metalúrgica, Fe da alimentação, turno e dia da semana.
+        Também calcula a recuperação metalúrgica turno a turno (t C.Mag × %Fe conc ÷ t alimentação × %Fe alim).
+      - Qualidade: fechamento do turno (Concentrado Magnético do laboratório) contra a meta de Fe
+        (padrão 64%, com meta diferente por dia quando a expedição pedir). Mostra o Fe turno a turno
+        com as prévias, o que estava diferente nos turnos fora da meta, % de turnos na meta por modo,
+        pilha, alimentação etc. e o gráfico teor x recuperação metalúrgica.
+      - Equipamentos: a lista da planilha (70 itens), toda editável: capacidade de processo e de
+        projeto, fator, dimensões, motores, potência e quais fluxos entram e saem de cada um.
+      - Configurar: % de atenção, horário dos turnos e, para cada fluxo, a unidade (t/h ou m³/h)
+        e de onde vem o valor.
+
+REGISTRO DE TESTES
+    Caderno dos testes da usina (floculantes, tecidos de filtragem, cal, telas e outros tipos
+    que você cadastrar em Configurar).
+      - + Novo teste: tipo, produto, fornecedor, equipamento/local, o que é usado hoje, início,
+        fim (em branco = em andamento), responsável e objetivo.
+      - Abrir: anotações durante o teste (data, turno, texto livre) e o resultado
+        (Aprovado, Reprovado ou Inconclusivo) com o porquê.
+      - Operação no período: média da usina durante o teste x mesmo número de turnos antes,
+        tirada dos Relatórios de Turno lançados no mesmo navegador. Só referência.
+      - Comparar: marque de 2 a 4 testes e veja lado a lado.
+      - Exportar para Excel: baixa a lista filtrada (CSV, abre no Excel).
+      - Entra na Cópia de segurança do Portal junto com os outros controles.
+
+PASTA DE DADOS NO COMPUTADOR (para não perder lançamentos)
+    Use o Portal no Google Chrome ou no Microsoft Edge do notebook.
+      1. Abra o Portal (index.html) > "Pasta de dados no computador" > Escolher pasta.
+         Crie uma pasta, por exemplo OneDrive\Dados Controles, e escolha ela. Se o navegador
+         perguntar, marque "Permitir em todas as visitas".
+      2. Pronto: os controles gravam tudo no arquivo dados-portal-controles.json dessa pasta,
+         a cada minuto e quando você troca de janela. O selo verde no canto da tela mostra o
+         último salvamento. Na subpasta "copias" fica uma cópia por dia (últimos 30 dias).
+      3. Versão nova do app, navegador limpo ou outro computador: abra o Portal, clique em
+         Escolher pasta e escolha A MESMA pasta. Se o navegador estiver vazio, os dados voltam
+         sozinhos; se tiver dados nos dois lados, ele pergunta qual vale (PASTA ou NAVEGADOR).
+      - Se aparecer "Clique para liberar a gravação na pasta", é só clicar (o navegador pede
+        de novo depois de fechado, a não ser que você tenha marcado "todas as visitas").
+      - Os lançamentos do Relatório de Turno vão para a pasta quando qualquer outro controle
+        ou o Portal estiver aberto (o Relatório em si não foi alterado).
