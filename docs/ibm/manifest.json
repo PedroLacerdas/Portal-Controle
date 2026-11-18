@@ -1,0 +1,12 @@
+{
+  "name": "Controle IBM",
+  "short_name": "Controle IBM",
+  "description": "Desgaste de mandíbulas, britador cônico, telas e trilhos da IBM",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f5f7",
+  "theme_color": "#1d6b47"
+}

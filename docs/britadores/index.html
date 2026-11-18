@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script>/* trava de login (GitHub Pages) */(function(){var ok=false;try{var s=JSON.parse(localStorage.getItem("portal.sessao")||"null");ok=!!(s&&s.ate>Date.now())}catch(e){}if(!ok){document.documentElement.style.visibility="hidden";location.replace("../login.html?volta="+encodeURIComponent(location.href))}})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controle de Britadores</title>
+<meta name="theme-color" content="#1d6b47">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Visual alinhado ao Portal de Controles (Mineral do Brasil · ITM) */
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#1d2621; --muted:#5f6a66; --line:#dde4e8; --line-strong:#2b322e;
+  --brand:#1d6b47; --brand-dark:#2b5a3b; --brand-soft:#e3f1e8;
+  --blue:#2f6db0; --blue-soft:#e3edf9; --amber:#c58a10; --amber-soft:#fcefd6; --purple:#7650c4; --purple-soft:#eee7fb;
+  --accent:#1d6b47; --accent-soft:#1d6b4718; --point:#8a958f; --sunken:#f4f7f8;
+  --ok:#1d7a4a; --ok-bg:#e3f1e8; --warn:#b07800; --warn-bg:#f8e7b866; --crit:#c0392b; --crit-bg:#c0392b1c;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.wrap{max-width:1500px;margin:0 auto;padding:36px 56px 64px;display:flex;flex-direction:column;gap:22px}
+@media (max-width:760px){.wrap{padding:20px 16px 48px}}
+
+/* cabeçalho */
+.brand{display:flex;gap:24px;align-items:center}
+.brand .logo{width:172px;height:auto;flex:none;display:block}
+.brand .logo{image-rendering:auto}@media (max-width:760px){.brand .logo{width:96px}.brand{gap:14px}}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:0}
+.eyebrow.green{color:var(--brand)}
+h1{font-size:2.05rem;font-weight:700;letter-spacing:-.02em;color:var(--brand-dark);margin:6px 0 10px;line-height:1.1}
+.sub{color:var(--muted);font-size:1.12rem;margin:0}
+@media (max-width:760px){h1{font-size:1.5rem}.sub{font-size:.95rem}}
+
+/* barra de ações */
+.tbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+.tbtn{display:inline-flex;align-items:center;gap:10px;font:500 1rem var(--font);color:var(--ink);background:transparent;border:1.5px solid var(--line-strong);border-radius:10px;padding:9px 16px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn svg{width:19px;height:19px;flex:none}
+.tbtn:hover{background:var(--surface)}
+.tbtn[aria-selected="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.tbtn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* seletor de britadores */
+.chips{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;scrollbar-color:var(--brand) transparent}
+.chip-b{flex:0 0 auto;min-width:190px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:4px}
+.chip-b .n{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.chip-b .s{font-size:.82rem;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.chip-b[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 6px 16px #1d6b4733}
+.chip-b[aria-pressed="true"] .s{color:#dcefe4}
+.chip-b[aria-pressed="true"] .dot{box-shadow:0 0 0 2px #fff}
+
+/* britador ativo */
+.ativo{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.ativo h2{font-size:2rem;font-weight:500;margin:6px 0 4px;letter-spacing:-.01em}
+.ativo p{margin:0;color:var(--muted)}
+.pill{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+.pill.warn{background:var(--amber-soft);color:var(--warn)}.pill.crit{background:var(--crit-bg);color:var(--crit)}.pill.na{background:var(--sunken);color:var(--muted)}
+
+/* indicadores */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1.5px solid var(--line-strong);border-radius:16px;padding:30px 26px;display:flex;gap:18px;align-items:center;min-width:0}
+.ico{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ico svg{width:24px;height:24px}
+.ico.g{background:var(--brand-soft);color:var(--brand)}.ico.b{background:var(--blue-soft);color:var(--blue)}.ico.a{background:var(--amber-soft);color:var(--amber)}.ico.p{background:var(--purple-soft);color:var(--purple)}
+.kpi .l{color:var(--muted);font-size:.95rem}
+.kpi .v{font-size:1.85rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .v small{font-size:.95rem;font-weight:400;color:var(--muted);letter-spacing:0}
+
+/* painéis */
+.banner{border:1px solid var(--amber);background:var(--amber-soft);padding:12px 16px;border-radius:12px;font-size:.92rem}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-size:1.15rem;font-weight:700;margin:0;color:var(--brand-dark)}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;background:var(--accent);display:inline-block;border-radius:2px}
+.sw.pt{width:7px;height:7px;border-radius:50%;background:var(--point)}
+.sw.base{background:var(--ink);height:2px}
+.sw.warnb{height:10px;background:var(--warn-bg);border:1px solid var(--warn)}
+.sw.critb{height:10px;background:var(--crit-bg);border:1px solid var(--crit)}
+.sw.proj{background:repeating-linear-gradient(90deg,var(--crit) 0 4px,transparent 4px 7px)}
+#chart{width:100%;min-height:340px;position:relative}
+#chart svg{display:block;width:100%;height:auto}
+#chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-115%)}
+.empty{padding:40px 12px;text-align:center;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* formulários */
+label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted);font-weight:500}
+input,select{font:500 .95rem var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+.fields{display:flex;flex-wrap:wrap;gap:14px}
+.fields>label{flex:1 1 160px}
+.btn{font:600 .92rem var(--font);border-radius:8px;padding:10px 18px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:#fff;display:inline-flex;align-items:center;gap:8px}
+.btn svg{width:17px;height:17px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line-strong)}
+.btn.small{padding:5px 11px;font-size:.8rem}
+.btn.danger{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.msg{font-size:.88rem;color:var(--muted)}.msg.err{color:var(--crit)}.msg.ok{color:var(--ok)}
+.hint{font-size:.86rem;color:var(--muted);margin:0;max-width:75ch}
+.meta{font-size:.86rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.chip.ok{color:var(--ok);background:var(--ok-bg)}.chip.warn{color:var(--warn);background:var(--amber-soft)}.chip.crit{color:var(--crit);background:var(--crit-bg)}.chip.na{color:var(--muted);background:var(--sunken)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;vertical-align:middle}
+td.num,th.num{text-align:right}
+.sieve td{padding:4px 8px}
+.sieve input{width:100%;padding:6px 9px}
+tr.cut td{background:var(--brand-soft)}
+.result{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:16px 18px;background:var(--brand-soft);border-radius:12px}
+.result .big{font-size:2rem;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+.seg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.segopt{flex-direction:row;cursor:pointer}
+.segopt input{position:absolute;opacity:0;pointer-events:none}
+.segopt span{display:inline-block;font:500 .9rem var(--font);color:var(--ink);border:1.5px solid var(--line-strong);border-radius:10px;padding:7px 14px}
+.segopt input:checked+span{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-dark);font-weight:600}
+.segopt input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+.syncwrap{display:inline-flex;align-items:center;gap:10px;margin-left:auto}
+.syncst{font-size:.82rem;font-weight:600;padding:6px 10px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+.syncst.na{background:var(--sunken);color:var(--muted)}.syncst.warn{background:var(--amber-soft);color:var(--warn)}.syncst.crit{background:var(--crit-bg);color:var(--crit)}
+@media (max-width:760px){.syncwrap{margin-left:0}}
+.crushers{display:flex;flex-direction:column;gap:8px}
+.crushers .r{display:flex;gap:8px;align-items:center}
+.crushers input{flex:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <!-- Logo da Mineral do Brasil (pode trocar pelo arquivo usado no Portal: <img src="logo.png">) -->
+      <img class="logo" alt="Mineral do Brasil" src="data:image/png;base64,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">
+      <div>
+        <p class="eyebrow">Mineral do Brasil · ITM</p>
+        <h1>Controle de Britadores</h1>
+        <p class="sub">Desgaste dos revestimentos pelo % de material abaixo de <span id="corteLbl">1,4 mm</span> na descarga</p>
+      </div>
+    </div>
+    <nav class="tbar" role="tablist" aria-label="Seções">
+      <!-- Ajuste o link abaixo para o endereço do Portal de Controles -->
+      <a class="tbtn" href="../index.html">Controles</a>
+      <button class="tbtn" role="tab" data-tab="painel" aria-selected="true">Painel</button>
+      <button class="tbtn" role="tab" data-tab="coleta" aria-selected="false">Lançar coleta</button>
+      <button class="tbtn" role="tab" data-tab="historico" aria-selected="false">Histórico</button>
+      <button class="tbtn" role="tab" data-tab="eventos" aria-selected="false">Trocas e GAP</button>
+      <button class="tbtn" type="button" id="topImport" title="Importar a Planilha Mestre ou um relatório Excel">Importar planilha</button>
+      <button class="tbtn" role="tab" data-tab="config" aria-selected="false">Configurar</button>
+      <span class="syncwrap"><span id="syncSt" class="syncst na" role="status">Salvo no aparelho</span>
+      <button class="tbtn" type="button" id="syncBtn">Sincronizar</button></span>
+    </nav>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="chips" id="cards" role="group" aria-label="Britadores"></div>
+
+  <!-- PAINEL -->
+  <section id="tab-painel" class="tabpane" style="display:flex;flex-direction:column;gap:22px">
+    <div class="ativo">
+      <div>
+        <p class="eyebrow green">Britador ativo</p>
+        <h2 id="atNome">—</h2>
+        <p id="atSub">—</p>
+      </div>
+      <span class="pill" id="atPill">—</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div><div class="l">Material abaixo de <span class="corteK">1,4 mm</span></div><div class="v" id="k1">—</div></div></div>
+      <div class="kpi"><div><div class="l">Linha de base</div><div class="v" id="k2">—</div></div></div>
+      <div class="kpi"><div><div class="l">Queda desde a troca</div><div class="v" id="k3">—</div></div></div>
+      <div class="kpi"><div><div class="l">Previsão de troca</div><div class="v" id="k4">—</div></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="chartTitle">Britador</h2>
+        <div class="legend">
+          <span><i class="sw pt"></i>Coleta</span>
+          <span><i class="sw"></i>Média móvel</span>
+          <span><i class="sw base"></i>Linha de base</span>
+          <span><i class="sw warnb"></i>Atenção</span>
+          <span><i class="sw critb"></i>Troca recomendada</span>
+          <span><i class="sw proj"></i>Projeção</span>
+        </div>
+      </div>
+      <div id="chart"></div>
+      <p class="hint" id="chartNote"></p>
+    </div>
+  </section>
+
+  <!-- COLETA -->
+  <section id="tab-coleta" class="tabpane" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel" id="impPanel">
+      <div class="panel-head">
+        <h2>Importar planilha Excel</h2>
+        <div class="actions">
+          <button class="btn" type="button" id="impBtn">Escolher arquivo Excel</button>
+          <input type="file" id="impFile" accept=".xlsx,.xls,.xlsm,.csv" multiple hidden>
+        </div>
+      </div>
+      <p class="hint"><b>Planilha Mestre:</b> importa as abas Granulometria e Eventos Britadores. <b>Relatório de descarga:</b> lê todas as abas e importa apenas os blocos de descarga dos britadores cadastrados (título "Descarga - BR 04-C - Teste 2", data, colunas MALHA / PESO / %, linhas até Fundo e Total). Blocos de alimentação e outros ensaios são ignorados. Confira a prévia antes de importar.</p>
+      <div id="impOut"></div>
+    </div>
+    <form class="panel" id="formColeta" novalidate>
+      <div class="panel-head">
+        <h2>Lançamento manual</h2>
+        <div class="seg" role="radiogroup" aria-label="Lançar em">
+          <span class="meta">Lançar em</span>
+          <label class="segopt"><input type="radio" name="cUnid" id="cUnidPct" value="pct" checked><span>Percentual (%)</span></label>
+          <label class="segopt"><input type="radio" name="cUnid" id="cUnidPeso" value="peso"><span>Peso</span></label>
+        </div>
+      </div>
+      <div class="fields">
+        <label>Data<input type="date" id="cData" required></label>
+        <label>Britador<select id="cBrit"></select></label>
+        <label style="flex:2 1 220px">Observação<input type="text" id="cObs" placeholder="Opcional — ex.: teste 2"></label>
+      </div>
+      <div class="grid2">
+        <div class="tablebox">
+          <table class="sieve">
+            <thead><tr><th>Malha (mm)</th><th class="num" id="cColUnid">Retido (%)</th></tr></thead>
+            <tbody id="sieveRows"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="result"><span class="big" id="cRes">—</span><span class="meta">passou na peneira de <span id="cCorte">1,4 mm</span> (malhas menores + fundo)<span id="cEst"></span></span></div>
+          <p class="meta" id="cTotal">Soma: —</p>
+          <p class="hint" id="cHint">Digite o percentual retido em cada malha. A soma das malhas com o fundo deve dar 100 %. O fundo é o material que passou pela menor malha. Dá para colar a coluna PESO copiada do Excel na primeira linha que os valores se distribuem para baixo.</p>
+          <div class="actions"><button class="btn" type="submit" id="cSalvar">Salvar coleta</button><button class="btn ghost" type="button" id="cLimpar">Limpar</button><span class="msg" id="cMsg"></span></div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- HISTORICO -->
+  <section id="tab-historico" class="tabpane" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Coletas lançadas</h2>
+        <div class="actions">
+          <select id="hFiltro" aria-label="Filtrar britador"></select>
+          <button class="btn ghost small" id="hCsv" type="button">Exportar CSV</button>
+        </div>
+      </div>
+      <div class="tablebox"><table><thead><tr><th>Data</th><th>Britador</th><th class="num">% abaixo do corte</th><th class="num">Total</th><th>Obs.</th><th></th></tr></thead><tbody id="hRows"></tbody></table></div>
+      <span class="msg" id="hMsg"></span>
+    </div>
+  </section>
+
+  <!-- EVENTOS -->
+  <section id="tab-eventos" class="tabpane" hidden>
+    <div class="grid2">
+      <form class="panel" id="formEv" novalidate>
+        <h2>Registrar evento</h2>
+        <p class="hint">A troca de revestimento reinicia o ciclo: a linha de base é recalculada com as primeiras coletas depois dela. Aberturas de GAP ficam só marcadas no gráfico.</p>
+        <div class="fields">
+          <label>Data<input type="date" id="eData"></label>
+          <label>Britador<select id="eBrit"></select></label>
+          <label>Tipo<select id="eTipo"><option value="troca">Troca de revestimento</option><option value="gap">Abertura de GAP</option><option value="outro">Outro</option></select></label>
+        </div>
+        <label>Observação<input type="text" id="eObs" placeholder="Ex.: mandíbula fixa e móvel trocadas"></label>
+        <div class="actions"><button class="btn" type="submit">Registrar</button><span class="msg" id="eMsg"></span></div>
+      </form>
+      <div class="panel">
+        <h2>Eventos</h2>
+        <div class="tablebox"><table><thead><tr><th>Data</th><th>Britador</th><th>Tipo</th><th>Obs.</th><th></th></tr></thead><tbody id="eRows"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="tab-config" class="tabpane" hidden>
+    <form class="panel" id="formCfg" novalidate>
+      <h2>Configuração</h2>
+      <div class="grid2">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <label>Britadores</label>
+          <div class="crushers" id="cfgBrits"></div>
+          <div><button type="button" class="btn ghost small" id="cfgAddBrit">+ Adicionar britador</button></div>
+          <label>Série de peneiras (mm, separadas por ponto e vírgula)<input type="text" id="cfgPen"></label>
+          <p class="hint">O percentual é o que passou pela peneira de corte: peso das malhas menores que o corte + fundo, dividido pelo total. O que fica retido na peneira de corte não entra. Em planilhas sem a peneira de corte (ex.: 2,00 e 1,00 mm), o valor é estimado pela curva granulométrica entre as duas malhas e aparece com *.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="fields">
+            <label>Corte (mm)<input type="number" step="0.01" id="cfgCorte"></label>
+            <label>Coletas para a linha de base<input type="number" step="1" min="1" id="cfgBase"></label>
+            <label>Janela da média móvel (coletas)<input type="number" step="1" min="1" id="cfgJan"></label>
+          </div>
+          <div class="fields">
+            <label>Atenção: queda de (p.p.)<input type="number" step="0.1" id="cfgAm"></label>
+            <label>Troca: queda de (p.p.)<input type="number" step="0.1" id="cfgVm"></label>
+          </div>
+          <p class="hint">Exemplo: com linha de base de 38 % e limite de troca em 6 p.p., o alerta vermelho dispara quando a média móvel chega a 32 %. Ajuste esses limites depois de acompanhar um ciclo completo de revestimento.</p>
+          <div class="actions"><button class="btn" type="submit">Salvar configuração</button><span class="msg" id="cfgMsg"></span></div>
+        </div>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   SINCRONIZAÇÃO COM O BANCO DE DADOS
+   Os dados ficam SEMPRE salvos no próprio aparelho (funciona sem rede).
+   Quando houver rede e um servidor configurado abaixo, as alterações
+   pendentes são enviadas e as novidades do servidor são baixadas.
+
+   Enquanto o banco não estiver definido, deixe url vazia: o app
+   funciona 100% local em cada aparelho.
+
+   Contrato esperado do servidor (qualquer banco pode ficar atrás dele):
+     POST {url}/sync      corpo: {"ops":[{"op":"upsert"|"delete","colecao":"amostras"|"eventos"|"config","id":"...","dados":{...}}]}
+                          resposta: 2xx quando gravou tudo
+     GET  {url}/mudancas?desde=<ISO ou vazio>
+                          resposta: {"agora":"<ISO>","registros":[{"colecao":"...","id":"...","dados":{...,"atualizadoEm":"<ISO>","excluido":false}}]}
+   ========================================================= */
+const SERVIDOR = {
+  url: "",   // PRÉVIA: sem servidor, dados ficam só neste navegador
+  token: "",
+  intervaloSeg: 120
+};
+
+(function(){
+const DEF={britadores:[{id:"br04b",nome:"BR04B"},{id:"br04c",nome:"BR04C"},{id:"br04d",nome:"BR04D"}],peneiras:[2,1.4,0.5,0.15],corte:1.4,amarelo:3,vermelho:6,diasBase:5,janela:7};
+let cfg=JSON.parse(JSON.stringify(DEF));
+let amostras=[], eventos=[], db=true, exemplo=false, sel=null;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=1)=>v==null||isNaN(v)?"—":v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const dayNum=s=>{const [y,m,d]=s.split("-").map(Number);return Math.round(Date.UTC(y,m-1,d)/864e5)};
+const fromDay=n=>new Date(n*864e5).toISOString().slice(0,10);
+const brDate=s=>{const [y,m,d]=s.split("-");return d+"/"+m+"/"+y};
+const short=n=>{const s=fromDay(n);return s.slice(8,10)+"/"+s.slice(5,7)};
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const nomeB=id=>(cfg.britadores.find(b=>b.id===id)||{}).nome||id;
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------- cálculo granulométrico ---------- */
+function passante(pen,ret,fundo,corte){
+  // % de material ABAIXO do corte: o que passou pela peneira de corte (malhas menores + fundo).
+  // O que fica retido na peneira de corte (>= corte) não entra.
+  // Sem a peneira de corte na série: estima pela curva granulométrica (interpolação log entre a malha acima e a abaixo).
+  const rows=pen.map((p,i)=>({p:+p,r:+ret[i]||0})).filter(x=>x.p>0).sort((a,b)=>b.p-a.p);
+  const total=rows.reduce((s,x)=>s+x.r,0)+(+fundo||0);
+  if(!(total>0)||!rows.length) return {v:null,total};
+  const eps=1e-9;
+  const passa=m=>(total-rows.filter(x=>x.p>=m-eps).reduce((s,x)=>s+x.r,0))/total*100;   // % que passa na malha m
+  if(rows.some(x=>Math.abs(x.p-corte)<eps)) return {v:passa(corte),total,est:false};
+  const acima=rows.filter(x=>x.p>corte+eps),abaixo=rows.filter(x=>x.p<corte-eps);
+  if(!acima.length) return {v:100,total,est:true};
+  const mA=acima[acima.length-1].p,pA=passa(mA);
+  if(!abaixo.length) return {v:pA*corte/mA,total,est:true};
+  const mB=abaixo[0].p,pB=passa(mB),k=Math.log(corte/mB)/Math.log(mA/mB);
+  return {v:pB+(pA-pB)*k,total,est:true};
+}
+
+/* ---------- análise por britador ---------- */
+function analisar(bid){
+  const byDay={};
+  amostras.filter(a=>a.britador===bid&&a.passante!=null).forEach(a=>{(byDay[a.data]=byDay[a.data]||[]).push(a.passante)});
+  const pts=Object.keys(byDay).sort().map(d=>({d:dayNum(d),data:d,v:byDay[d].reduce((s,x)=>s+x,0)/byDay[d].length}));
+  const evs=eventos.filter(e=>e.britador===bid).map(e=>({...e,d:dayNum(e.data)})).sort((a,b)=>a.d-b.d);
+  const trocas=evs.filter(e=>e.tipo==="troca").map(e=>e.d);
+  pts.forEach(p=>{p.c=trocas.filter(t=>t<=p.d).length});
+  const nC=trocas.length+1, ciclos=[];
+  for(let c=0;c<nC;c++){
+    const cp=pts.filter(p=>p.c===c);
+    cp.forEach((p,i)=>{const w=cp.slice(Math.max(0,i-cfg.janela+1),i+1);p.ma=w.reduce((s,x)=>s+x.v,0)/w.length});
+    const bw=cp.slice(0,cfg.diasBase);
+    const base=bw.length?bw.reduce((s,x)=>s+x.v,0)/bw.length:null;
+    const start=c===0?(cp[0]?cp[0].d:null):trocas[c-1];
+    ciclos.push({c,pts:cp,base,prov:bw.length<cfg.diasBase,start,end:cp.length?cp[cp.length-1].d:start});
+  }
+  const cur=ciclos[ciclos.length-1];
+  const last=cur.pts[cur.pts.length-1]||null;
+  let status="na",queda=null,proj=null,slope=null;
+  if(last&&cur.base!=null){
+    queda=cur.base-last.ma;
+    status=cur.prov?"na":queda>=cfg.vermelho?"crit":queda>=cfg.amarelo?"warn":"ok";
+    if(cur.pts.length>=6){
+      const xs=cur.pts.map(p=>p.d),ys=cur.pts.map(p=>p.v),n=xs.length;
+      const mx=xs.reduce((s,x)=>s+x,0)/n,my=ys.reduce((s,y)=>s+y,0)/n;
+      let sxy=0,sxx=0;xs.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)**2});
+      slope=sxx?sxy/sxx:0;
+      const lim=cur.base-cfg.vermelho, fitLast=my+slope*(last.d-mx);
+      if(slope<-1e-6){
+        if(fitLast<=lim) proj={dias:0,dia:last.d,from:{d:last.d,v:fitLast},lim};
+        else{const dias=Math.ceil((lim-fitLast)/slope);proj={dias,dia:last.d+dias,from:{d:last.d,v:fitLast},lim}}
+      }
+    }
+  }
+  return {pts,evs,ciclos,cur,last,status,queda,proj,slope};
+}
+
+/* ---------- dados de exemplo (somente visualização) ---------- */
+function gerarExemplo(){
+  let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const hoje=dayNum(today()),A=[],E=[];
+  [{id:"br04b",base:38.5,taxa:0.085,troca:null},{id:"br04c",base:36,taxa:0.13,troca:hoje-24},{id:"br04d",base:37.2,taxa:0.06,troca:hoje-55}].forEach(b=>{
+    for(let i=70;i>=0;i--){const d=hoje-i;let dt;
+      if(b.troca&&d>=b.troca) dt=d-b.troca; else dt=d-(hoje-70);
+      const v=b.base-b.taxa*dt+(rnd()-.5)*2.2;
+      A.push({id:"ex"+b.id+i,data:fromDay(d),britador:b.id,passante:v,total:1000});}
+    if(b.troca) E.push({id:"exe"+b.id,data:fromDay(b.troca),britador:b.id,tipo:"troca",obs:"Exemplo"});
+  });
+  E.push({id:"exa",data:fromDay(hoje-38),britador:"br04b",tipo:"gap",obs:"Exemplo"});
+  return {A,E};
+}
+
+/* ---------- render: painel ---------- */
+const ROT={ok:"Normal",warn:"Atenção",crit:"Programar troca",na:"Sem base"};
+const COR={ok:"var(--ok)",warn:"var(--warn)",crit:"var(--crit)",na:"var(--line)"};
+function renderCards(){
+  const el=$("cards");el.innerHTML="";
+  if(!cfg.britadores.find(b=>b.id===sel)) sel=cfg.britadores[0]?.id||null;
+  cfg.britadores.forEach(b=>{
+    const r=analisar(b.id);
+    const btn=document.createElement("button");btn.className="chip-b";btn.type="button";
+    btn.setAttribute("aria-pressed",String(b.id===sel));
+    btn.innerHTML=`<span class="n"><i class="dot" style="background:${COR[r.status]}"></i>${esc(b.nome)}</span><span class="s">${ROT[r.status]} · ${r.last?fmt(r.last.ma)+" % de finos":"sem coletas"}</span>`;
+    btn.onclick=()=>{sel=b.id;renderCards();renderChart()};
+    el.appendChild(btn);
+  });
+  renderAtivo();
+}
+function renderAtivo(){
+  const b=cfg.britadores.find(x=>x.id===sel);
+  if(!b){$("atNome").textContent="—";$("atSub").textContent="Cadastre um britador em Configurar.";return}
+  const r=analisar(b.id);
+  $("atNome").textContent=b.nome;
+  $("atSub").textContent=r.last?`Descarga · última coleta em ${brDate(r.last.data)} · ${r.cur.pts.length} coleta(s) no ciclo atual`:"Nenhuma coleta registrada";
+  const pill=$("atPill");pill.className="pill "+(r.status==="ok"?"":r.status);
+  pill.textContent=ROT[r.status]+(r.last&&r.cur.prov?" · base provisória":"");
+  $("k1").innerHTML=r.last?`${fmt(r.last.ma)}<small> % · média móvel</small>`:"—";
+  $("k2").innerHTML=r.cur.base!=null?`${fmt(r.cur.base)}<small> %${r.cur.prov?" · provisória":""}</small>`:"—";
+  $("k3").innerHTML=r.queda!=null?`${fmt(r.queda)}<small> p.p.</small>`:"—";
+  $("k4").innerHTML=r.proj?(r.proj.dias<=0?`Agora<small> · limite atingido</small>`:`${r.proj.dias}<small> dias · ${brDate(fromDay(r.proj.dia))}</small>`):`—<small> ${r.slope!=null?"sem tendência de queda":"poucas coletas"}</small>`;
+}
+
+function renderChart(){
+  const box=$("chart");box.innerHTML="";
+  const b=cfg.britadores.find(x=>x.id===sel);
+  $("chartTitle").textContent=b?b.nome+" — % de material abaixo de "+fmt(cfg.corte,cfg.corte%1?2:0).replace(/,?0+$/,"")+" mm":"Britador";
+  if(!b){box.innerHTML='<div class="empty">Cadastre um britador em Configurar.</div>';return}
+  const r=analisar(b.id);
+  if(!r.pts.length){box.innerHTML='<div class="empty">Nenhuma coleta deste britador ainda. Lance a primeira em <b>Lançar coleta</b>.</div>';$("chartNote").textContent="";return}
+  const W=Math.max(320,box.clientWidth||800),H=W<560?300:360,m={l:44,r:W<560?14:22,t:22,b:30};
+  let x0=r.pts[0].d,x1=r.pts[r.pts.length-1].d;
+  r.evs.forEach(e=>{x0=Math.min(x0,e.d);x1=Math.max(x1,e.d)});
+  let projEnd=null;
+  if(r.proj&&r.proj.dias>0){projEnd=Math.min(r.proj.dia,x1+Math.max(14,Math.round((x1-x0)*.5)));x1=Math.max(x1,projEnd)}
+  if(x1===x0)x1=x0+1;
+  let ys=r.pts.map(p=>p.v);r.ciclos.forEach(c=>{if(c.base!=null)ys.push(c.base,c.base-cfg.vermelho-1)});
+  let y0=Math.floor(Math.min(...ys)-1),y1=Math.ceil(Math.max(...ys)+1);
+  const X=d=>m.l+(d-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>m.t+(y1-v)/(y1-y0)*(H-m.t-m.b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico do % passante">`;
+  const step=Math.max(1,Math.ceil((y1-y0)/6));
+  for(let v=Math.ceil(y0/step)*step;v<=y1;v+=step){s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${v}%</text>`}
+  const nt=W<560?4:7,dx=Math.max(1,Math.round((x1-x0)/nt));
+  for(let d=x0;d<=x1;d+=dx){s+=`<text x="${X(d)}" y="${H-10}" text-anchor="middle">${short(d)}</text>`}
+  r.ciclos.forEach((c,i)=>{if(c.base==null)return;
+    const a=X(c.start),e=i===r.ciclos.length-1?X(x1):X(r.ciclos[i+1].start),w=Math.max(0,e-a);
+    const yA=Y(c.base-cfg.amarelo),yV=Y(c.base-cfg.vermelho);
+    s+=`<rect x="${a}" y="${yA}" width="${w}" height="${Math.max(0,yV-yA)}" fill="var(--warn-bg)"/>`;
+    s+=`<rect x="${a}" y="${yV}" width="${w}" height="${Math.max(0,H-m.b-yV)}" fill="var(--crit-bg)"/>`;
+    s+=`<line x1="${a}" x2="${e}" y1="${Y(c.base)}" y2="${Y(c.base)}" stroke="var(--ink)" stroke-width="1.5" ${c.prov?'stroke-dasharray="2 3"':""}/>`;
+    s+=`<text x="${e-4}" y="${Y(c.base)-5}" text-anchor="end" style="fill:var(--ink)">base ${fmt(c.base)}%</text>`;
+  });
+  r.evs.forEach(e=>{const xx=X(e.d),tr=e.tipo==="troca";
+    s+=`<line x1="${xx}" x2="${xx}" y1="${m.t}" y2="${H-m.b}" stroke="${tr?"var(--ink)":"var(--muted)"}" stroke-width="${tr?1.5:1}" stroke-dasharray="${tr?"":"4 3"}"/>`;
+    s+=`<text x="${xx+4}" y="${m.t+10}" style="fill:var(--ink)">${tr?"Troca":(e.tipo==="gap"||e.tipo==="ajuste")?"GAP":"Evento"}</text>`});
+  r.pts.forEach(p=>{s+=`<circle cx="${X(p.d)}" cy="${Y(p.v)}" r="2.6" fill="var(--point)" opacity=".75"/>`});
+  r.ciclos.forEach(c=>{if(c.pts.length<2)return;
+    s+=`<polyline fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linejoin="round" points="${c.pts.map(p=>X(p.d)+","+Y(p.ma)).join(" ")}"/>`});
+  if(r.proj&&r.proj.dias>0&&projEnd){
+    const vEnd=r.proj.from.v+r.slope*(projEnd-r.proj.from.d);
+    s+=`<line x1="${X(r.proj.from.d)}" y1="${Y(r.proj.from.v)}" x2="${X(projEnd)}" y2="${Y(vEnd)}" stroke="var(--crit)" stroke-width="1.8" stroke-dasharray="5 4"/>`;
+    if(projEnd===r.proj.dia) s+=`<circle cx="${X(projEnd)}" cy="${Y(r.proj.lim)}" r="4" fill="var(--crit)"/><text x="${X(projEnd)-6}" y="${Y(r.proj.lim)+16}" text-anchor="end" style="fill:var(--crit)">${short(projEnd)}</text>`;
+  }
+  const L=r.last;
+  s+=`<circle cx="${X(L.d)}" cy="${Y(L.ma)}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  s+=`<rect id="hit" x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/></svg>`;
+  box.innerHTML=s;
+  const tip=document.createElement("div");tip.className="tip";tip.hidden=true;box.appendChild(tip);
+  const svg=box.querySelector("svg");
+  const move=ev=>{const rc=svg.getBoundingClientRect(),k=W/rc.width,px=(ev.clientX-rc.left)*k;
+    let best=null,bd=1e9;r.pts.forEach(p=>{const dd=Math.abs(X(p.d)-px);if(dd<bd){bd=dd;best=p}});
+    if(!best){tip.hidden=true;return}
+    tip.hidden=false;tip.style.left=(X(best.d)/k)+"px";tip.style.top=(Y(best.v)/k)+"px";
+    tip.textContent=`${brDate(best.data)} · ${fmt(best.v)}% · média ${fmt(best.ma)}%`};
+  svg.addEventListener("pointermove",move);svg.addEventListener("pointerleave",()=>tip.hidden=true);
+  let note=`Média móvel de ${cfg.janela} coletas. Linha de base = média das ${cfg.diasBase} primeiras coletas após a última troca de revestimento.`;
+  if(r.slope!=null) note+=` Tendência do ciclo atual: ${fmt(r.slope*7,2)} p.p. por semana.`;
+  $("chartNote").textContent=note;
+}
+
+/* ---------- formulário de coleta ---------- */
+function renderSieve(){
+  const tb=$("sieveRows");const prev=[...tb.querySelectorAll("input")].map(i=>i.value);
+  const pens=[...cfg.peneiras].sort((a,b)=>b-a);
+  tb.innerHTML=pens.map((p,i)=>`<tr class="${p<cfg.corte-1e-9?"cut":""}"><td>${fmt(p,p%1?(String(p).split(".")[1]||"").length:0)} mm</td><td><input type="number" step="any" min="0" id="pen${i}" data-i="${i}" inputmode="decimal" aria-label="Retido na peneira ${p} mm"></td></tr>`).join("")
+   +`<tr class="cut"><td>Fundo</td><td><input type="number" step="any" min="0" id="penFundo" inputmode="decimal" aria-label="Fundo"></td></tr>`;
+  tb.querySelectorAll("input").forEach((inp,i)=>{if(prev[i]!=null&&prev.length===pens.length+1)inp.value=prev[i];inp.addEventListener("input",calcForm);inp.addEventListener("paste",colar)});
+  calcForm();
+}
+function colar(ev){
+  const t=(ev.clipboardData||window.clipboardData)?.getData("text")||"";
+  const vals=t.trim().split(/[\r\n\t]+/).map(v=>v.trim().replace(/\./g,"").replace(",","."));
+  if(vals.length<2)return;
+  ev.preventDefault();
+  const ins=[...$("sieveRows").querySelectorAll("input")];let k=ins.indexOf(ev.target);
+  vals.forEach(v=>{if(k<ins.length){ins[k].value=isNaN(parseFloat(v))?"":parseFloat(v);k++}});
+  calcForm();
+}
+function lerForm(){
+  const pens=[...cfg.peneiras].sort((a,b)=>b-a);
+  const ret=pens.map((_,i)=>parseFloat($("pen"+i).value)||0);
+  const fundo=parseFloat($("penFundo").value)||0;
+  return {pens,ret,fundo,...passante(pens,ret,fundo,cfg.corte)};
+}
+const unid=()=>$("cUnidPeso").checked?"peso":"pct";
+function calcForm(){
+  const f=lerForm(),pct=unid()==="pct";
+  $("cRes").textContent=f.v==null?"—":fmt(f.v)+" %"+(f.est?"*":"");$("cEst").textContent=f.est?" · * estimado: a série não tem a peneira de corte":"";
+  const t=$("cTotal");t.className="meta";
+  if(pct){t.textContent="Soma: "+(f.total?fmt(f.total,2)+" %":"—");
+    if(f.total&&Math.abs(f.total-100)>0.5){t.className="msg err";t.textContent+=" — a soma deveria dar 100 %. Confira os valores."}}
+  else t.textContent="Massa total: "+(f.total?fmt(f.total,3):"—");
+}
+function trocaUnid(){
+  const pct=unid()==="pct";
+  $("cColUnid").textContent=pct?"Retido (%)":"Peso retido";
+  $("cHint").textContent=pct?"Digite o percentual retido em cada malha. A soma das malhas com o fundo deve dar 100 %. O fundo é o material que passou pela menor malha. Dá para colar a coluna % copiada do Excel na primeira linha que os valores se distribuem para baixo."
+    :"Digite o peso retido em cada malha, como na planilha. O fundo é o material que passou pela menor malha. Dá para colar a coluna PESO copiada do Excel na primeira linha que os valores se distribuem para baixo.";
+  calcForm();
+}
+
+/* ---------- histórico e eventos ---------- */
+function renderHist(){
+  const f=$("hFiltro").value||"";
+  const rows=amostras.filter(a=>!f||a.britador===f).sort((a,b)=>a.data<b.data?1:a.data>b.data?-1:0);
+  $("hRows").innerHTML=rows.length?rows.map(a=>`<tr><td>${brDate(a.data)}</td><td>${esc(nomeB(a.britador))}</td><td class="num">${fmt(a.passante)}${a.est?"*":""}</td><td class="num">${a.unidade==="pct"?fmt(a.total,1)+" %":fmt(a.total,3)}</td><td>${esc(a.obs||"")}</td><td>${exemplo?"":`<button class="btn ghost small" data-del="${a.id}" type="button">Excluir</button>`}</td></tr>`).join("")
+    :`<tr><td colspan="6" class="empty">Nenhuma coleta lançada.</td></tr>`;
+  wireDelete($("hRows"),"amostras",$("hMsg"));
+}
+const TIPO={troca:"Troca de revestimento",gap:"Abertura de GAP",ajuste:"Abertura de GAP",outro:"Outro"};
+function renderEv(){
+  const rows=[...eventos].sort((a,b)=>a.data<b.data?1:-1);
+  $("eRows").innerHTML=rows.length?rows.map(e=>`<tr><td>${brDate(e.data)}</td><td>${esc(nomeB(e.britador))}</td><td>${TIPO[e.tipo]||e.tipo}</td><td>${esc(e.obs||"")}</td><td>${exemplo?"":`<button class="btn ghost small" data-del="${e.id}" type="button">Excluir</button>`}</td></tr>`).join("")
+    :`<tr><td colspan="5" class="empty">Nenhum evento registrado.</td></tr>`;
+  wireDelete($("eRows"),"eventos",$("eMsg"));
+}
+function wireDelete(tb,col,msg){
+  tb.querySelectorAll("[data-del]").forEach(btn=>btn.onclick=async()=>{
+    if(btn.dataset.armed!=="1"){btn.dataset.armed="1";btn.textContent="Confirmar";btn.classList.add("danger");setTimeout(()=>{if(btn.isConnected){btn.dataset.armed="";btn.textContent="Excluir";btn.classList.remove("danger")}},4000);return}
+    btn.disabled=true;
+    try{excluirReg(col,btn.dataset.del);apply();sincronizar();msg.className="msg ok";msg.textContent="Excluído."}
+    catch(e){msg.className="msg err";msg.textContent=erroTxt(e);btn.disabled=false}
+  });
+}
+function erroTxt(e){return"Não foi possível salvar no aparelho: "+(e&&e.message||"erro desconhecido")+"."}
+
+/* ---------- config ---------- */
+function fillSelects(){
+  const opts=cfg.britadores.map(b=>`<option value="${b.id}">${esc(b.nome)}</option>`).join("");
+  ["cBrit","eBrit"].forEach(id=>{const v=$(id).value;$(id).innerHTML=opts;if(v&&cfg.britadores.find(b=>b.id===v))$(id).value=v});
+  const hv=$("hFiltro").value;$("hFiltro").innerHTML=`<option value="">Todos os britadores</option>`+opts;$("hFiltro").value=hv&&cfg.britadores.find(b=>b.id===hv)?hv:"";
+  const c=fmt(cfg.corte,2).replace(/,?0+$/,"")+" mm";$("corteLbl").textContent=c;$("cCorte").textContent=c;document.querySelectorAll(".corteK").forEach(x=>x.textContent=c);
+}
+let cfgDraft=null;
+function renderCfg(){
+  cfgDraft=JSON.parse(JSON.stringify(cfg));
+  drawBrits();
+  $("cfgPen").value=cfg.peneiras.map(p=>String(p).replace(".",",")).join("; ");
+  $("cfgCorte").value=cfg.corte;$("cfgBase").value=cfg.diasBase;$("cfgJan").value=cfg.janela;$("cfgAm").value=cfg.amarelo;$("cfgVm").value=cfg.vermelho;
+}
+function drawBrits(){
+  const el=$("cfgBrits");el.innerHTML="";
+  cfgDraft.britadores.forEach((b,i)=>{const r=document.createElement("div");r.className="r";
+    r.innerHTML=`<input type="text" id="cfgB${i}" value="${esc(b.nome)}" aria-label="Nome do britador"><button type="button" class="btn ghost small">Remover</button>`;
+    r.querySelector("input").oninput=e=>b.nome=e.target.value;
+    r.querySelector("button").onclick=()=>{if(cfgDraft.britadores.length>1){cfgDraft.britadores.splice(i,1);drawBrits()}};
+    el.appendChild(r)});
+}
+
+/* ---------- armazenamento local (offline) ---------- */
+const LS="controle-britadores.v1";
+const novoId=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+const agoraISO=()=>new Date().toISOString();
+let base={amostras:{},eventos:{},config:null,pendentes:[],ultimaSync:"",ultimoEnvio:""};
+function carregar(){try{const j=JSON.parse(localStorage.getItem(LS)||"null");if(j)base={...base,...j}}catch(e){console.error(e)}}
+function gravar(){
+  try{localStorage.setItem(LS,JSON.stringify(base));return true}
+  catch(e){console.error(e);aviso("Não foi possível salvar no aparelho (memória cheia ou bloqueada). Exporte o CSV e libere espaço.");return false}
+}
+function salvarReg(col,dados){
+  const r={...dados,id:dados.id||novoId(),atualizadoEm:agoraISO(),excluido:false};
+  base[col][r.id]=r;base.pendentes.push({op:"upsert",colecao:col,id:r.id,dados:r});
+  gravar();return r;
+}
+function excluirReg(col,id){
+  const r=base[col][id];if(!r)return;
+  r.excluido=true;r.atualizadoEm=agoraISO();
+  base.pendentes.push({op:"delete",colecao:col,id,dados:r});gravar();
+}
+function salvarConfig(c){
+  base.config={...c,atualizadoEm:agoraISO()};
+  base.pendentes.push({op:"upsert",colecao:"config",id:"main",dados:base.config});gravar();
+}
+const ativos=col=>Object.values(base[col]).filter(r=>!r.excluido);
+
+let sincronizando=false;
+async function sincronizar(manual){
+  if(sincronizando)return;
+  if(!SERVIDOR.url){statusSync();if(manual)aviso("Nenhum servidor configurado. Os dados estão salvos neste aparelho.");return}
+  if(!navigator.onLine){statusSync();return}
+  sincronizando=true;statusSync();
+  const h={"Content-Type":"application/json"};if(SERVIDOR.token)h.Authorization="Bearer "+SERVIDOR.token;
+  try{
+    const ops=base.pendentes.slice();
+    if(ops.length){
+      const r=await fetch(SERVIDOR.url.replace(/\/$/,"")+"/sync",{method:"POST",headers:h,body:JSON.stringify({ops}),credentials:"same-origin"});
+      if(!r.ok)throw new Error(r.status===401||r.status===403?"LOGIN":"Servidor respondeu "+r.status+" ao enviar");
+      base.pendentes.splice(0,ops.length);base.ultimoEnvio=agoraISO();gravar();
+    }
+    const r2=await fetch(SERVIDOR.url.replace(/\/$/,"")+"/mudancas?desde="+encodeURIComponent(base.ultimaSync||""),{headers:h,credentials:"same-origin"});
+    if(!r2.ok)throw new Error(r2.status===401||r2.status===403?"LOGIN":"Servidor respondeu "+r2.status+" ao baixar");
+    const j=await r2.json();
+    const pend=new Set(base.pendentes.map(p=>p.colecao+"/"+p.id));
+    (j.registros||[]).forEach(x=>{
+      if(!x||!x.dados||pend.has(x.colecao+"/"+x.id))return;          // alteração local ainda não enviada vence
+      if(x.colecao==="config"){if(!base.config||(x.dados.atualizadoEm||"")>(base.config.atualizadoEm||""))base.config=x.dados;return}
+      if(!base[x.colecao])return;
+      const loc=base[x.colecao][x.id];
+      if(!loc||(x.dados.atualizadoEm||"")>=(loc.atualizadoEm||""))base[x.colecao][x.id]={...x.dados,id:x.id};
+    });
+    if(j.agora)base.ultimaSync=j.agora;
+    gravar();erroSync="";aplicarConfig();apply();
+  }catch(e){console.error(e);erroSync=e.message||"falha de conexão"}
+  sincronizando=false;statusSync();
+}
+let erroSync="";
+function statusSync(){
+  const el=$("syncSt"),n=base.pendentes.length;let cls="",t;
+  if(!SERVIDOR.url){t=`Salvo no aparelho${n?" · "+n+" alteração(ões) aguardando servidor":""}`;cls="na"}
+  else if(sincronizando)t="Sincronizando…";
+  else if(!navigator.onLine){t=`Offline${n?" · "+n+" pendente(s)":" · tudo salvo no aparelho"}`;cls="warn"}
+  else if(erroSync==="LOGIN"){t=`Entre de novo para sincronizar${n?" · "+n+" pendente(s)":""}`;cls="warn";el.title="Clique para entrar com sua conta Microsoft"}
+  else if(erroSync){t=`Erro ao sincronizar · ${n} pendente(s)`;cls="crit";el.title=erroSync}
+  else if(n)t=`${n} pendente(s)`,cls="warn";
+  else t="Sincronizado"+(base.ultimaSync?" · "+new Date(base.ultimaSync).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"");
+  el.className="syncst "+cls;el.textContent=t;
+  el.style.cursor=erroSync==="LOGIN"?"pointer":"";
+  el.onclick=erroSync==="LOGIN"?()=>{location.href="/.auth/login/aad?post_login_redirect_uri="+encodeURIComponent(location.pathname)}:null;
+}
+function aviso(t){const bn=$("banner");bn.hidden=false;bn.textContent=t}
+function aplicarConfig(){
+  if(base.config){const {atualizadoEm,...c}=base.config;cfg={...DEF,...c};cfgSalva=true}
+  renderSieve();if(!$("tab-config").hidden)renderCfg();
+}
+
+/* ---------- orquestração ---------- */
+function renderAll(){
+  const bn=$("banner");
+  if(exemplo){bn.hidden=false;bn.innerHTML="<b>Dados de exemplo.</b> O painel mostra uma simulação até a primeira coleta ser lançada. Importe a primeira planilha em <b>Lançar coleta</b> e confira os britadores em <b>Configurar</b>.";}
+  else bn.hidden=true;
+  fillSelects();renderCards();renderChart();renderHist();renderEv();statusSync();
+}
+let realA=[],realE=[];
+function apply(){
+  realA=ativos("amostras").map(a=>{const x={...a};
+    if(Array.isArray(x.peneiras)&&Array.isArray(x.retidos)){const r=passante(x.peneiras,x.retidos,x.fundo,cfg.corte);if(r.v!=null){x.passante=Math.round(r.v*100)/100;x.est=!!r.est}}
+    return x});
+  realE=ativos("eventos");
+  exemplo=!(realA.length||realE.length);
+  if(exemplo){const ex=gerarExemplo();amostras=ex.A;eventos=ex.E}else{amostras=realA;eventos=realE}
+  renderAll();
+}
+let cfgSalva=false;
+
+document.querySelectorAll(".tbar [data-tab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tbar [data-tab]").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
+  $("cards").hidden=b.dataset.tab!=="painel";
+  document.querySelectorAll(".tabpane").forEach(p=>p.hidden=p.id!=="tab-"+b.dataset.tab);
+  if(b.dataset.tab==="painel")renderChart();
+  if(b.dataset.tab==="config")renderCfg();
+});
+$("hFiltro").onchange=renderHist;
+$("cData").value=today();$("eData").value=today();
+document.querySelectorAll('input[name="cUnid"]').forEach(r=>r.onchange=trocaUnid);
+$("cLimpar").onclick=()=>{$("sieveRows").querySelectorAll("input").forEach(i=>i.value="");$("cObs").value="";calcForm()};
+
+
+/* botão "Importar planilha" da barra de cima: abre a aba certa e o seletor de arquivo */
+$("topImport").onclick=()=>{document.querySelector('.tbar [data-tab="coleta"]').click();$("impFile").click();document.getElementById("impFile").closest(".panel").scrollIntoView({behavior:"smooth",block:"start"})};
+/* ---------- importação da Planilha Mestre (mesmos ids da API/ponte: não duplica) ---------- */
+const MESTRE = [{"aba": "Granulometria", "col": "amostras", "idColecao": "britadores:amostras", "chave": ["data", "britador", "teste"], "colunas": {"Data": {"campo": "data", "tipo": "data"}, "Britador": {"campo": "britador", "tipo": "id"}, "Teste": {"campo": "teste", "tipo": "texto"}, "Lançado em": {"campo": "unidade", "tipo": "texto", "mapa": {"Percentual": "pct", "Peso": "peso"}}, "Observação": {"campo": "obs", "tipo": "texto", "opcional": true}}, "malhas": {"2,0 mm": 2.0, "1,4 mm": 1.4, "0,5 mm": 0.5, "0,15 mm": 0.15}, "fundo": "Fundo", "corte": 1.4}, {"aba": "Eventos Britadores", "col": "eventos", "idColecao": "britadores:eventos", "chave": ["data", "britador", "tipo"], "colunas": {"Data": {"campo": "data", "tipo": "data"}, "Britador": {"campo": "britador", "tipo": "id"}, "Tipo": {"campo": "tipo", "tipo": "texto", "mapa": {"Troca de revestimento": "troca", "Abertura de GAP": "gap", "Outro": "outro"}}, "Observação": {"campo": "obs", "tipo": "texto", "opcional": true}}}];
+function sha1hex(str){
+  const b=new TextEncoder().encode(str),l=b.length,n=((l+8>>6)+1)*16,w=new Array(n).fill(0);
+  for(let i=0;i<l;i++)w[i>>2]|=b[i]<<(24-(i%4)*8);
+  w[l>>2]|=0x80<<(24-(l%4)*8);w[n-1]=l*8;
+  let h0=0x67452301,h1=0xEFCDAB89,h2=0x98BADCFE,h3=0x10325476,h4=0xC3D2E1F0;const x=new Array(80);
+  const rl=(v,s)=>(v<<s)|(v>>>(32-s));
+  for(let i=0;i<n;i+=16){
+    for(let t=0;t<80;t++)x[t]=t<16?w[i+t]|0:rl(x[t-3]^x[t-8]^x[t-14]^x[t-16],1);
+    let a=h0,b2=h1,c=h2,d=h3,e=h4;
+    for(let t=0;t<80;t++){
+      const f=t<20?(b2&c)|(~b2&d):t<40?b2^c^d:t<60?(b2&c)|(b2&d)|(c&d):b2^c^d;
+      const k=t<20?0x5A827999:t<40?0x6ED9EBA1:t<60?0x8F1BBCDC:0xCA62C1D6;
+      const tmp=(rl(a,5)+f+e+k+x[t])|0;e=d;d=c;c=rl(b2,30);b2=a;a=tmp;
+    }
+    h0=(h0+a)|0;h1=(h1+b2)|0;h2=(h2+c)|0;h3=(h3+d)|0;h4=(h4+e)|0;
+  }
+  return [h0,h1,h2,h3,h4].map(v=>(v>>>0).toString(16).padStart(8,"0")).join("");
+}
+const mNorm=s=>String(s??"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function mConv(v,tipo){
+  if(v==null||v==="")return null;
+  if(tipo==="data"){
+    if(typeof v==="number"&&v>20000&&v<80000){const p=XLSX.SSF.parse_date_code(v);return p.y+"-"+String(p.m).padStart(2,"0")+"-"+String(p.d).padStart(2,"0")}
+    const iso=String(v).trim().match(/^(\d{4}-\d{2}-\d{2})/);if(iso)return iso[1];          // 2026-10-25 (Excel baixado do app)
+    const m=String(v).match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+    if(m){let y=+m[3];if(y<100)y+=2000;return y+"-"+String(+m[2]).padStart(2,"0")+"-"+String(+m[1]).padStart(2,"0")}
+    return null;
+  }
+  if(tipo==="numero"){
+    if(typeof v==="number")return v;
+    let s=String(v).trim().replace(/\s/g,"");
+    if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");else if(/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");
+    const n=parseFloat(s);return isNaN(n)?null:n;
+  }
+  if(tipo==="simnao")return ["sim","s","x","1","true","verdadeiro","yes"].includes(mNorm(v));
+  if(tipo==="id")return mNorm(v)||null;
+  return String(v).trim();
+}
+function mLerAba(wb,mp){
+  const ws=wb.Sheets[mp.aba];if(!ws)return null;
+  const linhas=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,blankrows:false});
+  if(!linhas.length)return {mp,regs:[]};
+  const cab=linhas[0].map(mNorm);
+  const col=(nome,obrig=true)=>{const i=cab.indexOf(mNorm(nome));if(i<0&&obrig)throw new Error(`Coluna "${nome}" não encontrada na aba "${mp.aba}".`);return i<0?null:i};
+  const cols=Object.entries(mp.colunas).map(([nome,d])=>({i:col(nome,!d.opcional),...d}));
+  const malhas=Object.entries(mp.malhas||{}).map(([nome,mm])=>({i:col(nome),mm}));
+  const iF=mp.fundo?col(mp.fundo):null;
+  const regs=[];
+  for(const row of linhas.slice(1)){
+    if(!row||row.every(v=>v==null||String(v).trim()===""))continue;
+    if(row.some(v=>typeof v==="string"&&v.trim().toUpperCase().startsWith("EXEMPLO")))continue;
+    const d={};
+    for(const c of cols){
+      let v=c.i==null?null:row[c.i];
+      if(c.mapa&&v!=null&&v!==""){const k=Object.keys(c.mapa).find(k=>mNorm(k)===mNorm(v));v=k?c.mapa[k]:v}
+      d[c.campo]=c.mapa&&c.tipo==="texto"?(v==null||v===""?null:String(v)):mConv(v,c.tipo);
+    }
+    if(mp.chave.some(k=>d[k]==null||d[k]===""))continue;
+    if(malhas.length){
+      const ret=malhas.map(m=>mConv(row[m.i],"numero")||0),fundo=mConv(row[iF],"numero")||0,total=ret.reduce((s,x)=>s+x,0)+fundo;
+      if(!(total>0))continue;
+      const rp=passante(malhas.map(m=>m.mm),ret,fundo,mp.corte);
+      Object.assign(d,{peneiras:malhas.map(m=>m.mm),retidos:ret,fundo,total,corte:mp.corte,passante:rp.v==null?null:Math.round(rp.v*100)/100});
+    }
+    d.id="xl-"+sha1hex(mp.idColecao+"|"+mp.chave.map(k=>String(d[k])).join("|")).slice(0,16);
+    d.origem="planilha";
+    regs.push(d);
+  }
+  return {mp,regs};
+}
+let mPendente=null;
+function mestreNoArquivo(wb){return MESTRE.some(mp=>wb.SheetNames.includes(mp.aba))}
+function mestrePrevia(livros,out){
+  const grupos=[],erros=[];
+  for(const wb of livros)for(const mp of MESTRE){
+    try{const g=mLerAba(wb,mp);if(g)grupos.push(g)}catch(e){erros.push(e.message)}
+  }
+  const campos=r=>JSON.stringify(Object.keys(r).filter(k=>!["id","atualizadoEm","excluido","origem"].includes(k)).sort().map(k=>[k,r[k]]));
+  const resumo=grupos.map(({mp,regs})=>{
+    let novos=0,alt=0,iguais=0;
+    regs.forEach(r=>{const a=base[mp.col][r.id];if(!a||a.excluido)novos++;else if(campos(a)!==campos(r))alt++;else iguais++});
+    return {mp,regs,novos,alt,iguais};
+  });
+  mPendente=resumo;
+  const total=resumo.reduce((s,g)=>s+g.novos+g.alt,0);
+  out.innerHTML=`<div class="tablebox"><table><thead><tr><th>Aba</th><th class="num">Linhas</th><th class="num">Novas</th><th class="num">Alteradas</th><th class="num">Já no app</th></tr></thead><tbody>
+    ${resumo.map(g=>`<tr><td>${esc(g.mp.aba)}</td><td class="num">${g.regs.length}</td><td class="num">${g.novos}</td><td class="num">${g.alt}</td><td class="num">${g.iguais}</td></tr>`).join("")||'<tr><td colspan="5" class="empty">Nenhuma aba da Planilha Mestre com dados.</td></tr>'}</tbody></table></div>
+    ${erros.length?`<p class="msg err">${esc(erros.join(" "))}</p>`:""}
+    <div class="actions" style="margin-top:10px"><button class="btn" type="button" id="mGo" ${total?"":"disabled"}>Importar ${total} registro(s)</button><button class="btn ghost" type="button" id="mCancel">Cancelar</button><span class="msg" id="mMsg">${total?"":"Nada novo para importar."}</span></div>`;
+  $("mCancel").onclick=()=>{mPendente=null;out.innerHTML=""};
+  $("mGo").onclick=()=>{
+    let n=0;const agora=new Date().toISOString();
+    mPendente.forEach(g=>g.regs.forEach(r=>{
+      const a=base[g.mp.col][r.id];
+      if(a&&!a.excluido&&campos(a)===campos(r))return;
+      const reg={...r,atualizadoEm:agora,excluido:false};
+      base[g.mp.col][r.id]=reg;base.pendentes.push({op:"upsert",colecao:g.mp.col,id:r.id,dados:reg});n++;
+    }));
+    gravar();apply();sincronizar();mPendente=null;
+    out.innerHTML=`<p class="msg ok">${n} registro(s) importado(s) da Planilha Mestre.</p>`;
+  };
+}
+
+/* ---------- importação de planilhas Excel ---------- */
+let impRows=[];
+const norm=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+function numCel(x){
+  if(!x||x.v==null||x.v==="")return null;
+  if(typeof x.v==="number")return x.v;
+  let s=String(x.v).trim().replace(/\s/g,"");
+  if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");
+  const n=parseFloat(s);return isNaN(n)?null:n;
+}
+function malhaCel(x,lab){
+  if(x&&typeof x.v==="number")return x.v;
+  const m=lab.match(/(\d+(?:[.,]\d+)?)/);return m?parseFloat(m[1].replace(",",".")):null;
+}
+function ymd(y,m,d){return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0")}
+function dataCel(x){
+  if(!x)return null;
+  if(x.t==="d"&&x.v instanceof Date)return ymd(x.v.getFullYear(),x.v.getMonth()+1,x.v.getDate());
+  if(x.t==="n"){
+    const pareceData=(x.z&&XLSX.SSF.is_date(x.z))||/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/.test(x.w||"");
+    if(pareceData&&x.v>20000&&x.v<80000){const p=XLSX.SSF.parse_date_code(x.v);return ymd(p.y,p.m,p.d)}
+    return null;
+  }
+  const m=String(x.v||"").match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){let y=+m[3];if(y<100)y+=2000;return ymd(y,+m[2],+m[1])}
+  return null;
+}
+function lerAba(ws,arq,aba){
+  if(!ws||!ws["!ref"])return[];
+  const R=XLSX.utils.decode_range(ws["!ref"]);
+  const cel=(r,c)=>ws[XLSX.utils.encode_cell({r,c})];
+  const txt=(r,c)=>{const x=cel(r,c);return x?String(x.w??x.v??"").trim():""};
+  const out=[];
+  for(let r=R.s.r;r<=R.e.r;r++)for(let c=R.s.c;c<=R.e.c;c++){
+    if(!/^malha/i.test(txt(r,c)))continue;
+    let titulo="",data=null;
+    for(let rr=r-1;rr>=Math.max(R.s.r,r-4);rr--)for(let k=c;k<=c+4;k++){
+      const t=txt(rr,k);if(!titulo&&/descarga/i.test(t))titulo=t;
+      if(!data)data=dataCel(cel(rr,k));
+    }
+    if(!titulo)continue;                                   // só blocos de descarga
+    const m=titulo.match(/br\s*-?\s*(\d+)\s*-?\s*([a-z])\b/i);
+    const cod=m?"BR"+m[1].padStart(2,"0")+m[2].toUpperCase():"";
+    const b=cod?cfg.britadores.find(x=>norm(x.nome)===cod):null;
+    if(!b)continue;                                        // só britadores cadastrados
+    let cp=-1,cpct=-1;
+    for(let k=c+1;k<=c+6;k++){const t=txt(r,k);if(cp<0&&/peso|massa|retid/i.test(t))cp=k;if(cpct<0&&/^%$/.test(t))cpct=k}
+    if(cp<0&&cpct<0)continue;
+    const pen=[],ret=[];let fundo=0;
+    for(let rr=r+1;rr<=Math.min(R.e.r,r+40);rr++){
+      const lab=txt(rr,c);if(!lab||/total/i.test(lab))break;
+      let v=cp>=0?numCel(cel(rr,cp)):null;if(v==null&&cpct>=0)v=numCel(cel(rr,cpct));
+      if(/fundo/i.test(lab)){fundo=v||0;continue}
+      const mm=malhaCel(cel(rr,c),lab);if(mm==null||!(mm>0))continue;
+      pen.push(mm);ret.push(v||0);
+    }
+    if(pen.length<2)continue;
+    const teste=(titulo.match(/teste\s*(\d+)/i)||[])[1]||"";
+    const res=passante(pen,ret,fundo,cfg.corte);
+    const dup=!!(data&&realA.some(a=>a.data===data&&a.britador===b.id&&String(a.teste||"")===teste));
+    out.push({arq,aba,titulo,cod,britador:b.id,data:data||"",teste,pen,ret,fundo,total:res.total,v:res.v,est:!!res.est,dup,sel:!dup&&res.v!=null&&!!data});
+  }
+  return out;
+}
+function impMsg(cls,t){$("impOut").innerHTML=`<p class="msg ${cls}">${t}</p>`}
+$("impBtn").onclick=()=>$("impFile").click();
+$("impFile").onchange=async e=>{
+  const files=[...e.target.files];e.target.value="";
+  if(!files.length)return;
+  if(!window.XLSX){impMsg("err","O leitor de Excel não carregou. Verifique a conexão com a internet e recarregue a página.");return}
+  impRows=[];const falhas=[];
+  impMsg("","Lendo "+files.length+" arquivo(s)…");
+  const mestres=[];
+  for(const f of files){
+    try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array",cellNF:true});
+      if(mestreNoArquivo(wb)){mestres.push(wb);continue}          // Planilha Mestre (abas Granulometria / Eventos)
+      wb.SheetNames.forEach(sn=>impRows.push(...lerAba(wb.Sheets[sn],f.name,sn)))}
+    catch(err){console.error(err);falhas.push(f.name)}
+  }
+  if(mestres.length&&!impRows.length){mestrePrevia(mestres,$("impOut"));return}
+  impRows.sort((a,b)=>(a.data||"").localeCompare(b.data||"")||a.cod.localeCompare(b.cod)||a.teste.localeCompare(b.teste));
+  renderImp(falhas);
+};
+function renderImp(falhas=[]){
+  const out=$("impOut");
+  if(!impRows.length){impMsg("err","Nenhum bloco de descarga dos britadores cadastrados foi encontrado"+(falhas.length?" (falha ao abrir: "+esc(falhas.join(", "))+")":"")+".");return}
+  const opts=id=>cfg.britadores.map(b=>`<option value="${b.id}"${b.id===id?" selected":""}>${esc(b.nome)}</option>`).join("");
+  const nSel=impRows.filter(r=>r.sel).length;
+  out.innerHTML=`<div class="tablebox"><table>
+    <thead><tr><th><input type="checkbox" id="impAll" aria-label="Selecionar todas" ${nSel===impRows.length?"checked":""}></th><th>Origem</th><th>Data</th><th>Britador</th><th>Teste</th><th class="num">% abaixo do corte</th><th class="num">Massa total</th><th>Situação</th></tr></thead>
+    <tbody>${impRows.map((r,i)=>{
+      const prob=!r.data?"Sem data":r.v==null?"Corte fora da série":r.dup?"Já lançada":"";
+      return `<tr><td><input type="checkbox" id="impS${i}" data-i="${i}" class="impSel" ${r.sel?"checked":""} aria-label="Importar linha ${i+1}"></td>
+      <td class="meta">${esc(r.arq)}<br>${esc(r.aba)}</td>
+      <td><input type="date" id="impD${i}" data-i="${i}" class="impData" value="${r.data}"></td>
+      <td><select id="impB${i}" data-i="${i}" class="impBrit" aria-label="Britador">${opts(r.britador)}</select></td>
+      <td>${esc(r.teste||"—")}</td>
+      <td class="num">${fmt(r.v,2)}${r.est?"*":""}</td>
+      <td class="num">${fmt(r.total,3)}</td>
+      <td>${prob?`<span class="chip ${r.dup?"na":"warn"}">${prob}</span>`:`<span class="chip ok">Pronta</span>`}</td></tr>`}).join("")}</tbody></table></div>
+    <div class="actions" style="margin-top:10px"><button class="btn" type="button" id="impGo" ${nSel?"":"disabled"}>Importar ${nSel} coleta(s)</button><button class="btn ghost" type="button" id="impCancel">Cancelar</button>
+    <span class="msg" id="impStatus">${falhas.length?"Não foi possível abrir: "+esc(falhas.join(", ")):""}</span></div>`;
+  out.querySelectorAll(".impSel").forEach(x=>x.onchange=()=>{impRows[x.dataset.i].sel=x.checked;renderImp()});
+  out.querySelectorAll(".impData").forEach(x=>x.onchange=()=>{impRows[x.dataset.i].data=x.value;renderImp()});
+  out.querySelectorAll(".impBrit").forEach(x=>x.onchange=()=>{impRows[x.dataset.i].britador=x.value;renderImp()});
+  $("impAll").onchange=e=>{impRows.forEach(r=>r.sel=e.target.checked&&r.v!=null);renderImp()};
+  $("impCancel").onclick=()=>{impRows=[];out.innerHTML=""};
+  $("impGo").onclick=importar;
+}
+async function importar(){
+  const st=$("impStatus"),go=$("impGo");
+  const sel=impRows.filter(r=>r.sel);
+  const ruins=sel.filter(r=>!r.data||!r.britador||r.v==null);
+  if(ruins.length){st.className="msg err";st.textContent=ruins.length+" linha(s) selecionada(s) sem data ou com corte fora da série. Corrija ou desmarque.";return}
+  go.disabled=true;st.className="msg";st.textContent="Importando…";
+  try{
+    sel.forEach(r=>salvarReg("amostras",{
+        data:r.data,britador:r.britador,peneiras:r.pen,retidos:r.ret,fundo:r.fundo,total:r.total,unidade:"peso",
+        passante:Math.round(r.v*100)/100,corte:cfg.corte,teste:r.teste,obs:r.titulo,origem:r.arq+" / "+r.aba,criadoEm:agoraISO()}));
+    apply();sincronizar();
+    impRows=[];$("impOut").innerHTML=`<p class="msg ok">${sel.length} coleta(s) importada(s).</p>`;
+  }catch(e){console.error(e);st.className="msg err";st.textContent=erroTxt(e);go.disabled=false}
+}
+
+$("formColeta").onsubmit=async ev=>{
+  ev.preventDefault();const msg=$("cMsg");const f=lerForm();
+  if(!$("cData").value){msg.className="msg err";msg.textContent="Informe a data da coleta.";return}
+  if(!f.total){msg.className="msg err";msg.textContent="Preencha o valor retido em pelo menos uma malha.";return}
+  if(unid()==="pct"&&Math.abs(f.total-100)>0.5){msg.className="msg err";msg.textContent="A soma dos percentuais está em "+fmt(f.total,2)+" %. Corrija para 100 % antes de salvar.";return}
+  if(f.v==null){msg.className="msg err";msg.textContent="O corte não está dentro da série de peneiras. Ajuste a série em Configurar.";return}
+  $("cSalvar").disabled=true;
+  try{salvarReg("amostras",{data:$("cData").value,britador:$("cBrit").value,peneiras:f.pens,retidos:f.ret,fundo:f.fundo,total:f.total,unidade:unid(),passante:Math.round(f.v*100)/100,corte:cfg.corte,obs:$("cObs").value.trim(),criadoEm:agoraISO()});apply();sincronizar();
+    msg.className="msg ok";msg.textContent=`Coleta salva: ${fmt(f.v)} % abaixo do corte${f.est?" (estimado)":""} (${nomeB($("cBrit").value)}).`;
+    $("sieveRows").querySelectorAll("input").forEach(i=>i.value="");$("cObs").value="";calcForm();}
+  catch(e){msg.className="msg err";msg.textContent=erroTxt(e)}
+  $("cSalvar").disabled=false;
+};
+$("formEv").onsubmit=async ev=>{
+  ev.preventDefault();const msg=$("eMsg");
+  if(!$("eData").value){msg.className="msg err";msg.textContent="Informe a data.";return}
+  try{salvarReg("eventos",{data:$("eData").value,britador:$("eBrit").value,tipo:$("eTipo").value,obs:$("eObs").value.trim()});apply();sincronizar();
+    msg.className="msg ok";msg.textContent="Evento registrado.";$("eObs").value="";}
+  catch(e){msg.className="msg err";msg.textContent=erroTxt(e)}
+};
+$("cfgAddBrit").onclick=()=>{let n=cfgDraft.britadores.length+1,id;do{id="b"+Math.random().toString(36).slice(2,7)}while(cfgDraft.britadores.find(b=>b.id===id));
+  cfgDraft.britadores.push({id,nome:"Novo britador "+n});drawBrits()};
+$("formCfg").onsubmit=async ev=>{
+  ev.preventDefault();const msg=$("cfgMsg");
+  const pens=$("cfgPen").value.split(/[;\s]+/).map(v=>parseFloat(v.replace(",","."))).filter(v=>v>0);
+  const n={britadores:cfgDraft.britadores.map(b=>({id:b.id,nome:b.nome.trim()||"Sem nome"})),peneiras:[...new Set(pens)].sort((a,b)=>b-a),
+    corte:parseFloat($("cfgCorte").value),diasBase:Math.max(1,parseInt($("cfgBase").value)||5),janela:Math.max(1,parseInt($("cfgJan").value)||7),
+    amarelo:parseFloat($("cfgAm").value),vermelho:parseFloat($("cfgVm").value)};
+  if(n.peneiras.length<2){msg.className="msg err";msg.textContent="Informe pelo menos duas peneiras.";return}
+  if(!(n.corte>0)){msg.className="msg err";msg.textContent="O corte precisa ser um número maior que zero.";return}
+  if(!(n.amarelo>0)||!(n.vermelho>n.amarelo)){msg.className="msg err";msg.textContent="O limite de troca precisa ser maior que o limite de atenção.";return}
+  try{salvarConfig(n);aplicarConfig();apply();sincronizar();msg.className="msg ok";msg.textContent="Configuração salva."}
+  catch(e){msg.className="msg err";msg.textContent=erroTxt(e)}
+};
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderChart,120)});
+
+carregar();aplicarConfig();trocaUnid();apply();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+window.addEventListener("online",()=>sincronizar());
+window.addEventListener("offline",statusSync);
+$("syncBtn").onclick=()=>sincronizar(true);
+setInterval(()=>{if(base.pendentes.length||SERVIDOR.url)sincronizar()},Math.max(15,SERVIDOR.intervaloSeg)*1000);
+sincronizar();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service worker não registrado:",e))}
+
+$("hCsv").onclick=()=>{
+  const lin=[["data","britador","passante_pct","corte_mm","massa_total","obs"].join(";")].concat(
+    [...amostras].sort((a,b)=>a.data<b.data?-1:1).map(a=>[a.data,nomeB(a.britador),String(a.passante).replace(".",","),String(a.corte??cfg.corte).replace(".",","),String(a.total).replace(".",","),(a.obs||"").replace(/;/g,",")].join(";")));
+  const url=URL.createObjectURL(new Blob(["\ufeff"+lin.join("\n")],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="coletas-britadores.csv";document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+})();
+</script>
+<!--PASTA-DADOS--><script>
+/* PASTA-DADOS: guarda uma cópia de todos os controles numa pasta do computador (Chrome/Edge).
+   O navegador continua sendo onde o app trabalha; a pasta é a cópia que não se perde quando
+   o histórico é limpo ou uma versão nova do app é aberta. */
+(function(){
+"use strict";
+if(window.PastaDados)return;
+const ARQ="dados-portal-controles.json",SUB="copias",MANTER=30;
+const BANCOS=[{db:"controle-itm",store:"kv"}];
+const IGNORAR=new Set(["controles.ultimoBackup","pasta-dados.ultimo","portal.sessao","portal.versaoDados"]);
+const APPS=[["rt-reports","Relatório de Turno","relatórios"],["controle-floculantes.v1","Floculantes","registros"],["controle-britadores.v1","Britadores","registros"],["controle-ibm.v1","Controle IBM","registros"],["controle-itm.v1","Fluxo ITM","registros"],["controle-testes.v1","Registro de Testes","registros"]];
+const suporta=typeof window.showDirectoryPicker==="function";
+
+/* ---------- IndexedDB ---------- */
+function idbAbrir(nome,store,criar){return new Promise(ok=>{if(!window.indexedDB)return ok(null);let r;
+  try{r=criar?indexedDB.open(nome,1):indexedDB.open(nome)}catch(e){return ok(null)}
+  r.onupgradeneeded=()=>{if(criar){if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store)}else{try{r.transaction.abort()}catch(e){}}};
+  r.onerror=()=>ok(null);r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains(store)){db.close();ok(null)}else ok(db)}})}
+async function idbTudo(nome,store){const db=await idbAbrir(nome,store,false);if(!db)return null;
+  return new Promise(ok=>{const out={};const c=db.transaction(store).objectStore(store).openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else{db.close();ok(out)}};c.onerror=()=>{db.close();ok(null)}})}
+async function idbPor(nome,store,obj){const db=await idbAbrir(nome,store,true);if(!db)throw new Error("IndexedDB indisponível");
+  return new Promise((ok,err)=>{const t=db.transaction(store,"readwrite"),s=t.objectStore(store);Object.keys(obj).forEach(k=>s.put(obj[k],k));t.oncomplete=()=>{db.close();ok()};t.onerror=()=>{db.close();err(t.error)}})}
+async function idbGet(k){const db=await idbAbrir("portal-pasta","kv",true);if(!db)return null;
+  return new Promise(ok=>{const r=db.transaction("kv").objectStore("kv").get(k);r.onsuccess=()=>{db.close();ok(r.result||null)};r.onerror=()=>{db.close();ok(null)}})}
+async function idbSet(k,v){return idbPor("portal-pasta","kv",{[k]:v})}
+
+/* ---------- foto dos dados ---------- */
+function contar(k,txt){try{const j=JSON.parse(txt);if(!j||typeof j!=="object")return 0;
+  if(k==="rt-reports")return Object.keys(j).length;
+  if(k==="controle-testes.v1")return Array.isArray(j.testes)?j.testes.length:0;
+  let n=0;Object.entries(j).forEach(([c,v])=>{if(c==="pendentes"||c==="config"||!v||typeof v!=="object"||Array.isArray(v))return;Object.values(v).forEach(r=>{if(r&&typeof r==="object"&&!r.excluido)n++})});return n}catch(e){return 0}}
+async function montar(){const ls={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!IGNORAR.has(k))ls[k]=localStorage.getItem(k)}
+  const idb={};for(const b of BANCOS){const v=await idbTudo(b.db,b.store);if(v)idb[b.db+"/"+b.store]=v}
+  return {app:"Portal de Controles · Mineral do Brasil",versao:1,criadoEm:new Date().toISOString(),localStorage:ls,indexedDB:idb}}
+function total(bk){let n=0;APPS.forEach(([k])=>{if(bk&&bk.localStorage&&bk.localStorage[k]!=null)n+=contar(k,bk.localStorage[k])});
+  const an=bk&&bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)n+=Object.keys(an).length;return n}
+function resumo(bk){const l=APPS.map(([k,nome,un])=>bk.localStorage[k]!=null?`${nome}: ${contar(k,bk.localStorage[k])} ${un}`:null).filter(Boolean);
+  const an=bk.indexedDB&&bk.indexedDB["controle-itm/kv"]&&bk.indexedDB["controle-itm/kv"].analises;if(an)l.push(`Análises do laboratório: ${Object.values(an).filter(a=>a&&!a.excluido).length}`);return l}
+const semData=bk=>{const c={...bk};delete c.criadoEm;return JSON.stringify(c)};
+
+/* ---------- pasta ---------- */
+let dir=null,estado="sem",ultimo=null,ultimoTxt=null,erro="",ouvintes=[];
+try{ultimo=localStorage.getItem("pasta-dados.ultimo")}catch(e){}
+const avisar=()=>ouvintes.forEach(f=>{try{f(info())}catch(e){}});
+function info(){return {suporta,estado,pasta:dir?dir.name:"",ultimo,erro}}
+async function permissao(pedir){if(!dir)return false;const o={mode:"readwrite"};
+  try{if(await dir.queryPermission(o)==="granted")return true;if(pedir&&await dir.requestPermission(o)==="granted")return true}catch(e){}return false}
+async function lerArquivo(d){try{const f=await (await (d||dir).getFileHandle(ARQ)).getFile();const bk=JSON.parse(await f.text());return bk&&bk.localStorage&&bk.versao===1?bk:null}catch(e){return null}}
+async function escrever(d,nome,txt){const fh=await d.getFileHandle(nome,{create:true});const w=await fh.createWritable();await w.write(txt);await w.close()}
+const hojeISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+async function gravarNaPasta(bk){const txt=JSON.stringify(bk);
+  await escrever(dir,ARQ,txt);
+  const sub=await dir.getDirectoryHandle(SUB,{create:true});await escrever(sub,"dados-"+hojeISO()+".json",txt);
+  try{const nomes=[];for await(const [n,h] of sub.entries())if(h.kind==="file"&&/^dados-\d{4}-\d\d-\d\d\.json$/.test(n))nomes.push(n);
+    nomes.sort().slice(0,Math.max(0,nomes.length-MANTER)).forEach(n=>sub.removeEntry(n).catch(()=>{}))}catch(e){}
+  ultimo=bk.criadoEm;ultimoTxt=semData(bk);try{localStorage.setItem("pasta-dados.ultimo",ultimo)}catch(e){}}
+async function copiaSeguranca(bk,motivo){try{const sub=await dir.getDirectoryHandle(SUB,{create:true});const d=new Date(),p=n=>String(n).padStart(2,"0");
+  await escrever(sub,`${motivo}-${hojeISO()}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.json`,JSON.stringify(bk))}catch(e){}}
+async function aplicar(bk){Object.keys(bk.localStorage).forEach(k=>{if(!IGNORAR.has(k))localStorage.removeItem(k)});
+  Object.entries(bk.localStorage).forEach(([k,v])=>{if(!IGNORAR.has(k))localStorage.setItem(k,v)});
+  for(const [chave,obj] of Object.entries(bk.indexedDB||{})){const [db,store]=chave.split("/");await idbPor(db,store,obj)}}
+
+let gravando=false;
+/* Grava se algo mudou. Nunca grava um navegador vazio por cima de uma pasta com dados. */
+async function salvar(){if(!dir||gravando)return;gravando=true;
+  try{if(!await permissao(false)){estado="permissao";return}
+    const bk=await montar(),s=semData(bk);
+    if(s===ultimoTxt){estado="ok";return}
+    if(!total(bk)){const f=await lerArquivo();if(f&&total(f)){estado="vazio";return}}
+    await gravarNaPasta(bk);estado="ok";erro=""}
+  catch(e){estado="erro";erro=e.message||String(e)}
+  finally{gravando=false;avisar()}}
+
+/* Escolhe a pasta. Se ela já tem dados, pergunta qual lado vale. */
+async function escolher(){if(!suporta)throw new Error("Este navegador não grava em pasta. Use o Google Chrome ou o Microsoft Edge no computador.");
+  const d=await window.showDirectoryPicker({id:"portal-controles",mode:"readwrite",startIn:"documents"});
+  const arq=await lerArquivo(d),nav=await montar();dir=d;await idbSet("dir",d);ultimoTxt=null;
+  let acao="gravar";
+  if(arq&&total(arq)){
+    if(!total(nav))acao="carregar";
+    else{const r=prompt(`Essa pasta já tem dados salvos em ${dataBR(arq.criadoEm)}:\n  ${resumo(arq).join("\n  ")}\n\nE este navegador tem:\n  ${resumo(nav).join("\n  ")}\n\nDigite PASTA para trazer os dados da pasta para este navegador (use quando abriu uma versão nova do app ou outro computador).\nDigite NAVEGADOR para gravar os dados deste navegador na pasta.\n\nO lado que for trocado ganha uma cópia de segurança na pasta "copias".`)||"";
+      const t=r.trim().toUpperCase();acao=t==="PASTA"?"carregar":t==="NAVEGADOR"?"gravar":"nada"}}
+  if(acao==="carregar"){if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");await aplicar(arq);ultimoTxt=null;estado="ok";ultimo=arq.criadoEm;avisar();return "carregado"}
+  if(acao==="gravar"){if(arq&&total(arq))await copiaSeguranca(arq,"pasta-antes-de-gravar");await gravarNaPasta(nav);estado="ok";avisar();return "gravado"}
+  estado="ok";avisar();return "nada"}
+async function carregarDaPasta(){if(!dir||!await permissao(true))throw new Error("Sem acesso à pasta.");
+  const arq=await lerArquivo();if(!arq)throw new Error(`Não achei o arquivo ${ARQ} na pasta.`);
+  const nav=await montar();if(total(nav))await copiaSeguranca(nav,"navegador-antes-de-carregar");
+  await aplicar(arq);ultimoTxt=semData(arq);estado="ok";avisar();return arq}
+async function liberar(){if(await permissao(true)){estado="ok";await salvar();return true}return false}
+async function esquecer(){dir=null;estado="sem";await idbSet("dir",null);avisar()}
+const dataBR=iso=>{if(!iso)return "—";const d=new Date(iso);return d.toLocaleDateString("pt-BR")+" às "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})};
+
+/* ---------- selo no canto da tela (nos apps) ---------- */
+function selo(){if(document.getElementById("pdSelo")||document.body.dataset.pdSemSelo!=null)return;
+  const st=document.createElement("style");st.textContent=`#pdSelo{position:fixed;right:14px;bottom:14px;z-index:9999;font:600 13px/1.2 Inter,system-ui,Arial,sans-serif;border-radius:999px;padding:8px 14px;border:1.5px solid #1d7a4a;background:#e3f1e8;color:#1d6b47;box-shadow:0 4px 14px #1d262126;cursor:default;max-width:calc(100vw - 28px)}
+#pdSelo.at{border-color:#c58a10;background:#fcefd6;color:#8a5a00;cursor:pointer}#pdSelo.er{border-color:#c0392b;background:#f8e1de;color:#a12d22;cursor:pointer}@media print{#pdSelo{display:none}}`;
+  document.head.appendChild(st);const b=document.createElement("button");b.id="pdSelo";b.type="button";b.hidden=true;document.body.appendChild(b);
+  b.onclick=async()=>{if(estado==="permissao"||estado==="erro")await liberar()};
+  ouvintes.push(i=>{b.hidden=i.estado==="sem";const h=i.ultimo?new Date(i.ultimo).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}):"";
+    b.className=i.estado==="ok"?"":i.estado==="erro"||i.estado==="vazio"?"er":"at";
+    b.textContent=i.estado==="ok"?`Salvo na pasta ${i.pasta}${h?" · "+h:""}`:i.estado==="permissao"?"Clique para liberar a gravação na pasta":i.estado==="vazio"?"Navegador vazio: carregue os dados da pasta no Portal":"Erro ao gravar na pasta (clique para tentar de novo)";
+    b.title=i.estado==="vazio"?"A pasta tem dados e este navegador não. Abra o Portal > Pasta de dados > Carregar dados da pasta.":i.erro||""})}
+
+async function iniciar(){if(!suporta){avisar();return}
+  try{dir=await idbGet("dir")}catch(e){dir=null}
+  if(dir){estado=await permissao(false)?"ok":"permissao";if(estado==="ok")setTimeout(salvar,1500)}
+  avisar()}
+setInterval(salvar,60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")salvar()});
+window.addEventListener("storage",()=>{clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,5000)});
+let ultLS=null;setInterval(()=>{let n=0;try{for(let i=0;i<localStorage.length;i++)n+=(localStorage.getItem(localStorage.key(i))||"").length}catch(e){}if(ultLS!=null&&n!==ultLS){clearTimeout(window.__pdT);window.__pdT=setTimeout(salvar,4000)}ultLS=n},3000);
+
+window.PastaDados={info,escolher,salvar,carregarDaPasta,liberar,esquecer,lerArquivo:()=>lerArquivo(),montar,resumo,total,ouvir:f=>{ouvintes.push(f);f(info())},dataBR};
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{selo();iniciar()});else{selo();iniciar()}
+})();
+</script><!--/PASTA-DADOS-->
+</body>
+</html>
